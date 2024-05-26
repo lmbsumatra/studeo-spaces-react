@@ -1,30 +1,56 @@
-import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+// src/App.js
 
-import DesignSystem from "./pages/DesignSystem.js";
-import Home from "./pages/home/Home.js";
-import Blogs from "./pages/blogs/Blogs.js";
-import Services from "./pages/services/Services.js";
-import Faqs from "./pages/faqs/Faqs.js";
-import Book from "./pages/book/Book.js";
+import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import './App.css';
+import Header from './components/Header';
+import Home from './pages/HomeScreen';
+import Blog from './pages/BlogScreen';
+import Services from './pages/ServicesScreen';
+import Book from './pages/BookingScreen';
+import FAQs from './pages/FAQs';
+import Confirmation from './pages/ConfirmationScreen';
+import Payment from './pages/PaymentScreen';
+import BookingSummary from './pages/BookingSummary';
+import AdminLogin from './pages/AdminLoginScreen';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminBookings from './pages/AdminBookings';
+import AdminCustomers from './pages/AdminCustomers';
+import AdminPayments from './pages/AdminPayments';
 
-import "./index.css";
+const App = () => {
+  const location = useLocation();
 
-function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/design-system" element={<DesignSystem />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/blogs" element={<Blogs />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/faqs" element={<Faqs />} />
-          <Route path="/book" element={<Book />} />
-        </Routes>
-      </BrowserRouter>
+    <div>
+      {location.pathname !== '/admin-login' && <Header />}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/blogs" element={<Blog />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/booking" element={<Book />} />
+        <Route path="/faqs" element={<FAQs />} />
+        <Route path="/confirmation" element={<Confirmation />} />
+        <Route path="/payment" element={<Payment />} />
+        <Route path="/booking-successful" element={<BookingSummary />} />
+
+
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin-bookings" element={<AdminBookings />} />
+        <Route path="/admin-customers" element={<AdminCustomers />} />
+        <Route path="/admin-payments" element={<AdminPayments />} />
+
+       </Routes>
     </div>
   );
-}
+};
 
-export default App;
+const AppWrapper = () => (
+  <Router>
+    <App />
+  </Router>
+);
+
+export default AppWrapper;
