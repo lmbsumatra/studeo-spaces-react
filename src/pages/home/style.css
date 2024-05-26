@@ -1,0 +1,11 @@
+.home {
+  background-image: url(../../assets/images/home/hero-background-image-mobile.png);
+}
+
+@media (min-width: 35rem) {
+  .home {
+    background-image: url(../../assets/images/home/hero-background-image.png);
+    background-repeat: no-repeat;
+    background-size:100vw;
+  }
+}

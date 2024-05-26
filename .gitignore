@@ -1,0 +1,44 @@
+# Dependency directories
+node_modules/
+
+# Production build
+build/
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Logs and debugging files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency lock files
+yarn.lock
+package-lock.json
+
+# macOS
+.DS_Store
+
+# Editor directories and files
+.idea/
+*.pidb
+*.code-workspace
+
+# User-specific files
+*.sublime-*
+*.swp
+.DS_Store
