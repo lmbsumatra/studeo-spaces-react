@@ -86,7 +86,7 @@ const FAQs = () => {
                   required
                 />
               </Form.Group>
-              <Button variant="primary" type="submit">
+              <Button variant="primary" className="btn btn-primary-clr" type="submit">
                 Send
               </Button>
             </Form>

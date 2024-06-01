@@ -3,10 +3,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Feedback = () => {
   return (
-    <section className="container items">
+    <section className="container items" id="feedback">
       <h1 className="fs-700 ff-serif text-center">Feedbacks</h1>
       <div className="d-flex justify-content-around">
-        <div className="card flex-items" style={{ width: '18rem' }}>
+        <div className="card flex-items"  style={{ width: '18rem' }}>
           <div className="icon">
             <img
               src="./assets/images/img_1.jpg"

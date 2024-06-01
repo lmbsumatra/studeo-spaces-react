@@ -207,7 +207,7 @@ select {
   color: #fff;
 }
 
-.btn-primary-clr > a{
+.btn-primary-clr > a {
   padding: 0;
   color: #fff;
 }
@@ -218,8 +218,26 @@ select {
   color: #fff;
 }
 
-.btn-primary-clr > a:hover{
+.btn-primary-clr > a:hover {
   color: #fff;
+}
+
+.btn-secondary-clr {
+  color: var(--clr-primary);
+  background-color: #fff;
+  border: 1px solid var(--clr-primary);
+  padding: 0.5rem 1rem;
+  display: inline-block;
+}
+
+.btn-check:hover + .btn-secondary-clr {
+  color: #fff;
+  background-color: var(--clr-primary);
+}
+
+.btn-check:checked + .btn-secondary-clr {
+  color: #fff;
+  background-color: var(--clr-primary);
 }
 
 /* active nav indicator */
@@ -256,6 +274,14 @@ section {
   object-fit: cover;
 }
 
+.card-img-top {
+  width: 100%;
+  height: auto;
+  max-height: 200px; /* Adjust based on your design */
+  object-fit: cover;
+}
+
+
 /* For circle icons */
 .icon {
   width: 100px;
@@ -275,21 +301,17 @@ section {
   border-radius: 50%;
 }
 
-.card:hover {
-  border: #db8523 solid 2px;
-}
 /* CSS for when radio button is checked */
-.card [aria-checked='true'] {
+.card [aria-checked="true"] {
   border: #db8523 solid 2px;
 }
-
 
 /********************************/
 /*        Navigation Bar        */
 /********************************/
 .navbar {
   flex-wrap: nowrap;
-  background-color: #F6F1E9;
+  background-color: #f6f1e9;
 }
 
 .navbar-nav {
@@ -371,6 +393,10 @@ section {
 /********************************/
 /*           Services           */
 /********************************/
+#services .card:hover {
+  border: #db8523 solid 2px;
+}
+
 /* For small devices (phones) */
 @media (max-width: 576px) {
   .items {
@@ -497,7 +523,6 @@ section {
   }
 }
 
-
 /********************************/
 /*            Footer            */
 /********************************/
@@ -545,3 +570,8 @@ footer ul li a {
     padding: 0 60px;
   }
 }
+
+/********************************/
+/*             Admin            */
+/********************************/
+
