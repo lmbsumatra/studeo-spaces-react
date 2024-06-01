@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Footer from "../components/Footer";
 
 const Book = () => {
@@ -14,18 +15,40 @@ const Book = () => {
 
   const navigate = useNavigate();
 
-  const handleBookNowClick = () => {
+  const handleBookNowClick = async () => {
+    console.log('Selected Service:', selectedService);
+    console.log('Date:', date);
+    console.log('Time:', time);
+    console.log('Name:', name);
+    console.log('Email:', email);
+    console.log('Contact Number:', contactNumber);
+    console.log('Payment Method:', paymentMethod);
+  
     const bookingDetails = {
-      selectedService,
+      service: selectedService,
       date,
       time,
       name,
       email,
-      contactNumber,
-      paymentMethod,
+      contact_number: contactNumber, // Use snake_case here
+      payment_method: paymentMethod, // Use snake_case here
     };
-    navigate("/confirmation", { state: bookingDetails });
+  
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/bookings', bookingDetails);
+      console.log('Booking successful!', response.data);
+      navigate('/confirmation', { state: bookingDetails });
+    } catch (error) {
+      if (error.response) {
+        console.error('Server responded with error:', error.response.data);
+        alert(`There was an error creating the booking! ${error.response.data.message}`);
+      } else {
+        console.error('There was an error creating the booking!', error);
+        alert('There was an error creating the booking! Please try again.');
+      }
+    }
   };
+  
 
   const handleCheckBookingClick = () => {
     if (referenceNumber) {

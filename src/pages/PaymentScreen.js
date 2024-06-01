@@ -1,11 +1,12 @@
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
 const Payment = () => {
-  // anong payment gateway ba gagamitin
-  // example lang to para sa flow
   const navigate = useNavigate();
+  const location = useLocation();
+
   const handleBookingSummary = () => {
-    
-    navigate("/booking-successful");
+    navigate("/booking-summary", { state: location.state });
   };
 
   return (

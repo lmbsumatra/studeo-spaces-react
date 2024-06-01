@@ -8,19 +8,20 @@ const BookingSummary = () => {
 
   // Destructure state or set defaults
   const {
-    selectedService = "N/A",
-    date = "N/A",
-    time = "N/A",
-    name = "N/A",
-    email = "N/A",
-    contactNumber = "N/A",
-    paymentMethod = "N/A",
+    service,
+    date,
+    time,
+    name,
+    email,
+    contact_number,
+    payment_method,
     refNumber = "N/A",
   } = location.state || {};
 
   // Redirect to booking page if no state is available
   if (!location.state) {
     navigate("/booking");
+    return null; // Ensure the component doesn't try to render without state
   }
 
   return (
@@ -31,12 +32,12 @@ const BookingSummary = () => {
           <hr />
           <h2 className="fs-600 ff-serif text-center">Receipt</h2>
           <p className="text-center">
-              <strong>Reference Number:</strong> {refNumber}
-            </p>
+            <strong>Reference Number:</strong> {refNumber}
+          </p>
           <div className="mt-4">
             <h3 className="fs-500 ff-serif">Booking Details</h3>
             <p>
-              <strong>Service:</strong> {selectedService}
+              <strong>Service:</strong> {service}
             </p>
             <p>
               <strong>Date:</strong> {date}
@@ -53,12 +54,12 @@ const BookingSummary = () => {
               <strong>Email:</strong> {email}
             </p>
             <p>
-              <strong>Contact Number:</strong> {contactNumber}
+              <strong>Contact Number:</strong> {contact_number}
             </p>
             <hr />
             <h3 className="fs-500 ff-serif">Payment Information</h3>
             <p>
-              <strong>Payment Method:</strong> {paymentMethod}
+              <strong>Payment Method:</strong> {payment_method}
             </p>
           </div>
           <div className="mt-5 text-center">
