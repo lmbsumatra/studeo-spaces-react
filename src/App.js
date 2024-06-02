@@ -13,11 +13,12 @@ import FAQs from './pages/FAQs';
 import Confirmation from './pages/ConfirmationScreen';
 import Payment from './pages/PaymentScreen';
 import BookingSummary from './pages/BookingSummary';
-import AdminLogin from './pages/AdminLoginScreen';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminBookings from './pages/AdminBookings';
-import AdminCustomers from './pages/AdminCustomers';
-import AdminPayments from './pages/AdminPayments';
+import AdminLogin from './pages/admin pages/AdminLoginScreen';
+import AdminDashboard from './pages/admin pages/AdminDashboard';
+import AdminBookings from './pages/admin pages/AdminBookings';
+import AdminCustomers from './pages/admin pages/AdminCustomers';
+import AdminPayments from './pages/admin pages/AdminPayments';
+import AdminMessagesScreen from './pages/admin pages/AdminMessagesScreen';
 
 const App = () => {
   const location = useLocation();
@@ -35,12 +36,12 @@ const App = () => {
         <Route path="/payment" element={<Payment />} />
         <Route path="/booking-successful" element={<BookingSummary />} />
 
-
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin-bookings" element={<AdminBookings />} />
         <Route path="/admin-customers" element={<AdminCustomers />} />
         <Route path="/admin-payments" element={<AdminPayments />} />
+        <Route path="/admin-messages" element={<AdminMessagesScreen />} />
 
        </Routes>
     </div>
