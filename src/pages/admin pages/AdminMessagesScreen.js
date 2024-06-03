@@ -1,56 +1,53 @@
-import React from 'react';
+// AdminMessagesScreen.js
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const AdminMessagesScreen = () => {
-  // Sample static messages
-  const messages = [
-    {
-      id: 1,
-      email: 'example1@example.com',
-      name: 'John Doe',
-      message: 'Hello, I have a question about your services.',
-      date: '2023-05-01',
-    },
-    {
-      id: 2,
-      email: 'example2@example.com',
-      name: 'Jane Smith',
-      message: 'Can you provide more information on your pricing?',
-      date: '2023-05-02',
-    },
-    {
-      id: 3,
-      email: 'example3@example.com',
-      name: 'Bob Johnson',
-      message: 'I need help with my account.',
-      date: '2023-05-03',
-    },
-  ];
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    // Fetch messages from the backend API when the component mounts
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/messages');
+        setMessages(response.data);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+
+    fetchMessages();
+  }, []); // Empty dependency array ensures the effect runs only once
 
   return (
     <div className="container mt-5">
       <h1 className='mb-4'>Messages</h1>
-      <table className="table table-bordered">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Email</th>
-            <th>Name</th>
-            <th>Message</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {messages.map((msg) => (
-            <tr key={msg.id}>
-              <td>{msg.id}</td>
-              <td>{msg.email}</td>
-              <td>{msg.name}</td>
-              <td>{msg.message}</td>
-              <td>{msg.date}</td>
+      {messages.length === 0 ? (
+        <p>No new messages</p> // display this if there no message
+      ) : (
+        <table className="table table-bordered">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Email</th>
+              <th>Name</th>
+              <th>Message</th>
+              <th>Date</th> 
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {messages.map((msg) => (
+              <tr key={msg.id}>
+                <td>{msg.id}</td>
+                <td>{msg.email}</td>
+                <td>{msg.name}</td>
+                <td>{msg.message}</td>
+                <td>{new Date(msg.created_at).toLocaleString()}</td> 
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };
