@@ -1,4 +1,5 @@
-import React from "react";
+//cofirmation.js
+import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 
@@ -6,11 +7,27 @@ const ConfirmationScreen = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleProceedToPayment = () => {
-    navigate("/payment");
-  };
-  
+  // Ensure the component doesn't try to render without state
+  useEffect(() => {
+    if (!location.state) {
+      navigate("/booking");
+    }
+  }, [location.state, navigate]);
+
+  if (!location.state) {
+    return null;
+  }
+
+  // Extract the state
   const { service, date, time, name, email, contact_number, payment_method } = location.state;
+
+  // Create the bookingDetails object
+  const bookingDetails = { service, date, time, name, email, contact_number, payment_method };
+
+  // Handle proceed to payment
+  const handleProceedToPayment = () => {
+    navigate("/payment", { state: bookingDetails });
+  };
 
   return (
     <div>
@@ -22,8 +39,8 @@ const ConfirmationScreen = () => {
         <p><strong>Time:</strong> {time}</p>
         <p><strong>Name:</strong> {name}</p>
         <p><strong>Email:</strong> {email}</p>
-        <p><strong>Contact Number:</strong> {contact_number}</p> {/* Correctly access snake_case */}
-        <p><strong>Payment Method:</strong> {payment_method}</p> {/* Correctly access snake_case */}
+        <p><strong>Contact Number:</strong> {contact_number}</p>
+        <p><strong>Payment Method:</strong> {payment_method}</p>
       </div>
 
       <div className="container text-center">
@@ -37,3 +54,4 @@ const ConfirmationScreen = () => {
 };
 
 export default ConfirmationScreen;
+

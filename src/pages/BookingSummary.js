@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 
@@ -8,19 +8,24 @@ const BookingSummary = () => {
 
   // Destructure state or set defaults
   const {
-    service,
-    date,
-    time,
-    name,
-    email,
-    contact_number,
-    payment_method,
+    service = "N/A",
+    date = "N/A",
+    time = "N/A",
+    name = "N/A",
+    email = "N/A",
+    contact_number = "N/A",
+    payment_method = "N/A",
     refNumber = "N/A",
   } = location.state || {};
 
   // Redirect to booking page if no state is available
+  useEffect(() => {
+    if (!location.state) {
+      navigate("/booking");
+    }
+  }, [location.state, navigate]);
+
   if (!location.state) {
-    navigate("/booking");
     return null; // Ensure the component doesn't try to render without state
   }
 

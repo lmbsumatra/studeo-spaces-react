@@ -1,6 +1,6 @@
+//bookingscreen.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import Footer from "../components/Footer";
 
 const Book = () => {
@@ -34,26 +34,13 @@ const Book = () => {
       contact_number: contactNumber, // Use snake_case here
       payment_method: paymentMethod, // Use snake_case here
     };
-  
-    try {
-      const response = await axios.post('http://127.0.0.1:8000/api/bookings', bookingDetails);
-      console.log('Booking successful!', response.data);
       navigate('/confirmation', { state: bookingDetails });
-    } catch (error) {
-      if (error.response) {
-        console.error('Server responded with error:', error.response.data);
-        alert(`There was an error creating the booking! ${error.response.data.message}`);
-      } else {
-        console.error('There was an error creating the booking!', error);
-        alert('There was an error creating the booking! Please try again.');
-      }
-    }
   };
   
 
   const handleCheckBookingClick = () => {
     if (referenceNumber) {
-      navigate("/successful-booking", { state: { referenceNumber } });
+      navigate("/booking-details", { state: { referenceNumber } });
     } else {
       alert("Please enter a valid reference number.");
     }

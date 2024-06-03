@@ -17,5 +17,6 @@ class Booking extends Model
         'email',
         'contact_number',
         'payment_method',
+        'refNumber'
     ];
 }

@@ -13,6 +13,7 @@ import FAQs from './pages/FAQs';
 import Confirmation from './pages/ConfirmationScreen';
 import Payment from './pages/PaymentScreen';
 import BookingSummary from './pages/BookingSummary';
+import BookingDetails from "./pages/BookingDetails";
 import AdminLogin from './pages/admin pages/AdminLoginScreen';
 import AdminDashboard from './pages/admin pages/AdminDashboard';
 import AdminBookings from './pages/admin pages/AdminBookings';
@@ -35,6 +36,7 @@ const App = () => {
         <Route path="/confirmation" element={<Confirmation />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/booking-successful" element={<BookingSummary />} />
+        <Route path="/booking-details" element={<BookingDetails />} />
 
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminDashboard />} />
