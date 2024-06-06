@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Booking;
+use App\Models\Customer;
 use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
@@ -13,29 +14,47 @@ class BookingController extends Controller
         $validatedData = $request->validate([
             'service' => 'required|string|max:255',
             'date' => 'required|date',
-            'time' => 'required|date_format:H:i',  // Corrected line
+            'time' => 'required|date_format:H:i',
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'contact_number' => 'required|string|max:20',
             'payment_method' => 'required|string|max:50',
             'refNumber' => 'required|string|unique:bookings,refNumber'
         ]);
-    
-        $booking = Booking::create($validatedData);
-    
-        return response()->json($booking, 201);
+
+        // Check if the customer already exists
+        $customer = Customer::where('email', $validatedData['email'])
+            ->where('name', $validatedData['name'])
+            ->where('contact_number', $validatedData['contact_number'])
+            ->first();
+
+        // If customer doesn't exist, create a new one
+        if (!$customer) {
+            $customer = Customer::create([
+                'name' => $validatedData['name'],
+                'email' => $validatedData['email'],
+                'contact_number' => $validatedData['contact_number'],
+            ]);
+        }
+
+        // Create the booking and associate it with the customer
+        $booking = new Booking($validatedData);
+        $booking->customer()->associate($customer);
+        $booking->save();
+
+        // Return booking details along with the customer ID
+        return response()->json(['booking' => $booking, 'customerID' => $customer->id], 201);
     }
 
     public function index()
     {
-        $bookings = Booking::all();
+        $bookings = Booking::with('customer')->get();
         return response()->json($bookings);
     }
 
-    // Add this method to fetch booking by reference number
     public function show($refNumber)
     {
-        $booking = Booking::where('refNumber', $refNumber)->first();
+        $booking = Booking::with('customer')->where('refNumber', $refNumber)->first();
 
         if ($booking) {
             return response()->json($booking);
@@ -44,3 +63,4 @@ class BookingController extends Controller
         }
     }
 }
+

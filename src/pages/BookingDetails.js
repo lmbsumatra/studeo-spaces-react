@@ -32,7 +32,7 @@ const BookingDetails = () => {
     return <p>Loading...</p>;
   }
 
-  const { service, date, time, name, email, contact_number, payment_method, refNumber } = bookingDetails;
+  const { service, date, time, name, email, contact_number, payment_method, refNumber, customer_id } = bookingDetails;
 
   return (
     <div className="container mt-5">
@@ -70,6 +70,10 @@ const BookingDetails = () => {
             <h3 className="fs-500 ff-serif">Payment Information</h3>
             <p>
               <strong>Payment Method:</strong> {payment_method}
+            </p>
+            <h3 className="fs-500 ff-serif">Customer ID</h3>
+            <p>
+              <strong>Customer ID:</strong> {customer_id}
             </p>
           </div>
           <div className="mt-5 text-center">

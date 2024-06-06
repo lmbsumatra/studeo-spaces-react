@@ -1,4 +1,3 @@
-//payment.js
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -8,7 +7,7 @@ const Payment = () => {
   const location = useLocation();
 
   const generateReferenceNumber = () => {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let referenceNumber = '';
     for (let i = 0; i < 6; i++) {
       referenceNumber += characters.charAt(Math.floor(Math.random() * characters.length));
@@ -22,8 +21,9 @@ const Payment = () => {
     const bookingDetailsWithRef = { ...location.state, refNumber: referenceNumber };
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/bookings', bookingDetailsWithRef);
+      const { customerID } = response.data; 
       console.log('Booking successful!', response.data);
-      navigate("/booking-successful", { state: bookingDetailsWithRef });
+      navigate("/booking-successful", { state: { ...bookingDetailsWithRef, customerID } });
     } catch (error) {
       if (error.response) {
         console.error('Server responded with error:', error.response.data);
@@ -34,6 +34,7 @@ const Payment = () => {
       }
     }
   };
+  
 
   useEffect(() => {
     if (!location.state) {

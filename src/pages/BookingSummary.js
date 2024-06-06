@@ -6,7 +6,6 @@ const BookingSummary = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Destructure state or set defaults
   const {
     service = "N/A",
     date = "N/A",
@@ -16,9 +15,9 @@ const BookingSummary = () => {
     contact_number = "N/A",
     payment_method = "N/A",
     refNumber = "N/A",
+    customerID = "N/A"
   } = location.state || {};
 
-  // Redirect to booking page if no state is available
   useEffect(() => {
     if (!location.state) {
       navigate("/booking");
@@ -26,7 +25,7 @@ const BookingSummary = () => {
   }, [location.state, navigate]);
 
   if (!location.state) {
-    return null; // Ensure the component doesn't try to render without state
+    return null;
   }
 
   return (
@@ -65,6 +64,10 @@ const BookingSummary = () => {
             <h3 className="fs-500 ff-serif">Payment Information</h3>
             <p>
               <strong>Payment Method:</strong> {payment_method}
+            </p>
+            <h3 className="fs-500 ff-serif">Customer ID</h3>
+            <p>
+              <strong>Customer ID:</strong> {customerID}
             </p>
           </div>
           <div className="mt-5 text-center">

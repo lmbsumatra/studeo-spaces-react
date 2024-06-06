@@ -1,6 +1,7 @@
-//bookingscreen.js
+// Book.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Footer from "../components/Footer";
 
 const Book = () => {
@@ -16,7 +17,7 @@ const Book = () => {
 
   const navigate = useNavigate();
 
-  const handleBookNowClick = async () => {
+  const handleBookNowClick = () => {
     console.log('Selected Service:', selectedService);
     console.log('Date:', date);
     console.log('Time:', time);
@@ -24,19 +25,20 @@ const Book = () => {
     console.log('Email:', email);
     console.log('Contact Number:', contactNumber);
     console.log('Payment Method:', paymentMethod);
-  
+
     const bookingDetails = {
       service: selectedService,
       date,
       time,
       name,
       email,
-      contact_number: contactNumber, // Use snake_case here
-      payment_method: paymentMethod, // Use snake_case here
+      contact_number: contactNumber,
+      payment_method: paymentMethod,
+      customerID: customerID, // Include customerID here
     };
-      navigate('/confirmation', { state: bookingDetails });
+
+    navigate('/confirmation', { state: bookingDetails });
   };
-  
 
   const handleCheckBookingClick = () => {
     if (referenceNumber) {
@@ -46,15 +48,16 @@ const Book = () => {
     }
   };
 
-  const handleUseCustomerID = (e) => {
+  const handleUseCustomerID = async (e) => {
     e.preventDefault();
-    // Logic to fetch and fill user details based on customerID
-    // For now, just set some dummy data
-    if (customerID === "12345") {
-      setName("John Doe");
-      setEmail("john.doe@example.com");
-      setContactNumber("1234567890");
-    } else {
+    try {
+      const response = await axios.get(`http://127.0.0.1:8000/api/customers/${customerID}`);
+      const customer = response.data;
+      setName(customer.name);
+      setEmail(customer.email);
+      setContactNumber(customer.contact_number);
+    } catch (error) {
+      console.error('Customer ID not found:', error);
       alert("Customer ID not found");
     }
   };
@@ -271,29 +274,25 @@ const Book = () => {
         <div className="container">
           <div className="mb-3">
             <label htmlFor="referenceNumber" className="form-label">
-              Reference Number
+              Enter your reference number:
             </label>
             <input
               type="text"
               className="form-control"
               id="referenceNumber"
-              placeholder="Enter your reference number"
+              placeholder="Enter Reference Number"
               value={referenceNumber}
               onChange={(e) => setReferenceNumber(e.target.value)}
             />
           </div>
-          <div className="text-center">
-            <button
-              className="btn btn-primary-clr"
-              onClick={handleCheckBookingClick}
-            >
-              Check Booking
-            </button>
-          </div>
+        </div>
+        <div className="container text-center">
+          <button className="btn btn-primary-clr" onClick={handleCheckBookingClick}>
+            Check Booking
+          </button>
         </div>
       </div>
-      <hr />
-      {/* Footer */}
+
       <Footer />
     </div>
   );
