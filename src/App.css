@@ -5,7 +5,7 @@
 :root {
   /* colors */
   --clr-dark: 230 35% 7%;
-  --clr-light: 231 77% 90%;
+  --clr-light: 211, 12%, 48%; 
   --clr-white: 0 0% 100%;
   --clr-primary: #f79728;
   --clr-primary-hover: #db8523;
@@ -139,6 +139,9 @@ select {
 }
 .text-white {
   color: hsl(var(--clr-white));
+}
+.text-clr-green {
+  color: #2ead0f;
 }
 
 /* typography */
@@ -341,37 +344,6 @@ section {
   }
 }
 
-/********************************/
-/*        Hero Section          */
-/********************************/
-.hero {
-  height: 100vh;
-  display: flex;
-  align-items: center;
-}
-
-/* For small devices (phones) */
-@media (max-width: 576px) {
-  .hero {
-    height: auto;
-  }
-  .hero.container-fluid {
-    padding: 0 10px;
-  }
-  .hero .container {
-    padding: 0;
-  }
-  .hero .row {
-    flex-direction: column;
-    align-items: center;
-  }
-  .hero .col {
-    width: 100%;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-}
-
 /* For medium devices (tablets) */
 @media (min-width: 577px) and (max-width: 992px) {
   .hero {
@@ -387,42 +359,6 @@ section {
   .hero.container-fluid {
     padding: 0 100px;
     height: 100vh;
-  }
-}
-
-/********************************/
-/*           Services           */
-/********************************/
-#services .card:hover {
-  border: #db8523 solid 2px;
-}
-
-/* For small devices (phones) */
-@media (max-width: 576px) {
-  .items {
-    padding: 0 10px;
-  }
-  .d-flex.justify-content-around {
-    flex-direction: column;
-    align-items: center;
-  }
-  .card {
-    width: 100%;
-    margin-bottom: 20px;
-  }
-}
-
-/* For medium devices (tablets) */
-@media (min-width: 577px) and (max-width: 992px) {
-  .items {
-    padding: 0 30px;
-  }
-}
-
-/* For large devices (desktops) */
-@media (min-width: 993px) {
-  .items {
-    padding: 0 60px;
   }
 }
 

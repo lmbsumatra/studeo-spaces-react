@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Footer from "../components/Footer";
+import Service from "../components/services/Service";
 
 const Book = () => {
   const [selectedService, setSelectedService] = useState(null);
@@ -69,42 +70,7 @@ const Book = () => {
         <h1 className="fs-700 ff-serif text-center">Booking</h1>
 
         {/* Select service */}
-        <div className="container" id="services">
-          <h2 className="fs-600 ff-serif">Select Service</h2>
-          <div className="d-flex justify-content-around">
-            {[1, 2, 3].map((i) => (
-              <div className="card" style={{ width: "18rem" }} key={i}>
-                <label htmlFor={`service${i}`}>
-                  <img
-                    src="../assets/images/img_1.jpg"
-                    className="card-img-top"
-                    alt="Service"
-                  />
-                  <div className="card-body">
-                    <h5 className="card-title fs-500 ff-serif">
-                      All day/All night Pass
-                    </h5>
-                    <p className="card-text fs-500">₱ 250.00</p>
-                    <input
-                      type="radio"
-                      className="btn-check"
-                      name="service"
-                      id={`service${i}`}
-                      autoComplete="off"
-                      onChange={() => setSelectedService(`Service ${i}`)}
-                    />
-                    <label
-                      className="btn btn-secondary-clr"
-                      htmlFor={`service${i}`}
-                    >
-                      Select
-                    </label>
-                  </div>
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
+        <Service title='Select Services' isBookingPage={true} />
 
         <hr />
         {/* Select date */}

@@ -1,0 +1,44 @@
+/********************************/
+/*        Hero Section          */
+/********************************/
+.hero {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    background-image: linear-gradient(to left, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 1)), url("../../assets/images/blogs/img_1.jpg");
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.text-container {
+    max-width: 55ch; /* Limiting to approximately 40 characters per line */
+    overflow-wrap: break-word; /* Break words to fit within the container */
+}
+
+/* For small and medium devices */
+@media (max-width: 992px) {
+}
+
+/* For small devices (phones) */
+@media (max-width: 576px) {
+    .hero {
+        height: auto;
+        background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 1)), url("../../assets/images/blogs/img_1.jpg");
+    }
+    .hero.container-fluid {
+        padding: 0 10px;
+    }
+    .hero .container {
+        padding: 0;
+    }
+    .hero .row {
+        flex-direction: column;
+        align-items: center;
+    }
+    .hero .col {
+        width: 100%;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+}
