@@ -23,10 +23,10 @@ const Service = ({ title, show, isBookingPage, onServiceSelect }) => {
     fetchServices();
   }, []);
 
-  const handleServiceSelect = (serviceId) => {
-    setSelectedService(serviceId);
+  const handleServiceSelect = (serviceName) => {
+    setSelectedService(serviceName);
     if (onServiceSelect) {
-      onServiceSelect(serviceId); // Call the callback function with the selected service ID
+      onServiceSelect(serviceName); // Call the callback function with the selected service ID
     }
   };
 
@@ -62,7 +62,7 @@ const Service = ({ title, show, isBookingPage, onServiceSelect }) => {
                         name="service"
                         id={`service${service.id}`}
                         autoComplete="off"
-                        onChange={() => handleServiceSelect(service.id)}
+                        onChange={() => handleServiceSelect(service.name)}
                       />
                       <label
                         className="btn btn-secondary-clr"

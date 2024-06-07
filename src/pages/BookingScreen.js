@@ -63,8 +63,8 @@ const Book = () => {
   };
 
   // Callback function to handle service selection
-  const handleServiceSelect = (serviceId) => {
-    setSelectedService(serviceId);
+  const handleServiceSelect = (serviceName) => {
+    setSelectedService(serviceName);
   };
 
   return (
