@@ -1,4 +1,3 @@
-// Book.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -63,6 +62,11 @@ const Book = () => {
     }
   };
 
+  // Callback function to handle service selection
+  const handleServiceSelect = (serviceId) => {
+    setSelectedService(serviceId);
+  };
+
   return (
     <div className="container">
       {/* Booking Section */}
@@ -70,7 +74,11 @@ const Book = () => {
         <h1 className="fs-700 ff-serif text-center">Booking</h1>
 
         {/* Select service */}
-        <Service title='Select Services' isBookingPage={true} />
+        <Service 
+          title='Select Services' 
+          isBookingPage={true} 
+          onServiceSelect={handleServiceSelect} 
+        />
 
         <hr />
         {/* Select date */}

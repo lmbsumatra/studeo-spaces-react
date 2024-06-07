@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
 
-const Service = ({ title, show, isBookingPage }) => {
+const Service = ({ title, show, isBookingPage, onServiceSelect }) => {
   const [services, setServices] = useState([]);
-  const [selectedService, setSelectedService] = useState(null); // State to store selected service
+  const [selectedService, setSelectedService] = useState(null);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -23,9 +23,11 @@ const Service = ({ title, show, isBookingPage }) => {
     fetchServices();
   }, []);
 
-  // Function to handle service selection
   const handleServiceSelect = (serviceId) => {
     setSelectedService(serviceId);
+    if (onServiceSelect) {
+      onServiceSelect(serviceId); // Call the callback function with the selected service ID
+    }
   };
 
   return (
