@@ -30,8 +30,6 @@ const Service = ({ title, show, isBookingPage, onServiceSelect }) => {
     }
   };
   
-  
-
   return (
     <section className="container items">
       <h1 className="fs-700 ff-serif text-center">{title}</h1>
@@ -65,9 +63,12 @@ const Service = ({ title, show, isBookingPage, onServiceSelect }) => {
                         id={`service${service.id}`}
                         autoComplete="off"
                         onChange={() => handleServiceSelect(service)}
+                        disabled={service.count === 0} // Disable the button if count is 0
                       />
                       <label
-                        className="btn btn-secondary-clr"
+                        className={`btn btn-secondary-clr ${
+                          service.count === 0 ? "disabled" : ""
+                        }`}
                         htmlFor={`service${service.id}`}
                       >
                         {selectedService === service.id ? "Selected" : "Select"}

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Customer;
+use App\Models\Service;
 use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
@@ -22,6 +23,22 @@ class BookingController extends Controller
             'payment_method' => 'required|string|max:50',
             'refNumber' => 'required|string|unique:bookings,refNumber'
         ]);
+
+        // Start by finding the service associated with the booking
+        $service = Service::where('name', $validatedData['service'])->first();
+
+        if (!$service) {
+            return response()->json(['error' => 'Service not found'], 404);
+        }
+
+        // Check if service count is greater than 0
+        if ($service->count <= 0) {
+            return response()->json(['error' => 'Service is not available'], 400);
+        }
+
+        // Decrement the count of the booked service
+        $service->count--;
+        $service->save();
 
         // Check if the customer already exists
         $customer = Customer::where('email', $validatedData['email'])
@@ -90,6 +107,4 @@ class BookingController extends Controller
 
         return response()->json(['message' => 'Booking status updated successfully'], 200);
     }
-
 }
-

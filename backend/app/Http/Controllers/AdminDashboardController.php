@@ -13,9 +13,8 @@ class AdminDashboardController extends Controller
     public function getData()
     {
         // Summing up the 'count' column across all services
-        $totalSeats = Service::sum('count');
+        $availableSeats = Service::sum('count');
         $bookedSeats = Booking::count();
-        $availableSeats = $totalSeats - $bookedSeats;
         $numberOfCustomers = Customer::sum('id');
         $totalSales = Booking::sum('price');
 
