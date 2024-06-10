@@ -1,14 +1,25 @@
-import React from 'react';
-// import './AdminDashboard.css'; // Assuming you have some custom CSS for styling
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const AdminDashboard = () => {
-    // Sample data for demonstration purposes
-    const availableSeats = 120;
-    const bookedSeats = 80;
-    const numberOfCustomers = 50;
-    const totalSales = 20000; // in currency, e.g., PHP
-    const pendingBookings = 10;
-    const canceledBookings = 5;
+    const [data, setData] = useState({
+        availableSeats: 0,
+        bookedSeats: 0,
+        numberOfCustomers: 0,
+        totalSales: 0,
+        pendingBookings: 0,
+        canceledBookings: 0,
+    });
+
+    useEffect(() => {
+        axios.get('http://127.0.0.1:8000/api/admin-dashboard-data')
+            .then(response => {
+                setData(response.data);
+            })
+            .catch(error => {
+                console.error('There was an error fetching the data!', error);
+            });
+    }, []);
 
     return (
         <div className="container mt-5" id="dashboard">
@@ -18,7 +29,7 @@ const AdminDashboard = () => {
                     <div className="card text-white bg-primary h-100">
                         <div className="card-body">
                             <h5 className="card-title">Available Seats</h5>
-                            <p className="card-text fs-3">{availableSeats}</p>
+                            <p className="card-text fs-3">{data.availableSeats}</p>
                         </div>
                     </div>
                 </div>
@@ -26,7 +37,7 @@ const AdminDashboard = () => {
                     <div className="card text-white bg-success h-100">
                         <div className="card-body">
                             <h5 className="card-title">Booked Seats</h5>
-                            <p className="card-text fs-3">{bookedSeats}</p>
+                            <p className="card-text fs-3">{data.bookedSeats}</p>
                         </div>
                     </div>
                 </div>
@@ -34,7 +45,7 @@ const AdminDashboard = () => {
                     <div className="card text-white bg-info h-100">
                         <div className="card-body">
                             <h5 className="card-title">Customers</h5>
-                            <p className="card-text fs-3">{numberOfCustomers}</p>
+                            <p className="card-text fs-3">{data.numberOfCustomers}</p>
                         </div>
                     </div>
                 </div>
@@ -42,7 +53,7 @@ const AdminDashboard = () => {
                     <div className="card text-white bg-warning h-100">
                         <div className="card-body">
                             <h5 className="card-title">Total Sales</h5>
-                            <p className="card-text fs-3">₱ {totalSales.toLocaleString()}</p>
+                            <p className="card-text fs-3">₱ {data.totalSales.toLocaleString()}</p>
                         </div>
                     </div>
                 </div>
@@ -50,7 +61,7 @@ const AdminDashboard = () => {
                     <div className="card text-white bg-danger h-100">
                         <div className="card-body">
                             <h5 className="card-title">Pending Bookings</h5>
-                            <p className="card-text fs-3">{pendingBookings}</p>
+                            <p className="card-text fs-3">{data.pendingBookings}</p>
                         </div>
                     </div>
                 </div>
@@ -58,7 +69,7 @@ const AdminDashboard = () => {
                     <div className="card text-white bg-secondary h-100">
                         <div className="card-body">
                             <h5 className="card-title">Canceled Bookings</h5>
-                            <p className="card-text fs-3">{canceledBookings}</p>
+                            <p className="card-text fs-3">{data.canceledBookings}</p>
                         </div>
                     </div>
                 </div>

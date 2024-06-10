@@ -13,6 +13,9 @@ class ServiceController extends Controller
             'name' => 'required|string|max:255',
             'duration' => 'required|string|max:255',
             'price' => 'required|numeric',
+            'images' => 'nullable|string',
+            'description' => 'nullable|string',
+            'count' => 'required|integer',
         ]);
 
         $service = Service::create($validatedData);

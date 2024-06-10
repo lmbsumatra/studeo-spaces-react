@@ -19,10 +19,10 @@ const ConfirmationScreen = () => {
   }
 
   // Extract the state
-  const { service, date, time, name, email, contact_number, payment_method } = location.state;
+  const { service, price, date, time, name, email, contact_number, payment_method } = location.state;
 
   // Create the bookingDetails object
-  const bookingDetails = { service, date, time, name, email, contact_number, payment_method };
+  const bookingDetails = { service, price, date, time, name, email, contact_number, payment_method };
 
   // Handle proceed to payment
   const handleProceedToPayment = () => {
@@ -35,6 +35,7 @@ const ConfirmationScreen = () => {
       <div className="container">
         <h2 className="fs-600 ff-serif">Booking Details</h2>
         <p><strong>Service:</strong> {service}</p>
+        <p><strong>Price:</strong> {price}</p>
         <p><strong>Date:</strong> {date}</p>
         <p><strong>Time:</strong> {time}</p>
         <p><strong>Name:</strong> {name}</p>

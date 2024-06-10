@@ -30,6 +30,7 @@ const AdminBookings = () => {
                 <th scope="col">Booking ID</th>
                 <th scope="col">Customer Name</th>
                 <th scope="col">Service</th>
+                <th scope="col">Price</th>
                 <th scope="col">Date</th>
                 <th scope="col">Time</th>
                 <th scope="col">Status</th>
@@ -41,6 +42,7 @@ const AdminBookings = () => {
                   <th scope="row">{booking.id}</th>
                   <td>{booking.customer?.name}</td>
                   <td>{booking.service}</td>
+                  <td>{booking.price}</td>
                   <td>{booking.date}</td>
                   <td>{booking.time}</td>
                   <td>{booking.status}</td>

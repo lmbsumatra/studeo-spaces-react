@@ -8,6 +8,7 @@ const BookingSummary = () => {
 
   const {
     service = "N/A",
+    price = "N/A",
     date = "N/A",
     time = "N/A",
     name = "N/A",
@@ -42,6 +43,9 @@ const BookingSummary = () => {
             <h3 className="fs-500 ff-serif">Booking Details</h3>
             <p>
               <strong>Service:</strong> {service}
+            </p>
+            <p>
+              <strong>Price:</strong> {price}
             </p>
             <p>
               <strong>Date:</strong> {date}

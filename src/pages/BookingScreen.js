@@ -6,6 +6,7 @@ import Service from "../components/services/Service";
 
 const Book = () => {
   const [selectedService, setSelectedService] = useState(null);
+  const [price, setPrice] = useState(null);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [name, setName] = useState("");
@@ -27,7 +28,8 @@ const Book = () => {
     console.log('Payment Method:', paymentMethod);
 
     const bookingDetails = {
-      service: selectedService,
+      service: selectedService.name,
+      price: selectedService.price,
       date,
       time,
       name,
@@ -63,9 +65,10 @@ const Book = () => {
   };
 
   // Callback function to handle service selection
-  const handleServiceSelect = (serviceName) => {
-    setSelectedService(serviceName);
+  const handleServiceSelect = (service) => {
+    setSelectedService(service);
   };
+  
 
   return (
     <div className="container">

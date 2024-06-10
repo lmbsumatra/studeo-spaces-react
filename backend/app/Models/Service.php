@@ -18,5 +18,6 @@ class Service extends Model
         'price',
         'images',
         'description',
+        'count',
     ];
 }

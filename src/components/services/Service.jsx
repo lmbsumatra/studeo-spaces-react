@@ -23,12 +23,14 @@ const Service = ({ title, show, isBookingPage, onServiceSelect }) => {
     fetchServices();
   }, []);
 
-  const handleServiceSelect = (serviceName) => {
-    setSelectedService(serviceName);
+  const handleServiceSelect = (service) => {
+    setSelectedService(service);
     if (onServiceSelect) {
-      onServiceSelect(serviceName); // Call the callback function with the selected service ID
+      onServiceSelect(service); // Call the callback function with the selected service object
     }
   };
+  
+  
 
   return (
     <section className="container items">
@@ -62,7 +64,7 @@ const Service = ({ title, show, isBookingPage, onServiceSelect }) => {
                         name="service"
                         id={`service${service.id}`}
                         autoComplete="off"
-                        onChange={() => handleServiceSelect(service.name)}
+                        onChange={() => handleServiceSelect(service)}
                       />
                       <label
                         className="btn btn-secondary-clr"

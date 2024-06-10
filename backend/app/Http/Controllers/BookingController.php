@@ -13,6 +13,7 @@ class BookingController extends Controller
     {
         $validatedData = $request->validate([
             'service' => 'required|string|max:255',
+            'price' => 'required|numeric',
             'date' => 'required|date',
             'time' => 'required|date_format:H:i',
             'name' => 'required|string|max:255',

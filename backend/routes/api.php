@@ -6,6 +6,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\AdminDashboardController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -27,3 +28,5 @@ Route::get('/services', [ServiceController::class, 'index']);
 
 Route::post('/bookings/cancel/{refNumber}', [BookingController::class, 'cancel']);
 Route::post('bookings/{id}/status', [BookingController::class, 'updateStatus']);
+
+Route::get('/admin-dashboard-data', [AdminDashboardController::class, 'getData']);
