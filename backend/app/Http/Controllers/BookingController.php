@@ -39,9 +39,9 @@ class BookingController extends Controller
 
         // Create the booking and associate it with the customer
         $booking = new Booking($validatedData);
+        $booking->status = 'pending';
         $booking->customer()->associate($customer);
         $booking->save();
-
         // Return booking details along with the customer ID
         return response()->json(['booking' => $booking, 'customerID' => $customer->id], 201);
     }
@@ -62,5 +62,33 @@ class BookingController extends Controller
             return response()->json(['message' => 'Booking not found'], 404);
         }
     }
+
+    public function cancel($refNumber)
+    {
+        $booking = Booking::where('refNumber', $refNumber)->first();
+
+        if ($booking) {
+            $booking->status = 'cancelled';
+            $booking->save();
+
+            return response()->json(['message' => 'Booking cancelled successfully'], 200);
+        } else {
+            return response()->json(['message' => 'Booking not found'], 404);
+        }
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'status' => 'required|string|in:Completed,Pending,Cancelled',
+        ]);
+
+        $booking = Booking::findOrFail($id);
+        $booking->status = $validatedData['status'];
+        $booking->save();
+
+        return response()->json(['message' => 'Booking status updated successfully'], 200);
+    }
+
 }
 

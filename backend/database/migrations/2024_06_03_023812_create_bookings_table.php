@@ -21,6 +21,7 @@ return new class extends Migration
                 $table->string('contact_number');
                 $table->string('payment_method');
                 $table->string('refNumber')->unique();
+                $table->string('status')->default('pending');
                 $table->timestamps();
             });
         }

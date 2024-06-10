@@ -24,3 +24,6 @@ Route::post('/messages', [MessageController::class, 'store']);
 Route::get('/messages', [MessageController::class, 'index']);
 
 Route::get('/services', [ServiceController::class, 'index']);
+
+Route::post('/bookings/cancel/{refNumber}', [BookingController::class, 'cancel']);
+Route::post('bookings/{id}/status', [BookingController::class, 'updateStatus']);

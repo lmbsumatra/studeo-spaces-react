@@ -18,6 +18,7 @@ class Booking extends Model
         'contact_number',
         'payment_method',
         'refNumber',
+        'status',
         'customer_id',
     ];
 

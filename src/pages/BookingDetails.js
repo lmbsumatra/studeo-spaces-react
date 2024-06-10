@@ -28,11 +28,29 @@ const BookingDetails = () => {
     fetchBookingDetails();
   }, [location.state, navigate]);
 
+  const handleCancelBooking = async () => {
+    const confirmCancel = window.confirm("Are you sure you want to cancel this booking?");
+    if (confirmCancel) {
+      try {
+        await axios.post(`http://127.0.0.1:8000/api/bookings/cancel/${bookingDetails.refNumber}`);
+        alert("Booking cancelled successfully.");
+        navigate("/booking");
+      } catch (error) {
+        console.error('Error cancelling booking:', error);
+        alert('Failed to cancel booking.');
+      }
+    }
+  };
+
+  const handleDone = () => {
+    navigate("/booking");
+  };
+
   if (!bookingDetails) {
     return <p>Loading...</p>;
   }
 
-  const { service, date, time, name, email, contact_number, payment_method, refNumber, customer_id } = bookingDetails;
+  const { service, date, time, name, email, contact_number, payment_method, refNumber, customer_id, status } = bookingDetails;
 
   return (
     <div className="container mt-5">
@@ -75,10 +93,24 @@ const BookingDetails = () => {
             <p>
               <strong>Customer ID:</strong> {customer_id}
             </p>
-          </div>
-          <div className="mt-5 text-center">
-            <h4 className="fs-500 ff-serif">Thank you for your booking!</h4>
-            <p className="fs-400">We look forward to serving you.</p>
+            <hr />
+            <h3 className="fs-500 ff-serif">Booking Status</h3>
+            <p>
+              <strong>Status:</strong> {status}
+            </p>
+            <div className="mt-5 text-center">
+              <h4 className="fs-500 ff-serif">Thank you for your booking!</h4>
+              <p className="fs-400">We look forward to serving you.</p>
+              {status === 'Pending' ? (
+                <button className="btn btn-danger" onClick={handleCancelBooking}>
+                  Cancel Booking
+                </button>
+              ) : (
+                <button className="btn btn-success" onClick={handleDone}>
+                  Done
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
