@@ -16,7 +16,7 @@ const Hero = () => {
             exams, Studeo Spaces offers a supportive and resourceful atmosphere
             tailored to your study needs.
           </p>
-          <button className="btn btn-primary-clr">Learn More</button>
+          <button className="btn btn-primary-clr learn-more-button">Learn More</button>
         </div>
     </section>
   );
