@@ -50,7 +50,7 @@ const Feedback = () => {
           </div>
           <div className="card-body">
             <p className="card-text fs-300 fst-italic">
-              "Hi Studeo Spaces Study Hub, Engineer na po kami!! We're so blessed and thankful to have known this place during out review. Kaya sa mga friends ko jan around Dapitan...."
+              "Hi Studeo Spaces Study Hub, Engineer na po kami!! We're so blessed and thankful to have known this place during our review. Kaya sa mga friends ko jan around Dapitan...."
             </p>
             <br />
             <h5 className="card-title ff-serif">Shaina Joyce Catapang</h5>
