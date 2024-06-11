@@ -19,16 +19,16 @@ const Book = () => {
   const navigate = useNavigate();
 
   const handleBookNowClick = () => {
-    console.log('Selected Service:', selectedService);
-    console.log('Date:', date);
-    console.log('Time:', time);
-    console.log('Name:', name);
-    console.log('Email:', email);
-    console.log('Contact Number:', contactNumber);
-    console.log('Payment Method:', paymentMethod);
+    console.log("Selected Service:", selectedService);
+    console.log("Date:", date);
+    console.log("Time:", time);
+    console.log("Name:", name);
+    console.log("Email:", email);
+    console.log("Contact Number:", contactNumber);
+    console.log("Payment Method:", paymentMethod);
 
     const bookingDetails = {
-      service: selectedService.name,
+      service_id: selectedService.id,
       price: selectedService.price,
       date,
       time,
@@ -39,7 +39,7 @@ const Book = () => {
       customerID: customerID, // Include customerID here
     };
 
-    navigate('/confirmation', { state: bookingDetails });
+    navigate("/confirmation", { state: bookingDetails });
   };
 
   const handleCheckBookingClick = () => {
@@ -53,13 +53,15 @@ const Book = () => {
   const handleUseCustomerID = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/customers/${customerID}`);
+      const response = await axios.get(
+        `http://127.0.0.1:8000/api/customers/${customerID}`
+      );
       const customer = response.data;
       setName(customer.name);
       setEmail(customer.email);
       setContactNumber(customer.contact_number);
     } catch (error) {
-      console.error('Customer ID not found:', error);
+      console.error("Customer ID not found:", error);
       alert("Customer ID not found");
     }
   };
@@ -68,20 +70,12 @@ const Book = () => {
   const handleServiceSelect = (service) => {
     setSelectedService(service);
   };
-  
 
   return (
     <div className="container">
       {/* Booking Section */}
       <section className="container items">
         <h1 className="fs-700 ff-serif text-center">Booking</h1>
-
-        {/* Select service */}
-        <Service 
-          title='Select Services' 
-          isBookingPage={true} 
-          onServiceSelect={handleServiceSelect} 
-        />
 
         <hr />
         {/* Select date */}
@@ -96,6 +90,7 @@ const Book = () => {
           />
         </div>
 
+
         <hr />
         {/* Select Time */}
         <div className="container">
@@ -108,7 +103,14 @@ const Book = () => {
             onChange={(e) => setTime(e.target.value)}
           />
         </div>
-
+        <hr />
+        {/* Select service */}
+        <Service
+          title="Select Services"
+          isBookingPage={true}
+          onServiceSelect={handleServiceSelect}
+          date={date}
+        />
         <hr />
         {/* Fill out information */}
         <div className="container">
@@ -232,7 +234,7 @@ const Book = () => {
               onChange={(e) => setPaymentMethod(e.target.value)}
             />
             <label className="btn btn-secondary-clr" htmlFor="handOn">
-              Cash on Delivery
+              Cash on Counter
             </label>
           </div>
         </div>
@@ -243,7 +245,7 @@ const Book = () => {
           </button>
         </div>
       </section>
-      
+
       <hr />
       {/* Reference Number Section */}
       <div className="container items">
@@ -264,7 +266,10 @@ const Book = () => {
           </div>
         </div>
         <div className="container text-center">
-          <button className="btn btn-primary-clr" onClick={handleCheckBookingClick}>
+          <button
+            className="btn btn-primary-clr"
+            onClick={handleCheckBookingClick}
+          >
             Check Booking
           </button>
         </div>

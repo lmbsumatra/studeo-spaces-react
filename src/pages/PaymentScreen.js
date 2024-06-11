@@ -46,13 +46,14 @@ const Payment = () => {
     return null;
   }
 
-  const { service, date, time, name, email, contact_number, payment_method } = location.state;
+  const { service_id, price, date, time, name, email, contact_number, payment_method } = location.state;
 
   return (
     <div>
       <div className="container">
         <h2 className="fs-600 ff-serif">Booking Details</h2>
-        <p><strong>Service:</strong> {service}</p>
+        <p><strong>Service ID:</strong> {service_id}</p>
+        <p><strong>Price:</strong> {price}</p>
         <p><strong>Date:</strong> {date}</p>
         <p><strong>Time:</strong> {time}</p>
         <p><strong>Name:</strong> {name}</p>

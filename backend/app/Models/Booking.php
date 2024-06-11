@@ -10,7 +10,7 @@ class Booking extends Model
     use HasFactory;
 
     protected $fillable = [
-        'service',
+        'service_id',
         'price',
         'date',
         'time',
@@ -26,5 +26,10 @@ class Booking extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
     }
 }

@@ -6,14 +6,13 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Service;
-use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'service' => 'required|string|max:255',
+            'service_id' => 'required|exists:services,id',
             'price' => 'required|numeric',
             'date' => 'required|date',
             'time' => 'required|date_format:H:i',
@@ -24,21 +23,17 @@ class BookingController extends Controller
             'refNumber' => 'required|string|unique:bookings,refNumber'
         ]);
 
-        // Start by finding the service associated with the booking
-        $service = Service::where('name', $validatedData['service'])->first();
-
-        if (!$service) {
-            return response()->json(['error' => 'Service not found'], 404);
-        }
+        // Find the service associated with the booking
+        $service = Service::findOrFail($validatedData['service_id']);
 
         // Check if service count is greater than 0
         if ($service->count <= 0) {
             return response()->json(['error' => 'Service is not available'], 400);
         }
 
-        // Decrement the count of the booked service
-        $service->count--;
-        $service->save();
+        // // Decrement the count of the booked service
+        // $service->count--;
+        // $service->save();
 
         // Check if the customer already exists
         $customer = Customer::where('email', $validatedData['email'])
@@ -56,10 +51,21 @@ class BookingController extends Controller
         }
 
         // Create the booking and associate it with the customer
-        $booking = new Booking($validatedData);
-        $booking->status = 'pending';
+        $booking = new Booking([
+            'service_id' => $validatedData['service_id'],
+            'price' => $validatedData['price'],
+            'date' => $validatedData['date'],
+            'time' => $validatedData['time'],
+            'name' => $validatedData['name'],
+            'email' => $validatedData['email'],
+            'contact_number' => $validatedData['contact_number'],
+            'payment_method' => $validatedData['payment_method'],
+            'refNumber' => $validatedData['refNumber'],
+            'status' => 'pending',
+        ]);
         $booking->customer()->associate($customer);
         $booking->save();
+
         // Return booking details along with the customer ID
         return response()->json(['booking' => $booking, 'customerID' => $customer->id], 201);
     }

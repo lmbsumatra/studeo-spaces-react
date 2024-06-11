@@ -20,4 +20,14 @@ class Service extends Model
         'description',
         'count',
     ];
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    public function availability()
+    {
+        return $this->hasMany(ServiceAvailability::class);
+    }
 }

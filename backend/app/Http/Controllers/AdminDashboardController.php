@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Models\Booking;
 use App\Models\Customer;
+use App\Models\ServiceAvailability;
 use Illuminate\Support\Facades\DB;
 
 class AdminDashboardController extends Controller
@@ -13,7 +14,7 @@ class AdminDashboardController extends Controller
     public function getData()
     {
         // Summing up the 'count' column across all services
-        $availableSeats = Service::sum('count');
+        $availableSeats = ServiceAvailability::sum('available_seats');
         $bookedSeats = Booking::count();
         $numberOfCustomers = Customer::sum('id');
         $totalSales = Booking::sum('price');

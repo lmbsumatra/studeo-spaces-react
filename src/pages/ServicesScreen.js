@@ -5,7 +5,7 @@ import Service from "../components/services/Service";
 const Services = () => {
   return (
     <div>
-      <Service title='Services'/>
+      <Service title='Services' isBookingPage={false}/>
       <Footer />
     </div>
   );

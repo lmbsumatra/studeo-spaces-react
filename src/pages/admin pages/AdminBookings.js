@@ -41,7 +41,7 @@ const AdminBookings = () => {
                 <tr key={booking.id}>
                   <th scope="row">{booking.id}</th>
                   <td>{booking.customer?.name}</td>
-                  <td>{booking.service}</td>
+                  <td>{booking.service_id}</td>
                   <td>{booking.price}</td>
                   <td>{booking.date}</td>
                   <td>{booking.time}</td>
