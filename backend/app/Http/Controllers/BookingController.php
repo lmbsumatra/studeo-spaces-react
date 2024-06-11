@@ -61,7 +61,7 @@ class BookingController extends Controller
             'contact_number' => $validatedData['contact_number'],
             'payment_method' => $validatedData['payment_method'],
             'refNumber' => $validatedData['refNumber'],
-            'status' => 'pending',
+            'status' => 'Pending',
         ]);
         $booking->customer()->associate($customer);
         $booking->save();
@@ -92,7 +92,7 @@ class BookingController extends Controller
         $booking = Booking::where('refNumber', $refNumber)->first();
 
         if ($booking) {
-            $booking->status = 'cancelled';
+            $booking->status = 'Cancelled';
             $booking->save();
 
             return response()->json(['message' => 'Booking cancelled successfully'], 200);
