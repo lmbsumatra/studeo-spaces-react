@@ -10,18 +10,17 @@ const Feedback = () => {
           <div className="icon">
             <img
               src="./assets/images/img_1.jpg"
-              className="icon-img"
+              className="icon-img"s
               alt="..."
             />
           </div>
           <div className="card-body">
             <p className="card-text fs-300 fst-italic">
-              "Some quick example text to build on the card title and make up
-              the bulk of the card's content."
+              "I stayed here almost everyday from August to October 2023 for my board review season. I passed po the recent Physician Licensure Examinations and I could say na malaki yung natulong ng Studeo sakin.."
             </p>
             <br />
-            <h5 className="card-title ff-serif">Firstname Lastname</h5>
-            <h6 className="card-title ff-serif">Status - Title</h6>
+            <h5 className="card-title ff-serif">Marie Mandario</h5>
+            <h6 className="card-title ff-serif">Physician - Physician Licensure Examination Board Passer 2023</h6>
           </div>
         </div>
         <div className="card flex-items" style={{ width: '18rem' }}>
@@ -34,12 +33,11 @@ const Feedback = () => {
           </div>
           <div className="card-body">
             <p className="card-text fs-300 fst-italic">
-              "Some quick example text to build on the card title and make up
-              the bulk of the card's content."
+              "Hello po! OTRP na po ako!! Maraming salamat po, Studeo Spaces! Lalo na rin po kay Ate Sol dahil matiyaga po niya akong hinihintay madalas kahit 5 AM na matatapos and napakabait na nireremind kami palagi na matulog kahit saglit sa napping area 🥺."
             </p>
             <br />
-            <h5 className="card-title ff-serif">Firstname Lastname</h5>
-            <h6 className="card-title ff-serif">Status - Title</h6>
+            <h5 className="card-title ff-serif">Raeverly Kris Chan</h5>
+            <h6 className="card-title ff-serif">Occupational Therapist Registered Philippines - PRC Board Passer 2023 </h6>
           </div>
         </div>
         <div className="card flex-items" style={{ width: '18rem' }}>
@@ -52,12 +50,11 @@ const Feedback = () => {
           </div>
           <div className="card-body">
             <p className="card-text fs-300 fst-italic">
-              "Some quick example text to build on the card title and make up
-              the bulk of the card's content."
+              "Hi Studeo Spaces Study Hub, Engineer na po kami!! We're so blessed and thankful to have known this place during out review. Kaya sa mga friends ko jan around Dapitan...."
             </p>
             <br />
-            <h5 className="card-title ff-serif">Firstname Lastname</h5>
-            <h6 className="card-title ff-serif">Status - Title</h6>
+            <h5 className="card-title ff-serif">Shaina Joyce Catapang</h5>
+            <h6 className="card-title ff-serif">Engineer - Licensure Exam Passer 2023 </h6>
           </div>
         </div>
       </div>
