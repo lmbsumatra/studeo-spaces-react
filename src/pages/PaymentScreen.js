@@ -32,6 +32,7 @@ const Payment = () => {
         console.error('There was an error creating the booking!', error);
         alert('There was an error creating the booking! Please try again.');
       }
+      navigate("/booking", { state: location.state });
     }
   };
   

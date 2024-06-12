@@ -6,8 +6,14 @@ const BookingSummary = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!location.state) {
+      navigate("/booking");
+    }
+  }, [location.state, navigate]);
+
   const {
-    service = "N/A",
+    service_id = "N/A",
     price = "N/A",
     date = "N/A",
     time = "N/A",
@@ -18,12 +24,6 @@ const BookingSummary = () => {
     refNumber = "N/A",
     customerID = "N/A"
   } = location.state || {};
-
-  useEffect(() => {
-    if (!location.state) {
-      navigate("/booking");
-    }
-  }, [location.state, navigate]);
 
   if (!location.state) {
     return null;
@@ -42,7 +42,7 @@ const BookingSummary = () => {
           <div className="mt-4">
             <h3 className="fs-500 ff-serif">Booking Details</h3>
             <p>
-              <strong>Service:</strong> {service}
+              <strong>Service ID:</strong> {service_id}
             </p>
             <p>
               <strong>Price:</strong> {price}

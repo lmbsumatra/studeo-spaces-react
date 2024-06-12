@@ -6,7 +6,6 @@ import Service from "../components/services/Service";
 
 const Book = () => {
   const [selectedService, setSelectedService] = useState(null);
-  const [price, setPrice] = useState(null);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [name, setName] = useState("");
@@ -19,6 +18,12 @@ const Book = () => {
   const navigate = useNavigate();
 
   const handleBookNowClick = () => {
+    // Check if all required fields are filled
+    if (!selectedService || !date || !time || !name || !email || !contactNumber || !paymentMethod) {
+      alert("Please fill in all required fields.");
+      return; // Stop further execution if any required field is missing
+    }
+  
     console.log("Selected Service:", selectedService);
     console.log("Date:", date);
     console.log("Time:", time);
@@ -26,7 +31,7 @@ const Book = () => {
     console.log("Email:", email);
     console.log("Contact Number:", contactNumber);
     console.log("Payment Method:", paymentMethod);
-
+  
     const bookingDetails = {
       service_id: selectedService.id,
       price: selectedService.price,
@@ -38,15 +43,27 @@ const Book = () => {
       payment_method: paymentMethod,
       customerID: customerID, // Include customerID here
     };
-
+  
     navigate("/confirmation", { state: bookingDetails });
   };
 
-  const handleCheckBookingClick = () => {
-    if (referenceNumber) {
-      navigate("/booking-details", { state: { referenceNumber } });
-    } else {
-      alert("Please enter a valid reference number.");
+  const handleCheckBookingClick = async () => {
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:8000/api/bookings/${referenceNumber}`
+      );
+      // Check if booking exists
+      if (response.data.message) {
+        // If booking not found, show error message
+        alert(response.data.message);
+      } else {
+        // If booking found, navigate to booking details page
+        navigate("/booking-details", { state: { referenceNumber } });
+      }
+    } catch (error) {
+      console.error("Error checking booking:", error);
+      // Show error message if request fails
+      alert("Error checking booking. Please try again.");
     }
   };
 

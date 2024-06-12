@@ -65,7 +65,10 @@ const BookingDetails = () => {
           <div className="mt-4">
             <h3 className="fs-500 ff-serif">Booking Details</h3>
             <p>
-              <strong>Service:</strong> {service}
+              <strong>Service:</strong> {service ? service.name : "Loading..."} 
+            </p>
+            <p>
+              <strong>Service Price:</strong> {service ? `$${service.price}` : "Loading..."}
             </p>
             <p>
               <strong>Date:</strong> {date}

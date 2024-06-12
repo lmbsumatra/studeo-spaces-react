@@ -72,14 +72,14 @@ class BookingController extends Controller
 
     public function index()
     {
-        $bookings = Booking::with('customer')->get();
+        $bookings = Booking::with(['customer', 'service'])->get();
         return response()->json($bookings);
     }
 
     public function show($refNumber)
     {
-        $booking = Booking::with('customer')->where('refNumber', $refNumber)->first();
-
+        $booking = Booking::with(['customer', 'service'])->where('refNumber', $refNumber)->first();
+        
         if ($booking) {
             return response()->json($booking);
         } else {
