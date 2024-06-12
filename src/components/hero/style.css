@@ -15,7 +15,10 @@
     max-width: 55ch; /* Limiting to approximately 40 characters per line */
     overflow-wrap: break-word; /* Break words to fit within the container */
 }
-
+.learn-more-button {
+    margin-top: 20px;
+  }
+  
 /* For small and medium devices */
 @media (max-width: 992px) {
 }

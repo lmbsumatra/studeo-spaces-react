@@ -7,7 +7,7 @@ const Footer = () => {
         <div className="col flex-items">
           <ul>
             <li style={{ width: '50px', height: '50px' }}>
-              <a href="#"><img src="../assets/logo/studeo-spaces-logo.png" alt="Studeo Spaces Logo" /></a>
+              <a href="#"><img src="./images/studeo-spaces-logo.png"alt="Studeo Spaces Logo" /></a>
             </li>
             <li><a href="#">Studeo Spaces</a></li>
           </ul>
