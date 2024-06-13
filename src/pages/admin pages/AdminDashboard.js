@@ -31,7 +31,7 @@ const AdminDashboard = () => {
     <div className="container mt-5" id="dashboard">
       
       <h1 className="mb-4">Admin Dashboard</h1>
-      <div className="container">
+      <div className="container mb-2">
         <h2 className="fs-600 ff-serif">Select Day</h2>
         <input
           type="date"

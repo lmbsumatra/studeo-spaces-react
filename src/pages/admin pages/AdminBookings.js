@@ -59,6 +59,30 @@ const AdminBookings = () => {
 
       if (response.status === 200) {
         console.log('Booking status updated successfully');
+
+        if (newStatus === 'Completed') {
+          // Retrieve the details of the booking
+          const bookingDetails = bookings.find(booking => booking.id === bookingId);
+
+          // Create payment data from booking details
+          const paymentData = {
+            customerName: bookingDetails.customer?.name,
+            amount: bookingDetails.service?.price,
+            date: bookingDetails.date,
+          };
+
+          // Add payment to the payment table
+          const paymentResponse = await axios.post(
+            'http://127.0.0.1:8000/api/payments',
+            paymentData
+          );
+
+          if (paymentResponse.status === 201) {
+            console.log('Payment added successfully');
+          } else {
+            throw new Error('Failed to add payment');
+          }
+        }
       } else {
         throw new Error('Failed to update status');
       }
@@ -98,9 +122,10 @@ const AdminBookings = () => {
                 <th scope="col">Booking ID</th>
                 <th scope="col">Customer Name</th>
                 <th scope="col">Service</th>
+                <th scope="col">Payment</th>
                 <th scope="col">Date</th>
                 <th scope="col">Time</th>
-                <th scope="col">Status</th>
+                <th scope="col">Payment Status</th>
               </tr>
             </thead>
             <tbody>
@@ -108,7 +133,8 @@ const AdminBookings = () => {
                 <tr key={booking.id}>
                   <th scope="row">{booking.id}</th>
                   <td>{booking.customer?.name}</td>
-                  <td>{booking.service?.name}</td> {/* Display service name */}
+                  <td>{booking.service?.name}</td> 
+                  <td>{booking.service?.price}</td> 
                   <td>{booking.date}</td>
                   <td>{booking.time}</td>
                   <td>
