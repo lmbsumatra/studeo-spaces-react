@@ -1,58 +1,70 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import logo from "../../assets/images/studeo-spaces-logo.png";
 
 const AdminLoginScreen = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem("token");
+    if (isAuthenticated) {
+      navigate("/admin-dashboard");
+    }
+  }, [navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Authentication logic here
-    // For example:
-    if (username === 'admin' && password === 'password') {
-      // Redirect to admin dashboard upon successful login
-      navigate('/admin/dashboard');
-    } else {
-      alert('Invalid username or password');
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/api/admins", {
+        username,
+        password,
+      });
+      // Handle successful login
+      console.log(response.data);
+      localStorage.setItem("token", response.data.token); // Store token in localStorage
+      navigate("/admin-dashboard"); // Redirect to dashboard
+    } catch (error) {
+      console.error("Error logging in:", error);
+      setError(error.response ? error.response.data.message : "Login failed");
     }
   };
 
   return (
-    <div className="container">
-      <h2 className="text-center mt-5">Admin Login</h2>
-      <form onSubmit={handleLogin} className="mt-3">
-        <div className="mb-3">
-          <label htmlFor="username" className="form-label">
-            Username
-          </label>
+    <div className="d-flex justify-content-center align-items-center vh-100">
+      <div className="col-12 col-md-6 col-lg-4 text-center">
+        <h2>Admin Login</h2>
+        <div className="d-flex justify-content-center mb-3">
+          <img src={logo} height="100px" />
+        </div>
+        <form onSubmit={handleSubmit} className="d-flex flex-column">
           <input
             type="text"
-            className="form-control"
-            id="username"
+            className="form-control mb-3"
+            placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
           />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="password" className="form-label">
-            Password
-          </label>
           <input
             type="password"
-            className="form-control"
-            id="password"
+            className="form-control mb-3"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-        </div>
-        <button type="submit" className="btn btn-primary-clr w-100">
-          Login
-        </button>
-      </form>
+          <button type="submit" className="btn btn-primary">
+            Login
+          </button>
+        </form>
+        {error && <p className="text-danger mt-3">{error}</p>}
+      </div>
     </div>
   );
 };

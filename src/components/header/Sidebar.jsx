@@ -9,7 +9,7 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
     <div className={`sidebar ${isExpanded ? "expanded" : "collapsed"}`}>
       {/* Logo */}
       <NavLink to="/" className="navbar-brand">
-        <img src={logo} style={{ height: "50px", width: "50px", margin: "10px"}} />
+        <img src={logo} alt="Logo" style={{ height: "50px", width: "50px", margin: "15px"}} />
       </NavLink>
       <button onClick={toggleSidebar} className="sidebar-toggle-btn">
         {!isExpanded ? (
@@ -32,7 +32,7 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
         <li className="sidebar-item">
           <NavLink
             exact
-            to="/admin"
+            to="/admin-dashboard"
             className={({ isActive }) =>
               isActive ? "sidebar-link active-nav" : "sidebar-link"
             }
@@ -40,7 +40,7 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
             Dashboard
           </NavLink>
         </li>
-        <li className="sidebar-item">
+        <li className="sidebar-item indent">
           <NavLink
             to="/admin-bookings"
             className={({ isActive }) =>
@@ -50,7 +50,7 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
             Bookings
           </NavLink>
         </li>
-        <li className="sidebar-item">
+        <li className="sidebar-item indent">
           <NavLink
             to="/admin-customers"
             className={({ isActive }) =>
@@ -60,7 +60,7 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
             Customers
           </NavLink>
         </li>
-        <li className="sidebar-item">
+        <li className="sidebar-item indent">
           <NavLink
             to="/admin-payments"
             className={({ isActive }) =>
@@ -70,7 +70,7 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
             Payments
           </NavLink>
         </li>
-        <li className="sidebar-item">
+        <li className="sidebar-item indent">
           <NavLink
             to="/admin-messages"
             className={({ isActive }) =>
@@ -78,6 +78,37 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
             }
           >
             Messages
+          </NavLink>
+        </li>
+        <hr/>
+        <li className="sidebar-item">
+          <NavLink
+            to="/content-management"
+            className={({ isActive }) =>
+              isActive ? "sidebar-link active-nav" : "sidebar-link"
+            }
+          >
+            Content Management
+          </NavLink>
+        </li>
+        <li className="sidebar-item indent">
+          <NavLink
+            to="/admin-services"
+            className={({ isActive }) =>
+              isActive ? "sidebar-link active-nav" : "sidebar-link"
+            }
+          >
+            Services
+          </NavLink>
+        </li>
+        <li className="sidebar-item indent">
+          <NavLink
+            to="/admin-blogs"
+            className={({ isActive }) =>
+              isActive ? "sidebar-link active-nav" : "sidebar-link"
+            }
+          >
+            Blogs
           </NavLink>
         </li>
       </ul>

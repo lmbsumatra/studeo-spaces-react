@@ -60,7 +60,6 @@ const Service = ({ title, show, isBookingPage, onServiceSelect, date }) => {
                 alt={service.name}
               />
               <div className="card-body d-flex flex-column">
-              {service.images}
                 <h5 className="card-title ff-serif">{service.name}</h5>
                 <p className="card-text text-accent fs-300">
                   {service.description}

@@ -1,12 +1,20 @@
 import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import user from "../../assets/images/icons/user.svg";
 import notif from "../../assets/images/icons/notif.svg";
 
 const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate()
 
   const isAdminPath = location.pathname.startsWith("/admin");
+
+  const handleLogout = () => {
+    // Clear authentication token from localStorage
+    localStorage.removeItem('token');
+    // Redirect to the login page
+    navigate('/login');
+  };
 
   return (
     <nav className="navbar">
@@ -27,7 +35,7 @@ const Header = () => {
                 <li className="nav-item">
                     <img src={notif} height="40px"/>
                 </li>
-                <li className="nav-item">
+                <li className="nav-item" onClick={handleLogout}>
                     Log Out
                 </li>
               </>

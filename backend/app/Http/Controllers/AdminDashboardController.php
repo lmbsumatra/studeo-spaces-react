@@ -12,15 +12,14 @@ use Carbon\Carbon;
 
 class AdminDashboardController extends Controller
 {
-    public function getData()
+    public function getData(Request $request)
     {
-        // Get today's date
-        $today = Carbon::today()->toDateString();
+        $selectedDate = $request->input('date', Carbon::today()->toDateString());
 
         // Calculate available seats
-        $availableSeats = Service::leftJoin('service_availability', function ($join) use ($today) {
+        $availableSeats = Service::leftJoin('service_availability', function ($join) use ($selectedDate) {
                 $join->on('services.id', '=', 'service_availability.service_id')
-                     ->where('service_availability.date', '=', $today);
+                     ->where('service_availability.date', '=', $selectedDate);
             })
             ->select(DB::raw('
                 SUM(CASE 
@@ -31,12 +30,20 @@ class AdminDashboardController extends Controller
             ->first()
             ->total_available_seats;
 
-        // Calculate other metrics
-        $bookedSeats = Booking::count();
-        $numberOfCustomers = Customer::count();
-        $totalSales = Booking::where('status', 'Completed')->sum('price');
-        $pendingBookings = Booking::where('status', 'Pending')->count();
-        $canceledBookings = Booking::where('status', 'Cancelled')->count();
+        // Calculate other metrics based on the selected date
+        $bookedSeats = Booking::whereDate('date', $selectedDate)->count();
+        $numberOfCustomers = Customer::whereHas('bookings', function ($query) use ($selectedDate) {
+            $query->whereDate('date', $selectedDate);
+        })->count();
+        $totalSales = Booking::where('status', 'Completed')
+                             ->whereDate('date', $selectedDate)
+                             ->sum('price');
+        $pendingBookings = Booking::where('status', 'Pending')
+                                  ->whereDate('date', $selectedDate)
+                                  ->count();
+        $canceledBookings = Booking::where('status', 'Cancelled')
+                                   ->whereDate('date', $selectedDate)
+                                   ->count();
 
         return response()->json([
             'availableSeats' => $availableSeats,

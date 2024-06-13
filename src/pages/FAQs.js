@@ -37,45 +37,21 @@ const FAQs = () => {
             <h2 className="fs-700 ff-serif letter-spacing-1">Questions</h2>
             <Accordion defaultActiveKey="0" id="accordionExample">
               <Accordion.Item eventKey="0">
-                <Accordion.Header>Accordion Item #1</Accordion.Header>
+                <Accordion.Header>How long can I stay?</Accordion.Header>
                 <Accordion.Body>
-                  <strong>This is the first item's accordion body.</strong> It
-                  is shown by default, until the collapse plugin adds the
-                  appropriate classes that we use to style each element. These
-                  classes control the overall appearance, as well as the showing
-                  and hiding via CSS transitions. You can modify any of this
-                  with custom CSS or overriding our default variables. It's also
-                  worth noting that just about any HTML can go within the
-                  <code>.accordion-body</code>, though the transition does limit
-                  overflow.
+                Access can be as short or as long as 19 hours daily – from 8:00 AM to 3:00 AM. And yes, you can go out and come in as frequently and as long as needed. But take note that the last admittance to the premises is 11:59 PM.
                 </Accordion.Body>
               </Accordion.Item>
               <Accordion.Item eventKey="1">
-                <Accordion.Header>Accordion Item #2</Accordion.Header>
+                <Accordion.Header>Is it safe to stay in late at night in Studeo Spaces?</Accordion.Header>
                 <Accordion.Body>
-                  <strong>This is the second item's accordion body.</strong> It
-                  is hidden by default, until the collapse plugin adds the
-                  appropriate classes that we use to style each element. These
-                  classes control the overall appearance, as well as the showing
-                  and hiding via CSS transitions. You can modify any of this
-                  with custom CSS or overriding our default variables. It's also
-                  worth noting that just about any HTML can go within the
-                  <code>.accordion-body</code>, though the transition does limit
-                  overflow.
+                  Studeo Spaces is SECURE. We are strategically located along a major street for greater accessibility and convenience. The location is also well-lit, making it safe and secure for users. The premises are patrolled by police officers to ensure that the overall area remains secure and free from potential threats. Numerous CCTV cameras are installed within the premises, providing extensive coverage and surveillance of the area. You’ll be safe with our RFID access control, manned lobby entry, and full CCTV coverage.
                 </Accordion.Body>
               </Accordion.Item>
               <Accordion.Item eventKey="2">
-                <Accordion.Header>Accordion Item #3</Accordion.Header>
+                <Accordion.Header>Are you open during the holidays?</Accordion.Header>
                 <Accordion.Body>
-                  <strong>This is the third item's accordion body.</strong> It
-                  is hidden by default, until the collapse plugin adds the
-                  appropriate classes that we use to style each element. These
-                  classes control the overall appearance, as well as the showing
-                  and hiding via CSS transitions. You can modify any of this
-                  with custom CSS or overriding our default variables. It's also
-                  worth noting that just about any HTML can go within the
-                  <code>.accordion-body</code>, though the transition does limit
-                  overflow.
+                  Studeo Spaces is open everyday, from Monday to Sunday, from 8:00 AM to 3:00 AM the following day. We are open even during national, city and special holidays and inclement weather. And we NEVER close due to private events since we don’t host them.
                 </Accordion.Body>
               </Accordion.Item>
             </Accordion>
