@@ -6,8 +6,8 @@ const Footer = () => {
       <div className="row items">
         <div className="col flex-items">
           <ul>
-            <li style={{ width: '50px', height: '50px' }}>
-              <a href="#"><img src="./images/studeo-spaces-logo.png"alt="Studeo Spaces Logo" /></a>
+            <li style={{ width: '50px', height: '50px', marginLeft:'50px',marginRight:'50px'}}>
+              <a href="#"><img src="./images/studeo-spaces-logo.png" alt="Studeo Spaces Logo" /></a>
             </li>
             <li><a href="#">Studeo Spaces</a></li>
           </ul>
