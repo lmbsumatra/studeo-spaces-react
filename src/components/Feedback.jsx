@@ -1,5 +1,6 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import img from '../assets/images/icons/user.svg';
 
 const Feedback = () => {
   return (
@@ -9,9 +10,10 @@ const Feedback = () => {
         <div className="card flex-items"  style={{ width: '18rem' }}>
           <div className="icon">
             <img
-              src="./assets/images/img_1.jpg"
-              className="icon-img"s
+              src={img}
+              className="icon-img"
               alt="..."
+              width='10px'
             />
           </div>
           <div className="card-body">
@@ -26,9 +28,10 @@ const Feedback = () => {
         <div className="card flex-items" style={{ width: '18rem' }}>
           <div className="icon">
             <img
-              src="./assets/images/img_1.jpg"
+              src={img}
               className="icon-img"
               alt="..."
+              width='10px'
             />
           </div>
           <div className="card-body">
@@ -43,9 +46,10 @@ const Feedback = () => {
         <div className="card flex-items" style={{ width: '18rem' }}>
           <div className="icon">
             <img
-              src="./assets/images/img_1.jpg"
+              src={img}
               className="icon-img"
               alt="..."
+              width='10px'
             />
           </div>
           <div className="card-body">

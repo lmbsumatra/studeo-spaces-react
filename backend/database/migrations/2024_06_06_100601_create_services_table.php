@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('duration');
             $table->decimal('price', 8, 2);
             $table->text('description')->nullable(); // Adding description column
-            $table->json('images')->nullable(); // Adding images column
+            $table->string('images')->nullable(); // Adding images column
             $table->integer('count')->default(0); // Adding count column
             $table->timestamps();
         });

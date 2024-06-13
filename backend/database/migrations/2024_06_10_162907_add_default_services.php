@@ -18,7 +18,7 @@ return new class extends Migration
                 'duration' => '8AM - 3AM',
                 'price' => 250,
                 'description' => 'All-day/All-night Pass from 8AM to 3AM',
-                'images' => null,
+                'images' => 'assets/images/services/img_1.png',
                 'count' => 30,
             ],
             [
@@ -26,7 +26,7 @@ return new class extends Migration
                 'duration' => '8AM - 3AM',
                 'price' => 250,
                 'description' => 'GLASSBOX: All-day/All-night Pass from 8AM to 3AM',
-                'images' => null,
+                'images' => 'assets/images/services/img_2.png',
                 'count' => 10,
             ],
             [
@@ -34,7 +34,7 @@ return new class extends Migration
                 'duration' => '6PM - 6AM',
                 'price' => 250,
                 'description' => 'GLASSBOX: Night Shift from 6PM to 6AM',
-                'images' => null,
+                'images' => 'assets/images/services/img_3.png',
                 'count' => 10,
             ],
             [
@@ -42,7 +42,7 @@ return new class extends Migration
                 'duration' => '15 days',
                 'price' => 3000,
                 'description' => 'Prepaid Tipid: 15-day pass',
-                'images' => null,
+                'images' => 'assets/images/services/img_4.png',
                 'count' => 30,
             ],
             [
@@ -50,7 +50,7 @@ return new class extends Migration
                 'duration' => '8 hours',
                 'price' => 1500,
                 'description' => 'BarkadAral Room for 6 people for 8 hours',
-                'images' => null,
+                'images' => 'assets/images/services/img_5.png',
                 'count' => 1,
             ],
             [
@@ -58,7 +58,7 @@ return new class extends Migration
                 'duration' => '12 hours',
                 'price' => 2000,
                 'description' => 'BarkadAral Room for 6 people for 12 hours',
-                'images' => null,
+                'images' => 'assets/images/services/img_6.png',
                 'count' => 1,
             ],
             [
@@ -66,7 +66,7 @@ return new class extends Migration
                 'duration' => '8AM - 5AM',
                 'price' => 3000,
                 'description' => 'BarkadAral Room for 6 people for 21 hours from 8AM to 5AM',
-                'images' => null,
+                'images' => 'assets/images/services/img_7.png',
                 'count' => 1,
             ],
         ]);

@@ -1,0 +1,56 @@
+/********************************/
+/*            Side Bar          */
+/********************************/
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: hsl(var(--clr-dark));
+    color: hsl(var(--clr-light));
+    transition: width 0.3s;
+    z-index: 1000;
+    overflow: hidden;
+  }
+  
+  .sidebar.collapsed {
+    width: 80px;
+  }
+  
+  .sidebar.expanded {
+    width: 200px;
+    box-shadow: 2px 0 5px hsl(var(--clr-light));
+  }
+  
+  .sidebar .sidebar-toggle-btn {
+    display: block;
+    margin: 10px;
+    background: none;
+    border: none;
+    color: hsl(var(--clr-light));
+    cursor: pointer;
+  }
+  
+  .sidebar .sidebar-toggle-btn img {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .sidebar-nav {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .sidebar-item {
+    padding: 10px;
+  }
+  
+  .sidebar-link {
+    color: hsl(var(--clr-light));
+    text-decoration: none;
+  }
+  
+  .sidebar-link.active-nav {
+    background-color: hsl(var(--clr-dark));
+  }
+  
