@@ -31,12 +31,14 @@ const App = () => {
   const [isSidebarExpanded, setSidebarExpanded] = useState(true);
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith("/admin");
+  const isLoginPage = location.pathname === "/login";
   const toggleSidebar = () => {
     setSidebarExpanded(!isSidebarExpanded);
   };
+
   return (
     <div>
-      {isAdminPath && <Header />}
+      {!isLoginPage && (isAdminPath ? <Header /> : <Header />)}
       {isAdminPath && (
         <Sidebar isExpanded={isSidebarExpanded} toggleSidebar={toggleSidebar} />
       )}
@@ -51,7 +53,6 @@ const App = () => {
         <Route path="/payment" element={<Payment />} />
         <Route path="/booking-successful" element={<BookingSummary />} />
         <Route path="/booking-details" element={<BookingDetails />} />
-
         <Route path="/login" element={<AdminLogin />} />
         <Route
           path="/admin-dashboard"

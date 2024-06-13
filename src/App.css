@@ -421,6 +421,10 @@ section {
 /*            Footer            */
 /********************************/
 /* Remove underline, change text color, and remove bullets */
+/* .container {      
+  padding-top: 100px;
+} */
+
 footer ul {
   list-style-type: none;
 }
