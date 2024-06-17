@@ -12,11 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('service_availability', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('service_id')->constrained('services')->onDelete('cascade');
-            $table->date('date');
-            $table->integer('available_seats');
-            $table->timestamps();
+        $table->id();
+        $table->string('name');
+        $table->string('duration');
+        $table->decimal('price', 8, 2);
+        $table->string('images')->nullable();
+        $table->text('description')->nullable();
+        $table->integer('count')->unsigned();
+        $table->tinyInteger('availability')->default(0); // Add this line
+        $table->timestamps();
+        $table->check('count >= 0'); // Add this line for constraint
         });
     }
 

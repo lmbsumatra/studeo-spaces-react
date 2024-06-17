@@ -99,9 +99,9 @@ class ComposerStaticInitdbe9afeafec34f01b2c5658aece81b8a
         ),
         'Illuminate\\Support\\' => 
         array (
-            0 => __DIR__ . '/..' . '/illuminate/macroable',
+            0 => __DIR__ . '/..' . '/illuminate/collections',
             1 => __DIR__ . '/..' . '/illuminate/conditionable',
-            2 => __DIR__ . '/..' . '/illuminate/collections',
+            2 => __DIR__ . '/..' . '/illuminate/macroable',
             3 => __DIR__ . '/..' . '/illuminate/support',
         ),
         'Illuminate\\Contracts\\' => 
@@ -110,8 +110,9 @@ class ComposerStaticInitdbe9afeafec34f01b2c5658aece81b8a
         ),
         'Fruitcake\\Cors\\' => 
         array (
-            0 => __DIR__ . '/..' . '/fruitcake/php-cors/src',
-            1 => __DIR__ . '/..' . '/barryvdh/laravel-cors/src',
+            0 => __DIR__ . '/..' . '/barryvdh/laravel-cors/src',
+            1 => __DIR__ . '/..' . '/fruitcake/php-cors/src',
+            2 => __DIR__ . '/..' . '/fruitcake/laravel-cors/src',
         ),
         'Doctrine\\Inflector\\' => 
         array (

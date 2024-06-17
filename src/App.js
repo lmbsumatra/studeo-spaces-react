@@ -5,6 +5,7 @@ import {
   Routes,
   Route,
   useLocation,
+  Navigate
 } from "react-router-dom";
 import "./App.css";
 import Header from "./components/header/Header";
@@ -23,7 +24,11 @@ import AdminBookings from "./pages/admin pages/AdminBookings";
 import AdminCustomers from "./pages/admin pages/AdminCustomers";
 import AdminPayments from "./pages/admin pages/AdminPayments";
 import AdminMessagesScreen from "./pages/admin pages/AdminMessagesScreen";
+import AdminServices from "./pages/admin pages/admin-services/AdminServices";
+import AdminAddService from "./pages/admin pages/admin-services/AdminAddService";
+import AdminEditService from "./pages/admin pages/admin-services/AdminEditService";
 import Sidebar from "./components/header/Sidebar";
+
 
 import PrivateRoute from "./PrivateRoute";
 
@@ -54,6 +59,23 @@ const App = () => {
         <Route path="/booking-successful" element={<BookingSummary />} />
         <Route path="/booking-details" element={<BookingDetails />} />
         <Route path="/login" element={<AdminLogin />} />
+
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <Navigate to='/admin-dashboard' />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/"
+          element={
+            <PrivateRoute>
+              <Navigate to='/admin-dashboard' />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/admin-dashboard"
           element={
@@ -92,6 +114,30 @@ const App = () => {
           element={
             <PrivateRoute>
               <AdminMessagesScreen />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin-services"
+          element={
+            <PrivateRoute>
+              <AdminServices title='Admin Services Management'/>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin-add-service"
+          element={
+            <PrivateRoute>
+              <AdminAddService />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin-edit-service/:id"
+          element={
+            <PrivateRoute>
+              <AdminEditService />
             </PrivateRoute>
           }
         />

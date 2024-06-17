@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const AdminDashboard = () => {
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]); // Initialize date as a string
+  // Subtract one day from the current date
+  const initialDate = new Date();
+  initialDate.setDate(initialDate.getDate() + 1);
+
+  const [date, setDate] = useState(initialDate.toISOString().split("T")[0]); // Initialize date as a string
   const [data, setData] = useState({
     availableSeats: 0,
     bookedSeats: 0,
@@ -18,7 +22,9 @@ const AdminDashboard = () => {
 
   const fetchData = (selectedDate) => {
     axios
-      .get(`http://127.0.0.1:8000/api/admin-dashboard-data?date=${selectedDate}`)
+      .get(
+        `http://127.0.0.1:8000/api/admin-dashboard-data?date=${selectedDate}`
+      )
       .then((response) => {
         setData(response.data);
       })
@@ -29,7 +35,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="container mt-5" id="dashboard">
-      
       <h1 className="mb-4">Admin Dashboard</h1>
       <div className="container mb-2">
         <h2 className="fs-600 ff-serif">Select Day</h2>

@@ -11,8 +11,8 @@ use App\Http\Controllers\ServiceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:sanctum')->get('/admin', function (Request $request) {
+    return $request->admin();
 });
 
 Route::post('/bookings', [BookingController::class, 'store']);
@@ -27,6 +27,12 @@ Route::post('/messages', [MessageController::class, 'store']);
 Route::get('/messages', [MessageController::class, 'index']);
 
 Route::get('/services', [ServiceController::class, 'index']);
+Route::post('/services', [ServiceController::class, 'create']);
+Route::get('/services/{id}', [ServiceController::class, 'read']);
+Route::patch('/services/{id}', [ServiceController::class, 'update']);
+Route::patch('/services-availability/{id}', [ServiceController::class, 'updateAvailability']);
+Route::get('/services-availability', [ServiceController::class, 'getAvailableSeats']);
+Route::delete('/services/{id}', [ServiceController::class, 'delete']);
 Route::get('/available', [ServiceController::class, 'available']);
 
 Route::post('/bookings/cancel/{refNumber}', [BookingController::class, 'cancel']);

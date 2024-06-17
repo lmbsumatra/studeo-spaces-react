@@ -14,7 +14,8 @@ class AdminDashboardController extends Controller
 {
     public function getData(Request $request)
     {
-        $selectedDate = $request->input('date', Carbon::today()->toDateString());
+        // Adjust the selected date to be one day behind
+        $selectedDate = $request->input('date', Carbon::now()->setTimezone('Asia/Manila')->toDateString());
 
         // Calculate available seats
         $availableSeats = Service::leftJoin('service_availability', function ($join) use ($selectedDate) {
