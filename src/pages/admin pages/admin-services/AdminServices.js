@@ -133,7 +133,7 @@ const AdminServices = ({ title, show, isBookingPage, onServiceSelect, date }) =>
                     </>
                   )}
                   <button
-                    className={`btn ${service.availability===1 ? "btn-success" : "btn-danger"}`}
+                    className={`btn ${service.availability===1 ? "btn-success" : "btn-outline-danger"}`}
                     onClick={() => handleToggleAvailability(service.id, service.availability)}
                   >
                     {service.availability===1 ? "Available" : "Unavailable"}

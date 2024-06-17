@@ -19,9 +19,9 @@ class AdminDashboardController extends Controller
 
         // Calculate available seats
         $availableSeats = Service::leftJoin('service_availability', function ($join) use ($selectedDate) {
-                $join->on('services.id', '=', 'service_availability.service_id')
-                     ->where('service_availability.date', '=', $selectedDate);
-            })
+            $join->on('services.id', '=', 'service_availability.service_id')
+                ->where('service_availability.date', '=', $selectedDate);
+        })
             ->select(DB::raw('
                 SUM(CASE 
                     WHEN service_availability.service_id IS NOT NULL THEN service_availability.available_seats 
@@ -32,19 +32,21 @@ class AdminDashboardController extends Controller
             ->total_available_seats;
 
         // Calculate other metrics based on the selected date
-        $bookedSeats = Booking::whereDate('date', $selectedDate)->count();
+        $bookedSeats = Booking::where('status', 'Completed')
+            ->whereDate('date', $selectedDate)
+            ->count();
         $numberOfCustomers = Customer::whereHas('bookings', function ($query) use ($selectedDate) {
             $query->whereDate('date', $selectedDate);
         })->count();
         $totalSales = Booking::where('status', 'Completed')
-                             ->whereDate('date', $selectedDate)
-                             ->sum('price');
+            ->whereDate('date', $selectedDate)
+            ->sum('price');
         $pendingBookings = Booking::where('status', 'Pending')
-                                  ->whereDate('date', $selectedDate)
-                                  ->count();
+            ->whereDate('date', $selectedDate)
+            ->count();
         $canceledBookings = Booking::where('status', 'Cancelled')
-                                   ->whereDate('date', $selectedDate)
-                                   ->count();
+            ->whereDate('date', $selectedDate)
+            ->count();
 
         return response()->json([
             'availableSeats' => $availableSeats,

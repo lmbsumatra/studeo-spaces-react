@@ -14,7 +14,7 @@ const AdminEditService = () => {
     count: "",
     availability: false // Initial state for availability as boolean
   });
-  const [error, setError] = useState(null);
+  const [error, setError] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,7 +35,7 @@ const AdminEditService = () => {
           availability: data.availability === 1 // Convert to boolean
         });
       } catch (error) {
-        setError(error.message);
+        setError({ general: error.message });
       }
     };
 
@@ -50,8 +50,22 @@ const AdminEditService = () => {
     }));
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    Object.keys(formData).forEach((key) => {
+      if (!formData[key] && key !== "availability") {
+        newErrors[key] = `${key.charAt(0).toUpperCase() + key.slice(1)} is required`;
+      }
+    });
+    setError(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/services/${id}`, {
         method: "PATCH",
@@ -68,7 +82,7 @@ const AdminEditService = () => {
       }
       navigate('/admin-services');
     } catch (error) {
-      setError(error.message);
+      setError({ general: error.message });
     }
   };
 
@@ -80,72 +94,72 @@ const AdminEditService = () => {
           <label htmlFor="name" className="form-label">Name</label>
           <input
             type="text"
-            className={`form-control ${error && error.name && "is-invalid"}`}
+            className={`form-control ${error.name && "is-invalid"}`}
             id="name"
             name="name"
             value={formData.name}
             onChange={handleChange}
           />
-          {error && error.name && <div className="invalid-feedback">{error.name}</div>}
+          {error.name && <div className="invalid-feedback">{error.name}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="duration" className="form-label">Duration</label>
           <input
             type="text"
-            className={`form-control ${error && error.duration && "is-invalid"}`}
+            className={`form-control ${error.duration && "is-invalid"}`}
             id="duration"
             name="duration"
             value={formData.duration}
             onChange={handleChange}
           />
-          {error && error.duration && <div className="invalid-feedback">{error.duration}</div>}
+          {error.duration && <div className="invalid-feedback">{error.duration}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="price" className="form-label">Price</label>
           <input
             type="number"
-            className={`form-control ${error && error.price && "is-invalid"}`}
+            className={`form-control ${error.price && "is-invalid"}`}
             id="price"
             name="price"
             value={formData.price}
             onChange={handleChange}
           />
-          {error && error.price && <div className="invalid-feedback">{error.price}</div>}
+          {error.price && <div className="invalid-feedback">{error.price}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="images" className="form-label">Images</label>
           <input
             type="text"
-            className={`form-control ${error && error.images && "is-invalid"}`}
+            className={`form-control ${error.images && "is-invalid"}`}
             id="images"
             name="images"
             value={formData.images}
             onChange={handleChange}
           />
-          {error && error.images && <div className="invalid-feedback">{error.images}</div>}
+          {error.images && <div className="invalid-feedback">{error.images}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="description" className="form-label">Description</label>
           <textarea
-            className={`form-control ${error && error.description && "is-invalid"}`}
+            className={`form-control ${error.description && "is-invalid"}`}
             id="description"
             name="description"
             value={formData.description}
             onChange={handleChange}
           />
-          {error && error.description && <div className="invalid-feedback">{error.description}</div>}
+          {error.description && <div className="invalid-feedback">{error.description}</div>}
         </div>
         <div className="mb-3">
           <label htmlFor="count" className="form-label">Count</label>
           <input
             type="number"
-            className={`form-control ${error && error.count && "is-invalid"}`}
+            className={`form-control ${error.count && "is-invalid"}`}
             id="count"
             name="count"
             value={formData.count}
             onChange={handleChange}
           />
-          {error && error.count && <div className="invalid-feedback">{error.count}</div>}
+          {error.count && <div className="invalid-feedback">{error.count}</div>}
         </div>
         <div className="mb-3 form-check">
           <input
@@ -158,6 +172,7 @@ const AdminEditService = () => {
           />
           <label htmlFor="availability" className="form-check-label">Available</label>
         </div>
+        {error.general && <div className="alert alert-danger">{error.general}</div>}
         <button type="submit" className="btn btn-primary">Update Service</button>
       </form>
     </section>

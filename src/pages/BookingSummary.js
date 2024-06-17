@@ -33,7 +33,7 @@ const BookingSummary = () => {
     <div className="container mt-5">
       <div className="card">
         <div className="card-body">
-          <h1 className="fs-700 ff-serif text-center">Booking Confirmation</h1>
+          <h1 className="fs-700 ff-serif text-center">Booking Summary</h1>
           <hr />
           <h2 className="fs-600 ff-serif text-center">Receipt</h2>
           <p className="text-center">
@@ -69,6 +69,7 @@ const BookingSummary = () => {
             <p>
               <strong>Payment Method:</strong> {payment_method}
             </p>
+            <hr />
             <h3 className="fs-500 ff-serif">Customer ID</h3>
             <p>
               <strong>Customer ID:</strong> {customerID}

@@ -6,7 +6,7 @@ import Blogs from "../components/blogs/Blogs";
 
 const Blog = () => {
   return (
-    <div>
+    <div className="container mt-5">
       <Blogs />
       <Footer />
     </div>

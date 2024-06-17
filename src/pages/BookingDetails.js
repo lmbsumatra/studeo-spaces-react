@@ -92,6 +92,7 @@ const BookingDetails = () => {
             <p>
               <strong>Payment Method:</strong> {payment_method}
             </p>
+            <hr />
             <h3 className="fs-500 ff-serif">Customer ID</h3>
             <p>
               <strong>Customer ID:</strong> {customer_id}

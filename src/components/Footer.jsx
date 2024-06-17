@@ -2,7 +2,7 @@ import React from 'react';
 
 const Footer = () => {
   return (
-    <footer className="container">
+    <footer className="container mt-5">
       <div className="row items">
         <div className="col flex-items">
           <ul>

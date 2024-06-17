@@ -2,6 +2,7 @@ import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import user from "../../assets/images/icons/user.svg";
 import notif from "../../assets/images/icons/notif.svg";
+import logo from "../../assets/images/studeo-spaces-logo.png";
 
 const Header = () => {
   const location = useLocation();
@@ -20,6 +21,9 @@ const Header = () => {
     <nav className="navbar">
       <div className="container-fluid">
         {/* Logo */}
+        <NavLink to="/" className="navbar-brand">
+        <img src={logo} alt="Logo" style={{ height: "50px", width: "50px"}} />
+      </NavLink>
         <NavLink to="/" className="navbar-brand">
         </NavLink>
 

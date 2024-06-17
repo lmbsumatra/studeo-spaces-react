@@ -89,7 +89,7 @@ const Book = () => {
   };
 
   return (
-    <div className="container">
+    <div className="container mt-5">
       {/* Booking Section */}
       <section className="container items">
         <h1 className="fs-700 ff-serif text-center">Booking</h1>

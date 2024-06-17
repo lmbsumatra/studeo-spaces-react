@@ -28,7 +28,7 @@ const FAQs = () => {
   };
 
   return (
-    <div>
+    <div className="container mt-5">
       <Container>
         <Row>
           {/* Accordion */}
@@ -60,7 +60,7 @@ const FAQs = () => {
           {/* Email Us Form */}
           <Col>
             <p className="fs-400">Got other questions?</p>
-            <h2 className="fs-700 ff-serif letter-spacing-1">Email us!</h2>
+            <h2 className="fs-700 ff-serif letter-spacing-1">Send us a message!</h2>
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3" controlId="exampleInputEmail1">
                 <Form.Label>Email address</Form.Label>
