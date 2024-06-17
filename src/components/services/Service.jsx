@@ -2,17 +2,24 @@ import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
 
-const Service = ({ title, show, isBookingPage, onServiceSelect, date, dateSelected }) => {
+const Service = ({ title, show, isBookingPage, onServiceSelect, date }) => {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
 
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        let response = await fetch(`http://127.0.0.1:8000/api/services`);
+        let response;
+        if (isBookingPage) {
+          response = await fetch(`http://127.0.0.1:8000/api/available?date=${date}`);
+        } else {
+          response = await fetch(`http://127.0.0.1:8000/api/services`);
+        }
+
         if (!response.ok) {
           throw new Error("Failed to fetch services");
         }
+
         const data = await response.json();
         console.log("Fetched services:", data); // Debug: log the fetched data
         setServices(data);
@@ -21,8 +28,12 @@ const Service = ({ title, show, isBookingPage, onServiceSelect, date, dateSelect
       }
     };
 
-    fetchServices();
-  }, []); // Fetch services only once on component mount
+    if (isBookingPage && date) {
+      fetchServices();
+    } else if (!isBookingPage) {
+      fetchServices();
+    }
+  }, [date, isBookingPage]); // Fetch services when date or isBookingPage changes
 
   const handleServiceSelect = (service) => {
     setSelectedService(service);
@@ -30,7 +41,7 @@ const Service = ({ title, show, isBookingPage, onServiceSelect, date, dateSelect
       onServiceSelect(service); // Call the callback function with the selected service object
     }
   };
-
+  
   return (
     <section className="container items">
       <h1 className="fs-700 ff-serif text-center">{title}</h1>
@@ -64,10 +75,10 @@ const Service = ({ title, show, isBookingPage, onServiceSelect, date, dateSelect
                         id={`service${service.id}`}
                         autoComplete="off"
                         onChange={() => handleServiceSelect(service)}
-                        disabled={!dateSelected || service.count === 0} // Disable if date not selected or count is 0
+                        disabled={service.count === 0} // Disable the button if count is 0
                       />
                       <label
-                        className={`btn btn-secondary-clr ${!dateSelected ? "disabled" : ""}`}
+                        className="btn btn-secondary-clr"
                         htmlFor={`service${service.id}`}
                       >
                         {selectedService === service.id ? "Selected" : "Select"}
