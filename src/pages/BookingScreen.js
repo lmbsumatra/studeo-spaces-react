@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Footer from "../components/Footer";
@@ -16,12 +16,48 @@ const Book = () => {
   const [customerID, setCustomerID] = useState("");
 
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (!date) {
+      setSelectedService(null); // Reset selectedService when date is cleared
+    }
+  }, [date]);
+
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const isValidContactNumber = (contactNumber) => {
+    const contactNumberRegex = /^\d{10,15}$/; // Adjust regex based on your requirements
+    return contactNumberRegex.test(contactNumber);
+  };
 
   const handleBookNowClick = () => {
     // Check if all required fields are filled
     if (!selectedService || !date || !time || !name || !email || !contactNumber || !paymentMethod) {
       alert("Please fill in all required fields.");
       return; // Stop further execution if any required field is missing
+    }
+    if (!isValidEmail(email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    if (!isValidContactNumber(contactNumber)) {
+      alert("Please enter a valid contact number.");
+      return;
+    }
+
+    // Validate the selected date
+    const selectedDate = new Date(date);
+    const currentDate = new Date();
+    // Set the time of current date to 00:00:00 for comparison
+    currentDate.setHours(0, 0, 0, 0);
+
+    if (selectedDate < currentDate) {
+      alert("Please select a valid future date.");
+      return;
     }
   
     console.log("Selected Service:", selectedService);
@@ -127,6 +163,7 @@ const Book = () => {
           isBookingPage={true}
           onServiceSelect={handleServiceSelect}
           date={date}
+          dateSelected={Boolean(date)} // Pass down true if date is selected, false otherwise
         />
         <hr />
         {/* Fill out information */}
