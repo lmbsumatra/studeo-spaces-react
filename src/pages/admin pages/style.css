@@ -1,0 +1,30 @@
+.container {
+    height: 100%;
+    width: 100%;
+  }
+  .sidebar {
+    transition: width 0.3s;
+  }
+  
+  .sidebar.expanded {
+    width: 250px; /* Adjust based on your design */
+  }
+  
+  .sidebar.collapsed {
+    width: 80px; /* Adjust based on your design */
+  }
+  
+  .main-content {
+    flex: auto;
+    transition: margin-left 0.3s; /* Smooth transition */
+  }
+  
+  .main-content.expanded {
+    margin-left: 250px; /* Adjust based on your expanded sidebar width */
+  }
+  
+  .main-content.collapsed {
+    margin-left: 80px;
+  }
+  
+  

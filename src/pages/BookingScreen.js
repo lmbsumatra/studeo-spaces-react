@@ -1,10 +1,13 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Footer from "../components/Footer";
 import Service from "../components/services/Service";
+import Spinner from 'react-bootstrap/Spinner'; // Import Spinner component
+import { toast } from "react-toastify";
 
 const Book = () => {
+  // State declarations
   const [selectedService, setSelectedService] = useState(null);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -14,24 +17,49 @@ const Book = () => {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
   const [customerID, setCustomerID] = useState("");
+  const [loading, setLoading] = useState(false); // Loading state
 
   const navigate = useNavigate();
+  const location = useLocation();
+  // Extract URL parameters
+  const queryParams = new URLSearchParams(location.search);
+  const serviceId = queryParams.get("serviceId");
 
-  const handleBookNowClick = () => {
-    // Check if all required fields are filled
-    if (!selectedService || !date || !time || !name || !email || !contactNumber || !paymentMethod) {
-      alert("Please fill in all required fields.");
-      return; // Stop further execution if any required field is missing
+  useEffect(() => {
+    // Set initial date and time if serviceId is present
+    if (serviceId) {
+      const now = new Date();
+      setDate(now.toISOString().split("T")[0]); // YYYY-MM-DD
+      setTime(
+        now.toLocaleTimeString('en-US', {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })
+      );
+
+      // Set selected service for auto-selection
+      setSelectedService(serviceId);
     }
-  
-    console.log("Selected Service:", selectedService);
-    console.log("Date:", date);
-    console.log("Time:", time);
-    console.log("Name:", name);
-    console.log("Email:", email);
-    console.log("Contact Number:", contactNumber);
-    console.log("Payment Method:", paymentMethod);
-  
+  }, [location.search]);
+
+  // Event handler for booking
+  const handleBookNowClick = async () => {
+    // Check if all required fields are filled
+    if (
+      !selectedService ||
+      !date ||
+      !time ||
+      !name ||
+      !email ||
+      !contactNumber ||
+      !paymentMethod
+    ) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    // Prepare booking details
     const bookingDetails = {
       service_id: selectedService.id,
       price: selectedService.price,
@@ -41,34 +69,50 @@ const Book = () => {
       email,
       contact_number: contactNumber,
       payment_method: paymentMethod,
-      customerID: customerID, // Include customerID here
+      customerID: customerID,
     };
-  
-    navigate("/confirmation", { state: bookingDetails });
+
+    setLoading(true); // Set loading to true
+
+    try {
+      // Simulate a delay to show loading spinner (remove in production)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      navigate("/confirmation", { state: bookingDetails });
+    } catch (error) {
+      console.error("Error booking:", error);
+      alert("Error booking. Please try again.");
+    } finally {
+      setLoading(false); // Set loading to false
+    }
   };
 
+  // Event handler for checking bookings
   const handleCheckBookingClick = async () => {
+    setLoading(true); // Set loading to true
+
     try {
       const response = await axios.get(
         `http://127.0.0.1:8000/api/bookings/${referenceNumber}`
       );
-      // Check if booking exists
       if (response.data.message) {
-        // If booking not found, show error message
         alert(response.data.message);
       } else {
-        // If booking found, navigate to booking details page
         navigate("/booking-details", { state: { referenceNumber } });
       }
     } catch (error) {
       console.error("Error checking booking:", error);
-      // Show error message if request fails
-      alert("Error checking booking. Please try again.");
+      toast.error("Error: Invalid Booking Id");
+    } finally {
+      setLoading(false); // Set loading to false
     }
   };
 
+  // Event handler for using customer ID
   const handleUseCustomerID = async (e) => {
     e.preventDefault();
+    setLoading(true); // Set loading to true
+
     try {
       const response = await axios.get(
         `http://127.0.0.1:8000/api/customers/${customerID}`
@@ -79,21 +123,22 @@ const Book = () => {
       setContactNumber(customer.contact_number);
     } catch (error) {
       console.error("Customer ID not found:", error);
-      alert("Customer ID not found");
+      toast.error("Customer ID not found");
+    } finally {
+      setLoading(false); // Set loading to false
     }
   };
 
   // Callback function to handle service selection
   const handleServiceSelect = (service) => {
+    navigate(`/booking`)
     setSelectedService(service);
   };
 
   return (
     <div className="container mt-5">
-      {/* Booking Section */}
       <section className="container items">
         <h1 className="fs-700 ff-serif text-center">Booking</h1>
-
         <hr />
         {/* Select date */}
         <div className="container">
@@ -106,8 +151,6 @@ const Book = () => {
             onChange={(e) => setDate(e.target.value)}
           />
         </div>
-
-
         <hr />
         {/* Select Time */}
         <div className="container">
@@ -127,6 +170,7 @@ const Book = () => {
           isBookingPage={true}
           onServiceSelect={handleServiceSelect}
           date={date}
+          preselectedServiceId={serviceId} // Pass preselected service ID
         />
         <hr />
         {/* Fill out information */}
@@ -199,15 +243,27 @@ const Book = () => {
                   />
                 </div>
                 <div className="text-center">
-                  <button type="submit" className="btn btn-primary-clr">
-                    Submit
+                  <button type="submit" className="btn btn-primary-clr" disabled={loading}>
+                    {loading ? (
+                      <>
+                        <Spinner
+                          as="span"
+                          animation="border"
+                          size="sm"
+                          role="status"
+                          aria-hidden="true"
+                        />{" "}
+                        Loading...
+                      </>
+                    ) : (
+                      "Submit"
+                    )}
                   </button>
                 </div>
               </form>
             </div>
           </div>
         </div>
-
         <hr />
         {/* Select Payment Method */}
         <div className="container">
@@ -247,22 +303,37 @@ const Book = () => {
               name="paymentMethod"
               id="handOn"
               autoComplete="off"
-              value="Hand On"
+              value="Pay on Counter"
               onChange={(e) => setPaymentMethod(e.target.value)}
             />
             <label className="btn btn-secondary-clr" htmlFor="handOn">
-              Cash on Counter
+              Pay on Counter
             </label>
           </div>
         </div>
-
         <div className="container text-center">
-          <button className="btn btn-primary-clr" onClick={handleBookNowClick}>
-            Book Now!
+          <button
+            className="btn btn-primary-clr"
+            onClick={handleBookNowClick}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Spinner
+                  as="span"
+                  animation="border"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"
+                />{" "}
+                Processing...
+              </>
+            ) : (
+              "Book Now!"
+            )}
           </button>
         </div>
       </section>
-
       <hr />
       {/* Reference Number Section */}
       <div className="container items">
@@ -286,12 +357,25 @@ const Book = () => {
           <button
             className="btn btn-primary-clr"
             onClick={handleCheckBookingClick}
+            disabled={loading}
           >
-            Check Booking
+            {loading ? (
+              <>
+                <Spinner
+                  as="span"
+                  animation="border"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"
+                />{" "}
+                Checking...
+              </>
+            ) : (
+              "Check Booking"
+            )}
           </button>
         </div>
       </div>
-
       <Footer />
     </div>
   );

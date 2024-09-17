@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
+// App.js
+import React, { useState, useEffect, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useLocation,
-  Navigate
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
+import io from "socket.io-client";
 import "./App.css";
-import Header from "./components/header/Header";
+import { NotificationProvider } from "../src/pages/context/notificationContext";
+
+import Header from "../src/components/header/Header"
 import Home from "./pages/HomeScreen";
-import Blog from "./pages/BlogScreen";
+import Blog from "./pages/BlogsScreen";
 import Services from "./pages/ServicesScreen";
 import Book from "./pages/BookingScreen";
 import FAQs from "./pages/FAQs";
@@ -27,28 +27,23 @@ import AdminMessagesScreen from "./pages/admin pages/AdminMessagesScreen";
 import AdminServices from "./pages/admin pages/admin-services/AdminServices";
 import AdminAddService from "./pages/admin pages/admin-services/AdminAddService";
 import AdminEditService from "./pages/admin pages/admin-services/AdminEditService";
-import Sidebar from "./components/header/Sidebar";
-
-
 import PrivateRoute from "./PrivateRoute";
+import Card from "./Card";
+import Admin from "../src/pages/admin pages/Admin"
 
 const App = () => {
-  const [isSidebarExpanded, setSidebarExpanded] = useState(true);
+  
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith("/admin");
   const isLoginPage = location.pathname === "/login";
-  const toggleSidebar = () => {
-    setSidebarExpanded(!isSidebarExpanded);
-  };
+
 
   return (
     <div>
       {!isLoginPage && (isAdminPath ? <Header /> : <Header />)}
-      {isAdminPath && (
-        <Sidebar isExpanded={isSidebarExpanded} toggleSidebar={toggleSidebar} />
-      )}
 
       <Routes>
+        <Route path="/card" element={<Card />} />
         <Route path="/" element={<Home />} />
         <Route path="/blogs" element={<Blog />} />
         <Route path="/services" element={<Services />} />
@@ -58,97 +53,64 @@ const App = () => {
         <Route path="/payment" element={<Payment />} />
         <Route path="/booking-successful" element={<BookingSummary />} />
         <Route path="/booking-details" element={<BookingDetails />} />
-        <Route path="/login" element={<AdminLogin />} />
 
+
+
+        <Route path="/login" element={<AdminLogin />} />
         <Route
           path="/admin"
-          element={
-            <PrivateRoute>
-              <Navigate to='/admin-dashboard' />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/"
-          element={
-            <PrivateRoute>
-              <Navigate to='/admin-dashboard' />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin-dashboard"
-          element={
-            <PrivateRoute>
-              <AdminDashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin-bookings"
-          element={
-            <PrivateRoute>
-              <AdminBookings />
-            </PrivateRoute>
-          }
-        />
+          element={<PrivateRoute><Admin /></PrivateRoute>}
+        >
+          {/* <Route
+            path="/*"
+            element={<Admin isSidebarExpanded={isSidebarExpanded} toggleSidebar={toggleSidebar} />}
+          > */}
+            <Route
+              path="dashboard"
+              element={<AdminDashboard />}
+            />
+            <Route
+              path="bookings"
+              element={<AdminBookings />}
+            />
+            <Route
+              path="payments"
+              element={<AdminPayments />}
+            />
+            <Route
+              path="customers"
+              element={<AdminCustomers />}
+            />
+            <Route
+              path="messages"
+              element={<AdminMessagesScreen />}
+            />
+            <Route
+              path="services"
+              element={<AdminServices title="Admin Services Management" />}
+            />
+            <Route
+              path="/admin/add-service"
+              element={<AdminAddService />}
+            />
+            <Route
+              path="/admin/edit-service/:id"
+              element={<AdminEditService />}
+            />
+          {/* </Route> */}
+        </Route>
         <Route path="/admin-login" element={<AdminLogin />} />
-        <Route
-          path="/admin-payments"
-          element={
-            <PrivateRoute>
-              <AdminPayments />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin-customers"
-          element={
-            <PrivateRoute>
-              <AdminCustomers />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin-messages"
-          element={
-            <PrivateRoute>
-              <AdminMessagesScreen />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin-services"
-          element={
-            <PrivateRoute>
-              <AdminServices title='Admin Services Management'/>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin-add-service"
-          element={
-            <PrivateRoute>
-              <AdminAddService />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin-edit-service/:id"
-          element={
-            <PrivateRoute>
-              <AdminEditService />
-            </PrivateRoute>
-          }
-        />
       </Routes>
+      
     </div>
   );
 };
 
 const AppWrapper = () => (
   <Router>
-    <App />
+    <NotificationProvider>
+      <App />
+    </NotificationProvider>
   </Router>
 );
 

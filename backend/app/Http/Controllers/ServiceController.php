@@ -149,13 +149,13 @@ class ServiceController extends Controller
 
 
         // Debugging
-        echo "Current Date: $currentDate"; // Output current date for debugging
+       // echo "Current Date: $currentDate"; // Output current date for debugging
 
         // Query for available seats for today's date
         $availability = ServiceAvailability::where('date', $currentDate)->get();
 
         // Debugging
-        echo "Availability: " . json_encode($availability); // Output availability for debugging
+       // echo "Availability: " . json_encode($availability); // Output availability for debugging
 
         // Return response as JSON
         return response()->json($availability);

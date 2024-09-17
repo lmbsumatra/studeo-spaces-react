@@ -10,6 +10,12 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ServiceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\NotificationController;
+
+Route::post('/notifications', [NotificationController::class, 'createNotification']);
+Route::get('/notifications', [NotificationController::class, 'index']);
+Route::delete('/notifications/{id}', [NotificationController::class, 'softDelete']);
+
 
 Route::middleware('auth:sanctum')->get('/admin', function (Request $request) {
     return $request->admin();

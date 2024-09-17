@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
+import { Spinner } from "react-bootstrap";
+import { toast } from "react-toastify";
 
 const AdminEditService = () => {
   const { id } = useParams();
@@ -12,15 +14,19 @@ const AdminEditService = () => {
     images: "",
     description: "",
     count: "",
-    availability: false // Initial state for availability as boolean
+    availability: false, // Initial state for availability as boolean
   });
   const [error, setError] = useState({});
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchService = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/services/${id}`);
+        setLoading(true);
+        const response = await fetch(
+          `http://127.0.0.1:8000/api/services/${id}`
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch service");
         }
@@ -32,10 +38,12 @@ const AdminEditService = () => {
           images: data.images,
           description: data.description,
           count: data.count,
-          availability: data.availability === 1 // Convert to boolean
+          availability: data.availability === 1, // Convert to boolean
         });
       } catch (error) {
         setError({ general: error.message });
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -54,7 +62,9 @@ const AdminEditService = () => {
     const newErrors = {};
     Object.keys(formData).forEach((key) => {
       if (!formData[key] && key !== "availability") {
-        newErrors[key] = `${key.charAt(0).toUpperCase() + key.slice(1)} is required`;
+        newErrors[key] = `${
+          key.charAt(0).toUpperCase() + key.slice(1)
+        } is required`;
       }
     });
     setError(newErrors);
@@ -67,6 +77,7 @@ const AdminEditService = () => {
       return;
     }
     try {
+      setLoading(true)
       const response = await fetch(`http://127.0.0.1:8000/api/services/${id}`, {
         method: "PATCH",
         headers: {
@@ -74,24 +85,31 @@ const AdminEditService = () => {
         },
         body: JSON.stringify({
           ...formData,
-          availability: formData.availability ? 1 : 0 // Convert boolean to 1 or 0
+          availability: formData.availability ? 1 : 0, // Convert boolean to 1 or 0
         }),
       });
       if (!response.ok) {
         throw new Error("Failed to update service");
       }
-      navigate('/admin-services');
+      toast.success(`Success! ${formData.name} is updated.`)
+      navigate("/admin/services");
     } catch (error) {
+      toast.error(`Error! ${error}`)
       setError({ general: error.message });
+    }
+    finally {
+      setLoading(false)
     }
   };
 
   return (
-    <section className="container items">
+    <div className="container items mt-5">
       <h1 className="fs-700 ff-serif text-center">Edit Service</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label htmlFor="name" className="form-label">Name</label>
+          <label htmlFor="name" className="form-label">
+            Name
+          </label>
           <input
             type="text"
             className={`form-control ${error.name && "is-invalid"}`}
@@ -99,11 +117,14 @@ const AdminEditService = () => {
             name="name"
             value={formData.name}
             onChange={handleChange}
+            disabled={loading}
           />
           {error.name && <div className="invalid-feedback">{error.name}</div>}
         </div>
         <div className="mb-3">
-          <label htmlFor="duration" className="form-label">Duration</label>
+          <label htmlFor="duration" className="form-label">
+            Duration
+          </label>
           <input
             type="text"
             className={`form-control ${error.duration && "is-invalid"}`}
@@ -111,11 +132,16 @@ const AdminEditService = () => {
             name="duration"
             value={formData.duration}
             onChange={handleChange}
+            disabled={loading}
           />
-          {error.duration && <div className="invalid-feedback">{error.duration}</div>}
+          {error.duration && (
+            <div className="invalid-feedback">{error.duration}</div>
+          )}
         </div>
         <div className="mb-3">
-          <label htmlFor="price" className="form-label">Price</label>
+          <label htmlFor="price" className="form-label">
+            Price
+          </label>
           <input
             type="number"
             className={`form-control ${error.price && "is-invalid"}`}
@@ -123,11 +149,14 @@ const AdminEditService = () => {
             name="price"
             value={formData.price}
             onChange={handleChange}
+            disabled={loading}
           />
           {error.price && <div className="invalid-feedback">{error.price}</div>}
         </div>
         <div className="mb-3">
-          <label htmlFor="images" className="form-label">Images</label>
+          <label htmlFor="images" className="form-label">
+            Images
+          </label>
           <input
             type="text"
             className={`form-control ${error.images && "is-invalid"}`}
@@ -135,22 +164,32 @@ const AdminEditService = () => {
             name="images"
             value={formData.images}
             onChange={handleChange}
+            disabled={loading}
           />
-          {error.images && <div className="invalid-feedback">{error.images}</div>}
+          {error.images && (
+            <div className="invalid-feedback">{error.images}</div>
+          )}
         </div>
         <div className="mb-3">
-          <label htmlFor="description" className="form-label">Description</label>
+          <label htmlFor="description" className="form-label">
+            Description
+          </label>
           <textarea
             className={`form-control ${error.description && "is-invalid"}`}
             id="description"
             name="description"
             value={formData.description}
             onChange={handleChange}
+            disabled={loading}
           />
-          {error.description && <div className="invalid-feedback">{error.description}</div>}
+          {error.description && (
+            <div className="invalid-feedback">{error.description}</div>
+          )}
         </div>
         <div className="mb-3">
-          <label htmlFor="count" className="form-label">Count</label>
+          <label htmlFor="count" className="form-label">
+            Count
+          </label>
           <input
             type="number"
             className={`form-control ${error.count && "is-invalid"}`}
@@ -158,6 +197,7 @@ const AdminEditService = () => {
             name="count"
             value={formData.count}
             onChange={handleChange}
+            disabled={loading}
           />
           {error.count && <div className="invalid-feedback">{error.count}</div>}
         </div>
@@ -169,13 +209,34 @@ const AdminEditService = () => {
             name="availability"
             checked={formData.availability}
             onChange={handleChange}
+            disabled={loading}
           />
-          <label htmlFor="availability" className="form-check-label">Available</label>
+          <label htmlFor="availability" className="form-check-label">
+            Available
+          </label>
         </div>
-        {error.general && <div className="alert alert-danger">{error.general}</div>}
-        <button type="submit" className="btn btn-primary">Update Service</button>
+        {error.general && (
+          <div className="alert alert-danger">{error.general}</div>
+        )}
+        <button type="submit" className="btn btn-primary">
+        {loading ? (
+                      <>
+                        <Spinner
+                          as="span"
+                          animation="border"
+                          size="sm"
+                          role="status"
+                          aria-hidden="true"
+                        />{" "}
+                        Loading...
+                      </>
+                    ) : (
+                      "Update Service"
+                    )}
+        </button>
+       
       </form>
-    </section>
+    </div>
   );
 };
 

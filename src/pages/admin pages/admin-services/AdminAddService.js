@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
+import { toast } from 'react-toastify';
 
 const AdminAddService = () => {
   const [formData, setFormData] = useState({
@@ -52,16 +53,18 @@ const AdminAddService = () => {
         }),
       });
       if (!response.ok) {
+        toast.error("Failed to add service.")
         throw new Error("Failed to add service");
       }
-      navigate('/admin-services');
+      toast.success("New service has been added.")
+      navigate('/admin/services');
     } catch (error) {
       setError({ general: error.message });
     }
   };
 
   return (
-    <section className="container items">
+    <section className="container items mt-5">
       <h1 className="fs-700 ff-serif text-center">Add Service</h1>
       <form onSubmit={handleSubmit}>
         {/* Other form fields */}

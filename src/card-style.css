@@ -1,0 +1,53 @@
+.pass {
+  width: 266px;
+  height: auto;
+  justify-content: space-between;
+  border: 1px solid grey;
+  padding: 8px;
+}
+
+.pass > * {
+    margin-bottom: 5px;
+}
+
+.header {
+    display: block;
+    justify-content: center;
+    align-items: center;
+}
+
+.pass > .body > .center {
+    display: flex;
+    justify-content: space-between;
+}
+
+.pass > .body > .center > .user-id > * {
+    text-align: center; 
+}
+.pass > .body > .center > .user-id > .sub-title {
+    font-size: 11px;
+}
+.pass > .body > .center > .user-id > .title {
+    font-size: 14px;
+    font-weight: 800;
+}
+.bullet {
+  background-color: #ff951d;
+  height: 46px;
+  width: 46px;
+  border-radius: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+ .center> .bullets-1 > .bullet {
+  margin-bottom: 5px;
+}
+
+.id-picture {
+    width: 100px;
+    height: 100px;
+    background-color: rgb(236, 236, 236);
+}

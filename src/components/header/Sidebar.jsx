@@ -32,7 +32,7 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
         <li className="sidebar-item">
           <NavLink
             exact
-            to="/admin-dashboard"
+            to="/admin/dashboard"
             className={({ isActive }) =>
               isActive ? "sidebar-link active-nav" : "sidebar-link"
             }
@@ -42,7 +42,7 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
         </li>
         <li className="sidebar-item indent">
           <NavLink
-            to="/admin-bookings"
+            to="/admin/bookings"
             className={({ isActive }) =>
               isActive ? "sidebar-link active-nav" : "sidebar-link"
             }
@@ -52,7 +52,7 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
         </li>
         <li className="sidebar-item indent">
           <NavLink
-            to="/admin-customers"
+            to="/admin/customers"
             className={({ isActive }) =>
               isActive ? "sidebar-link active-nav" : "sidebar-link"
             }
@@ -62,7 +62,7 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
         </li>
         <li className="sidebar-item indent">
           <NavLink
-            to="/admin-payments"
+            to="/admin/payments"
             className={({ isActive }) =>
               isActive ? "sidebar-link active-nav" : "sidebar-link"
             }
@@ -72,7 +72,7 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
         </li>
         <li className="sidebar-item indent">
           <NavLink
-            to="/admin-messages"
+            to="/admin/messages"
             className={({ isActive }) =>
               isActive ? "sidebar-link active-nav" : "sidebar-link"
             }
@@ -93,7 +93,7 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
         </li>
         <li className="sidebar-item indent">
           <NavLink
-            to="/admin-services"
+            to="/admin/services"
             className={({ isActive }) =>
               isActive ? "sidebar-link active-nav" : "sidebar-link"
             }
@@ -103,7 +103,7 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
         </li>
         <li className="sidebar-item indent">
           <NavLink
-            to="/admin-blogs"
+            to="/admin/blogs"
             className={({ isActive }) =>
               isActive ? "sidebar-link active-nav" : "sidebar-link"
             }

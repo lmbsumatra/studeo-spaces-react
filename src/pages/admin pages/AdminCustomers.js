@@ -1,16 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const AdminCustomers = () => {
   const [customers, setCustomers] = useState([]);
+  const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/customers');
+        setLoading(true);
+        const response = await axios.get("http://127.0.0.1:8000/api/customers");
         setCustomers(response.data);
       } catch (error) {
-        console.error('Error fetching customers:', error);
+        console.error("Error fetching customers:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -20,7 +24,17 @@ const AdminCustomers = () => {
   return (
     <div className="container mt-5">
       <h1 className="mb-4">Customers</h1>
-      {customers.length === 0 ? (
+      {isLoading ? (
+        <>
+          <p>
+            <div className="text-center">
+              <div className="spinner-border" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+            </div>
+          </p>
+        </>
+      ) : customers.length === 0 ? (
         <p>No customers to show</p>
       ) : (
         <div className="table-responsive">
@@ -36,7 +50,7 @@ const AdminCustomers = () => {
               </tr>
             </thead>
             <tbody>
-              {customers.map(customer => (
+              {customers.map((customer) => (
                 <tr key={customer.id}>
                   <th scope="row">{customer.id}</th>
                   <td>{customer.name}</td>
@@ -44,7 +58,7 @@ const AdminCustomers = () => {
                   <td>{customer.contact_number}</td>
                   <td>{customer.bookings.length}</td>
                   <td>
-                    {customer.bookings.map(booking => (
+                    {customer.bookings.map((booking) => (
                       <div key={booking.refNumber}>
                         {booking.refNumber} ({booking.status})
                       </div>

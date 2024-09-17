@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../../assets/images/studeo-spaces-logo.png";
+import { toast } from "react-toastify";
 
 const AdminLoginScreen = () => {
   const [username, setUsername] = useState("");
@@ -28,7 +29,8 @@ const AdminLoginScreen = () => {
       // Handle successful login
       console.log(response.data);
       localStorage.setItem("token", response.data.token); // Store token in localStorage
-      navigate("/admin-dashboard"); // Redirect to dashboard
+      navigate("/admin/dashboard"); // Redirect to dashboard
+      toast.success(`Welcome, ${username}!`)
     } catch (error) {
       console.error("Error logging in:", error);
       setError(error.response ? error.response.data.message : "Login failed");

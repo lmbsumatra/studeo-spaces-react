@@ -51,8 +51,106 @@
   background-color: hsl(var(--clr-dark));
 }
 
-/* Add an indent to certain items */
 .sidebar-item.indent {
-  padding-left: 40px; /* Adjust the value as needed */
+  padding-left: 40px;
 }
+
+/* Notification Button Styling */
+.btn-notif {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  background-color: transparent;
+  transition: background-color 0.05s ease;
+}
+
+.notification-popup {
+  position: absolute;
+  top: 60px; 
+  right: 20px;
+  width: 400px;
+  max-height: 500px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  overflow-y: scroll;
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.popup-header h5 {
+  margin: 0;
+}
+
+.close-popup {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.popup-content {
+  padding: 10px;
+}
+
+.popup-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.popup-content ul li {
+  margin-bottom: 8px;
+  
+}
+.notification-item {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  position: relative;
+}
+
+.notification-item:hover {
+  background-color: #f0f0f0;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.timestamp {
+  display: block;
+  font-size: 0.8em;
+  color: #888;
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-popup {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+}
+
 

@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [statuses, setStatuses] = useState({});
   const [sortedBookings, setSortedBookings] = useState([]);
-  const [sortOption, setSortOption] = useState('default'); // Default sorting option
+  const [sortOption, setSortOption] = useState("default"); // Default sorting option
+  const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/bookings');
+        setLoading(true);
+        const response = await axios.get("http://127.0.0.1:8000/api/bookings");
         setBookings(response.data);
         const initialStatuses = response.data.reduce((acc, booking) => {
           acc[booking.id] = booking.status; // Initialize with actual status
@@ -19,7 +21,9 @@ const AdminBookings = () => {
         setStatuses(initialStatuses);
         sortBookings(response.data, sortOption);
       } catch (error) {
-        console.error('Error fetching bookings:', error);
+        console.error("Error fetching bookings:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -29,10 +33,14 @@ const AdminBookings = () => {
   const sortBookings = (data, option) => {
     let sortedData = [...data];
 
-    if (option === 'dateAscend') {
-      sortedData = sortedData.sort((a, b) => new Date(a.date) - new Date(b.date));
-    } else if (option === 'dateDescend') {
-      sortedData = sortedData.sort((a, b) => new Date(b.date) - new Date(a.date));
+    if (option === "dateAscend") {
+      sortedData = sortedData.sort(
+        (a, b) => new Date(a.date) - new Date(b.date)
+      );
+    } else if (option === "dateDescend") {
+      sortedData = sortedData.sort(
+        (a, b) => new Date(b.date) - new Date(a.date)
+      );
     }
 
     setSortedBookings(sortedData);
@@ -45,6 +53,7 @@ const AdminBookings = () => {
 
   const handleStatusChange = async (bookingId, newStatus) => {
     try {
+      setLoading(true);
       setStatuses((prevStatuses) => ({
         ...prevStatuses,
         [bookingId]: newStatus,
@@ -58,11 +67,13 @@ const AdminBookings = () => {
       );
 
       if (response.status === 200) {
-        console.log('Booking status updated successfully');
+        console.log("Booking status updated successfully");
 
-        if (newStatus === 'Completed') {
+        if (newStatus === "Completed") {
           // Retrieve the details of the booking
-          const bookingDetails = bookings.find(booking => booking.id === bookingId);
+          const bookingDetails = bookings.find(
+            (booking) => booking.id === bookingId
+          );
 
           // Create payment data from booking details
           const paymentData = {
@@ -73,26 +84,28 @@ const AdminBookings = () => {
 
           // Add payment to the payment table
           const paymentResponse = await axios.post(
-            'http://127.0.0.1:8000/api/payments',
+            "http://127.0.0.1:8000/api/payments",
             paymentData
           );
 
           if (paymentResponse.status === 201) {
-            console.log('Payment added successfully');
+            console.log("Payment added successfully");
           } else {
-            throw new Error('Failed to add payment');
+            throw new Error("Failed to add payment");
           }
         }
       } else {
-        throw new Error('Failed to update status');
+        throw new Error("Failed to update status");
       }
     } catch (error) {
-      console.error('Error updating booking status:', error);
+      console.error("Error updating booking status:", error);
       // Revert to previous status if the request fails
       setStatuses((prevStatuses) => ({
         ...prevStatuses,
         [bookingId]: prevStatuses[bookingId],
       }));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -112,7 +125,17 @@ const AdminBookings = () => {
           </select>
         </div>
       </div>
-      {bookings.length === 0 ? (
+      {isLoading ? (
+        <>
+          <p>
+            <div className="text-center">
+              <div className="spinner-border" role="status">
+                <span className="sr-only">Loading...</span>
+              </div>
+            </div>
+          </p>
+        </>
+      ) : bookings.length === 0 ? (
         <p>No bookings to show</p>
       ) : (
         <div className="table-responsive">
@@ -133,13 +156,13 @@ const AdminBookings = () => {
                 <tr key={booking.id}>
                   <th scope="row">{booking.id}</th>
                   <td>{booking.customer?.name}</td>
-                  <td>{booking.service?.name}</td> 
-                  <td>{booking.service?.price}</td> 
+                  <td>{booking.service?.name}</td>
+                  <td>{booking.service?.price}</td>
                   <td>{booking.date}</td>
                   <td>{booking.time}</td>
                   <td>
                     <select
-                      value={statuses[booking.id] || 'Pending'}
+                      value={statuses[booking.id] || "Pending"}
                       onChange={(e) =>
                         handleStatusChange(booking.id, e.target.value)
                       }

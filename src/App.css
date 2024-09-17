@@ -5,7 +5,7 @@
 :root {
   /* colors */
   --clr-dark: 230 35% 7%;
-  --clr-light: 211, 12%, 48%; 
+  --clr-light: 211, 12%, 48%;
   --clr-white: 0 0% 100%;
   --clr-primary: #f79728;
   --clr-primary-hover: #db8523;
@@ -243,6 +243,29 @@ select {
   background-color: var(--clr-primary);
 }
 
+/* Notification Button Styling */
+.btn-notif:hover {
+  background-color: #f5dbb5;
+}
+
+.btn-notif img {
+  height: 30px;
+  width: 30px;
+  object-fit: cover;
+  filter: grayscale(100%) brightness(0.7);
+  transition: filter 0.2s ease;
+}
+
+.btn-notif:hover img {
+  filter: grayscale(50%);
+}
+.nav-item.btn-notif.active img {
+  filter: grayscale(0%);
+}
+.nav-item.btn-notif.active {
+  background-color: #f5dbb5;
+}
+
 /* active nav indicator */
 .active-nav {
   border-bottom: #db8523 3px solid;
@@ -283,7 +306,6 @@ section {
   max-height: 200px; /* Adjust based on your design */
   object-fit: cover;
 }
-
 
 /* For circle icons */
 .icon {

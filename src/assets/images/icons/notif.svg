@@ -1,6 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
-<svg width="800px" height="800px" viewBox="0 0 24 24" id="_24x24_On_Light_Notification-Alert" data-name="24x24/On Light/Notification-Alert" xmlns="http://www.w3.org/2000/svg">
-  <rect id="view-box" width="24" height="24" fill="none"/>
-  <path id="Shape" d="M6,17v-.5H2.25A2.253,2.253,0,0,1,0,14.25v-.382a2.542,2.542,0,0,1,1.415-2.289A1.247,1.247,0,0,0,2.1,10.572l.446-4.91A6.227,6.227,0,0,1,10.618.286a5.477,5.477,0,0,0-.635,1.374A4.794,4.794,0,0,0,8.75,1.5,4.7,4.7,0,0,0,4.045,5.8L3.6,10.708A2.739,2.739,0,0,1,2.089,12.92a1.055,1.055,0,0,0-.589.949v.382A.751.751,0,0,0,2.25,15h13A.751.751,0,0,0,16,14.25v-.382a1.053,1.053,0,0,0-.586-.948A2.739,2.739,0,0,1,13.9,10.708l-.2-2.18a5.473,5.473,0,0,0,1.526.221l.166,1.822a1.26,1.26,0,0,0,.686,1.005,2.547,2.547,0,0,1,1.418,2.29v.382a2.252,2.252,0,0,1-2.25,2.25H11.5V17A2.75,2.75,0,0,1,6,17Zm1.5,0A1.25,1.25,0,0,0,10,17v-.5H7.5ZM15.047,6.744A3.486,3.486,0,0,1,13.5,6.28L13.456,5.8a4.7,4.7,0,0,0-1.648-3.185,3.5,3.5,0,0,1,.61-1.417A6.221,6.221,0,0,1,14.95,5.662l.1,1.081v0Z" transform="translate(3.25 2.25)" fill="#141124"/>
-  <path id="Shape-2" data-name="Shape" d="M3.5,7A3.5,3.5,0,1,1,7,3.5,3.5,3.5,0,0,1,3.5,7Z" transform="translate(15 2)" fill="#ff6359"/>
+<svg width="706" height="800" viewBox="0 0 706 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M611.824 580.932V329.412C611.824 186.468 495.945 70.5884 353 70.5884C210.056 70.5884 94.1768 186.468 94.1768 329.412V580.932H141.236C204.442 580.932 275.031 580.932 353 580.932C430.97 580.932 501.558 580.932 564.765 580.932H611.824Z" fill="url(#paint0_linear_137_658)"/>
+<path d="M623.589 541.177C669.071 541.177 705.941 578.047 705.941 623.53C705.941 669.012 669.071 705.883 623.589 705.883H82.412C36.9297 705.883 0.059082 669.012 0.059082 623.53C0.059082 578.047 36.9297 541.177 82.412 541.177H623.589Z" fill="url(#paint1_linear_137_658)"/>
+<path d="M211.823 658.824C211.823 736.793 275.03 800 353 800C430.969 800 494.176 736.793 494.176 658.824H211.823Z" fill="url(#paint2_linear_137_658)"/>
+<path d="M305.941 119.125L400.058 119.125H447.117V82.3532C447.117 36.8709 410.247 0.000228882 364.764 0.000228882H341.235C295.753 0.000228882 258.882 36.8709 258.882 82.3532V119.125L305.941 119.125Z" fill="url(#paint3_linear_137_658)"/>
+<defs>
+<linearGradient id="paint0_linear_137_658" x1="25976.5" y1="70.5884" x2="25976.5" y2="51104.9" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FFC923"/>
+<stop offset="1" stop-color="#FFAD41"/>
+</linearGradient>
+<linearGradient id="paint1_linear_137_658" x1="35294.2" y1="541.177" x2="35294.2" y2="17011.8" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FE9F15"/>
+<stop offset="1" stop-color="#FFB03C"/>
+</linearGradient>
+<linearGradient id="paint2_linear_137_658" x1="-13623.5" y1="800" x2="-13623.5" y2="-13317.6" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FFB637"/>
+<stop offset="1" stop-color="#FFBE2F"/>
+</linearGradient>
+<linearGradient id="paint3_linear_137_658" x1="-8964.65" y1="119.125" x2="-8964.65" y2="-11793.4" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FFC226"/>
+<stop offset="1" stop-color="#FFE825"/>
+</linearGradient>
+</defs>
+
 </svg>
