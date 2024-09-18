@@ -25,11 +25,11 @@ const FAQs = () => {
 
   const testNotificationData = {
     customer_id: null,
-    customer_name: "Test User",
-    message: "This is a test message",
-    type: "customer_message",
-    action_url: null,
+    customer_name: "Admin User",
+    message: "confirm??!",
+    type: "customer_message", // Match this type with the keys in notificationTypes
   };
+  
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,9 +50,7 @@ const FAQs = () => {
       toast.success(
         "Message sent successfully! We will get back to you after 2 days."
       );
-      socket.emit("Notification", {
-        message: `A customer has sent a message!`,
-      });
+      socket.emit("Notification", testNotificationData);
 
       // Clear form fields after successful submission
       setFormData({ email: "", name: "", message: "" });
@@ -73,7 +71,42 @@ const FAQs = () => {
             <p className="fs-400">Frequently asked</p>
             <h2 className="fs-700 ff-serif letter-spacing-1">Questions</h2>
             <Accordion defaultActiveKey="0" id="accordionExample">
-              {/* Accordion items here */}
+              <Accordion.Item eventKey="0">
+                <Accordion.Header>How long can I stay?</Accordion.Header>
+                <Accordion.Body>
+                  Access can be as short or as long as 19 hours daily – from
+                  8:00 AM to 3:00 AM. And yes, you can go out and come in as
+                  frequently and as long as needed. But take note that the last
+                  admittance to the premises is 11:59 PM.
+                </Accordion.Body>
+              </Accordion.Item>
+              <Accordion.Item eventKey="1">
+                <Accordion.Header>
+                  Is it safe to stay in late at night in Studeo Spaces?
+                </Accordion.Header>
+                <Accordion.Body>
+                  Studeo Spaces is SECURE. We are strategically located along a
+                  major street for greater accessibility and convenience. The
+                  location is also well-lit, making it safe and secure for
+                  users. The premises are patrolled by police officers to ensure
+                  that the overall area remains secure and free from potential
+                  threats. Numerous CCTV cameras are installed within the
+                  premises, providing extensive coverage and surveillance of the
+                  area. You’ll be safe with our RFID access control, manned
+                  lobby entry, and full CCTV coverage.
+                </Accordion.Body>
+              </Accordion.Item>
+              <Accordion.Item eventKey="2">
+                <Accordion.Header>
+                  Are you open during the holidays?
+                </Accordion.Header>
+                <Accordion.Body>
+                  Studeo Spaces is open everyday, from Monday to Sunday, from
+                  8:00 AM to 3:00 AM the following day. We are open even during
+                  national, city and special holidays and inclement weather. And
+                  we NEVER close due to private events since we don’t host them.
+                </Accordion.Body>
+              </Accordion.Item>
             </Accordion>
           </Col>
 

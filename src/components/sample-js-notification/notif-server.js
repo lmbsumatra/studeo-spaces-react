@@ -29,14 +29,19 @@ io.on("connection", (socket) => {
   // Handle incoming notifications from any admin
   socket.on("Notification", (data) => {
     console.log(`Notification received: ${data.message}`);
-    // Emit to all connected clients
-    io.emit("Notification", { message: data.message });
+    
+    // Emit the notification to all connected clients
+    io.emit("Notification", { 
+      message: data.message, 
+      type: data.type // Ensure the type is passed here
+    });
   });
 
   socket.on("disconnect", () => {
     console.log("Admin disconnected");
   });
 });
+
 
 server.listen(3002, () => {
   console.log("Server listening on port 3002");

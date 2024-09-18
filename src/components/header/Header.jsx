@@ -7,6 +7,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { toast } from "react-toastify";
+import { io } from "socket.io-client";
 
 dayjs.extend(relativeTime);
 
@@ -15,6 +16,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const isAdminPath = location.pathname.startsWith("/admin");
 
@@ -24,22 +26,42 @@ const Header = () => {
   };
 
   useEffect(() => {
-    const fetchNotification = async () => {
+    const fetchNotifications = async () => {
       try {
-        const response = await axios.get(
-          "http://127.0.0.1:8000/api/notifications"
-        );
+        const response = await axios.get("http://127.0.0.1:8000/api/notifications");
         setNotifications(response.data);
+        setUnreadCount(response.data.filter((notif) => !notif.is_read).length);
       } catch (error) {
         console.error("Error fetching notifications:", error);
       }
     };
 
-    fetchNotification();
-  }, []); // Ensure fetch is called only once on mount
+    // Fetch notifications on initial load
+    fetchNotifications();
+
+    // Set up polling
+    const intervalId = setInterval(fetchNotifications, 1000); // Poll every 60 seconds
+
+    // Initialize Socket.IO connection
+    const socket = io("http://127.0.0.1:8000");
+
+    socket.on("new_notification", (newNotification) => {
+      setNotifications((prevNotifications) => [newNotification, ...prevNotifications]);
+      setUnreadCount((prevCount) => prevCount + 1);
+    });
+
+    // Clean up interval and Socket.IO connection on component unmount
+    return () => {
+      clearInterval(intervalId);
+      socket.disconnect();
+    };
+  }, []);
 
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
+    if (!showNotifications) {
+      setUnreadCount(0);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -79,9 +101,7 @@ const Header = () => {
                   <img src={user} height="40px" alt="User Icon" />
                 </li>
                 <li
-                  className={`nav-item btn-notif ${
-                    showNotifications ? "active" : ""
-                  }`}
+                  className={`nav-item btn-notif ${showNotifications ? "active" : ""}`}
                 >
                   <img
                     src={notif}
@@ -89,6 +109,9 @@ const Header = () => {
                     alt="Notification Icon"
                     onClick={toggleNotifications}
                   />
+                  {unreadCount > 0 && (
+                    <span className="notification-counter">{unreadCount}</span>
+                  )}
                 </li>
                 <li className="nav-item" onClick={handleLogout}>
                   Log Out
@@ -168,9 +191,7 @@ const Header = () => {
                     key={notif.id}
                     className="notification-item"
                     onMouseEnter={(e) => e.currentTarget.classList.add("hover")}
-                    onMouseLeave={(e) =>
-                      e.currentTarget.classList.remove("hover")
-                    }
+                    onMouseLeave={(e) => e.currentTarget.classList.remove("hover")}
                   >
                     <p>{formatNotification(notif)}</p>
                     <span className="timestamp">
