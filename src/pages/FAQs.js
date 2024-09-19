@@ -25,8 +25,8 @@ const FAQs = () => {
 
   const testNotificationData = {
     customer_id: null,
-    customer_name: "Admin User",
-    message: "confirm??!",
+    customer_name: "Customer",
+    message: formData.message,
     type: "customer_message", // Match this type with the keys in notificationTypes
   };
   

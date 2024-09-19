@@ -17,6 +17,7 @@ const Header = () => {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const socket = io("http://localhost:3003"); // Adjust your socket server URL
 
   const isAdminPath = location.pathname.startsWith("/admin");
 
@@ -35,27 +36,32 @@ const Header = () => {
         console.error("Error fetching notifications:", error);
       }
     };
-
-    // Fetch notifications on initial load
+  
+    // Fetch notifications once on mount
     fetchNotifications();
-
-    // Set up polling
-    const intervalId = setInterval(fetchNotifications, 1000); // Poll every 60 seconds
-
-    // Initialize Socket.IO connection
-    const socket = io("http://127.0.0.1:8000");
-
-    socket.on("new_notification", (newNotification) => {
-      setNotifications((prevNotifications) => [newNotification, ...prevNotifications]);
-      setUnreadCount((prevCount) => prevCount + 1);
+  
+    // Adjusted interval for fetching notifications
+    const intervalId = setInterval(fetchNotifications, 30000);
+  
+    // Socket connection
+    socket.on("connect", () => {
+      console.log("Socket connected");
+      // Optionally fetch notifications again to ensure the latest state
     });
-
-    // Clean up interval and Socket.IO connection on component unmount
+  
+    socket.on("notification", (newNotification) => {
+      setNotifications((prev) => [...prev, newNotification]);
+      setUnreadCount((prev) => prev + 1);
+      toast.info("New notification received!");
+    });
+  
     return () => {
       clearInterval(intervalId);
-      socket.disconnect();
+      socket.off("notification");
+      socket.off("connect");
     };
-  }, []);
+  }, [socket]);
+  
 
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
@@ -68,6 +74,7 @@ const Header = () => {
     try {
       await axios.delete(`http://127.0.0.1:8000/api/notifications/${id}`);
       setNotifications(notifications.filter((notif) => notif.id !== id));
+      setUnreadCount(unreadCount - 1);
       toast.info("Notification removed.");
     } catch (error) {
       toast.error("Failed removing notification.");
@@ -85,7 +92,7 @@ const Header = () => {
       case "message":
         return `${customer_name} sent you a message: ${message}`;
       default:
-        return `${customer_name} has a new notification: ${message}`;
+        return `You has a new notification: ${message}`;
     }
   };
 
@@ -100,9 +107,7 @@ const Header = () => {
                 <li className="nav-item">
                   <img src={user} height="40px" alt="User Icon" />
                 </li>
-                <li
-                  className={`nav-item btn-notif ${showNotifications ? "active" : ""}`}
-                >
+                <li className={`nav-item btn-notif ${showNotifications ? "active" : ""}`}>
                   <img
                     src={notif}
                     height="40px"
@@ -120,53 +125,27 @@ const Header = () => {
             ) : (
               <>
                 <li className="nav-item">
-                  <NavLink
-                    exact
-                    to="/"
-                    className={({ isActive }) =>
-                      isActive ? "nav-link active-nav" : "nav-link"
-                    }
-                  >
+                  <NavLink exact to="/" className={({ isActive }) => (isActive ? "nav-link active-nav" : "nav-link")}>
                     Home
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink
-                    to="/blogs"
-                    className={({ isActive }) =>
-                      isActive ? "nav-link active-nav" : "nav-link"
-                    }
-                  >
+                  <NavLink to="/blogs" className={({ isActive }) => (isActive ? "nav-link active-nav" : "nav-link")}>
                     Blogs
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink
-                    to="/services"
-                    className={({ isActive }) =>
-                      isActive ? "nav-link active-nav" : "nav-link"
-                    }
-                  >
+                  <NavLink to="/services" className={({ isActive }) => (isActive ? "nav-link active-nav" : "nav-link")}>
                     Services
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink
-                    to="/faqs"
-                    className={({ isActive }) =>
-                      isActive ? "nav-link active-nav" : "nav-link"
-                    }
-                  >
+                  <NavLink to="/faqs" className={({ isActive }) => (isActive ? "nav-link active-nav" : "nav-link")}>
                     FAQs
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink
-                    to="/booking"
-                    className={({ isActive }) =>
-                      isActive ? "nav-link active-nav" : "nav-link"
-                    }
-                  >
+                  <NavLink to="/booking" className={({ isActive }) => (isActive ? "nav-link active-nav" : "nav-link")}>
                     <button className="btn btn-primary-clr">Book now!</button>
                   </NavLink>
                 </li>
@@ -178,10 +157,7 @@ const Header = () => {
             <div className="notification-popup active">
               <div className="popup-header">
                 <h5>Notifications</h5>
-                <button
-                  className="close-popup"
-                  onClick={() => setShowNotifications(false)}
-                >
+                <button className="close-popup" onClick={() => setShowNotifications(false)}>
                   X
                 </button>
               </div>
@@ -197,10 +173,7 @@ const Header = () => {
                     <span className="timestamp">
                       {dayjs(notif.created_at).fromNow()}
                     </span>
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDelete(notif.id)}
-                    >
+                    <button className="delete-btn" onClick={() => handleDelete(notif.id)}>
                       X
                     </button>
                   </div>

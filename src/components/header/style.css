@@ -153,4 +153,18 @@
   cursor: pointer;
 }
 
+.notification-counter {
+  position: absolute;
+  color: white;
+  background-color: red;
+  font-size: 10px;
+  top: 12px;
+  right: 120px;
+  border-radius: 100%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
