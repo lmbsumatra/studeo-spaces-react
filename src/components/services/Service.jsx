@@ -2,13 +2,21 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
+import Promo from "../promo/Promo";
 
-const Service = ({ title, show, isBookingPage, onServiceSelect, date, preselectedServiceId }) => {
+const Service = ({
+  title,
+  show,
+  isBookingPage,
+  onServiceSelect,
+  date,
+  preselectedServiceId,
+}) => {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [available, setAvailable] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,7 +75,7 @@ const Service = ({ title, show, isBookingPage, onServiceSelect, date, preselecte
     console.log("pre", preselectedServiceId);
     if (preselectedServiceId) {
       const id = Number(preselectedServiceId); // Convert to number if needed
-      const serviceToSelect = services.find(service => service.id === id);
+      const serviceToSelect = services.find((service) => service.id === id);
       console.log(serviceToSelect);
       if (serviceToSelect) {
         setSelectedService(serviceToSelect);
@@ -77,7 +85,6 @@ const Service = ({ title, show, isBookingPage, onServiceSelect, date, preselecte
       }
     }
   }, [services, preselectedServiceId, onServiceSelect]);
-  
 
   const handleServiceSelect = (service) => {
     setSelectedService(service);
@@ -91,7 +98,7 @@ const Service = ({ title, show, isBookingPage, onServiceSelect, date, preselecte
   };
 
   return (
-    <section className="container items">
+    <section className="container items" id="services">
       <h1 className="fs-700 ff-serif text-center">{title}</h1>
       {loading && !isBookingPage ? (
         <div className="text-center">
@@ -100,9 +107,10 @@ const Service = ({ title, show, isBookingPage, onServiceSelect, date, preselecte
           </div>
         </div>
       ) : (
-        <div className="row">
+        <div className="row flex-items">
+          <Promo />
           {services.slice(0, show).map((service) => (
-            <div className="col-lg-4 col-md-6 col-sm-12 mb-4" key={service.id}>
+            <div className="cards col-lg-4 col-md-6 col-sm-12 mb-4 " key={service.id}>
               <div
                 style={{ width: "17rem", height: "24rem" }}
                 className={`card ${

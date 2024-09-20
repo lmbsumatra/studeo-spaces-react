@@ -15,7 +15,7 @@ const AdminServices = ({
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingBtn, setIsLoadingBtn] = useState(false);
+  const [loadingServiceIds, setLoadingServiceIds] = useState({});
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -78,7 +78,7 @@ const AdminServices = ({
     const newAvailability = availability === 1 ? 0 : 1; // Toggle the availability
 
     try {
-      setIsLoadingBtn(true);
+      setLoadingServiceIds((prev) => ({ ...prev, [id]: true }));
       const response = await fetch(
         `http://127.0.0.1:8000/api/services-availability/${id}`,
         {
@@ -92,7 +92,6 @@ const AdminServices = ({
 
       if (!response.ok) {
         throw new Error("Failed to update service availability");
-        toast.error("Error changing availability.");
       }
 
       // Update the state based on the new availability
@@ -109,7 +108,7 @@ const AdminServices = ({
       setError(error.message);
       toast.error("Error changing availability.");
     } finally {
-      setIsLoadingBtn(false);
+      setLoadingServiceIds((prev) => ({ ...prev, [id]: false }));
     }
   };
 
@@ -138,117 +137,110 @@ const AdminServices = ({
       ) : (
         <>
           {error && <p>Error: {error}</p>}
-          <>
-            <div className="row">
-              {services.slice(0, show).map((service) => (
+          <div className="row">
+            {services.slice(0, show).map((service) => (
+              <div
+                className="col-lg-4 col-md-6 col-sm-12 mb-4"
+                key={service.id}
+              >
                 <div
-                  className="col-lg-4 col-md-6 col-sm-12 mb-4"
-                  key={service.id}
+                  style={{ width: "17rem", height: "24rem" }}
+                  className={`card ${
+                    isBookingPage && selectedService === service.id
+                      ? "selected"
+                      : ""
+                  }`}
                 >
-                  <div
-                    style={{ width: "17rem", height: "24rem" }}
-                    className={`card ${
-                      isBookingPage && selectedService === service.id
-                        ? "selected"
-                        : ""
-                    }`}
-                  >
-                    <img
-                      src={service.images}
-                      className="card-img-top"
-                      alt={service.name}
-                    />
-                    <div className="card-body d-flex flex-column">
-                      <h5 className="card-title ff-serif">{service.name}</h5>
-                      <p className="card-text text-accent fs-300">
-                        {service.description}
-                      </p>
-                      <p className="card-text fs-500 text-clr-green">
-                        ₱ {service.price}
-                      </p>
-                      <div className="mt-auto d-flex justify-content-between">
-                        {isBookingPage ? (
-                          <>
-                            <input
-                              type="radio"
-                              className="btn-check"
-                              name="service"
-                              id={`service${service.id}`}
-                              autoComplete="off"
-                              onChange={() => handleServiceSelect(service)}
-                              disabled={service.count === 0}
-                            />
-                            <label
-                              className="btn btn-secondary-clr"
-                              htmlFor={`service${service.id}`}
-                            >
-                              {selectedService === service.id
-                                ? "Selected"
-                                : "Select"}
-                            </label>
-                            {!service.count && (
-                              <span className="text-danger">Unavailable</span>
-                            )}
-                          </>
+                  <img
+                    src={service.images}
+                    className="card-img-top"
+                    alt={service.name}
+                  />
+                  <div className="card-body d-flex flex-column">
+                    <h5 className="card-title ff-serif">{service.name}</h5>
+                    <p className="card-text text-accent fs-300">
+                      {service.description}
+                    </p>
+                    <p className="card-text fs-500 text-clr-green">
+                      ₱ {service.price}
+                    </p>
+                    <div className="mt-auto d-flex justify-content-between">
+                      {isBookingPage ? (
+                        <>
+                          <input
+                            type="radio"
+                            className="btn-check"
+                            name="service"
+                            id={`service${service.id}`}
+                            autoComplete="off"
+                            onChange={() => handleServiceSelect(service)}
+                            disabled={service.count === 0}
+                          />
+                          <label
+                            className="btn btn-secondary-clr"
+                            htmlFor={`service${service.id}`}
+                          >
+                            {selectedService === service.id
+                              ? "Selected"
+                              : "Select"}
+                          </label>
+                          {!service.count && (
+                            <span className="text-danger">Unavailable</span>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleEdit(service.id)}
+                            className="btn btn-primary"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="btn btn-danger"
+                            onClick={() => handleDelete(service.id)}
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                      <button
+                        className={`btn ${
+                          service.availability === 1 || service.availability > 0
+                            ? "btn-success"
+                            : "btn-outline-danger"
+                        }`}
+                        onClick={() =>
+                          handleToggleAvailability(
+                            service.id,
+                            service.availability
+                          )
+                        }
+                        disabled={loadingServiceIds[service.id]}
+                      >
+                        {loadingServiceIds[service.id] ? (
+                          <Spinner
+                            as="span"
+                            animation="border"
+                            size="sm"
+                            role="status"
+                            aria-hidden="true"
+                          />
                         ) : (
                           <>
-                            <button
-                              onClick={() => handleEdit(service.id)}
-                              className="btn btn-primary"
-                              disabled={isLoadingBtn}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              className="btn btn-danger"
-                              onClick={() => handleDelete(service.id)}
-                              disabled={isLoadingBtn}
-                            >
-                              Delete
-                            </button>
+                            {service.availability === 1 ||
+                            service.availability > 0
+                              ? "Available"
+                              : "Unavailable"}
                           </>
                         )}
-                        <button
-                          className={`btn ${
-                            service.availability === 1 ||
-                            service.availability > 0
-                              ? "btn-success"
-                              : "btn-outline-danger"
-                          }`}
-                          onClick={() =>
-                            handleToggleAvailability(
-                              service.id,
-                              service.availability
-                            )
-                          }
-                          disabled={isLoadingBtn}
-                        >
-                          {isLoadingBtn ? (
-                            <>
-                              <Spinner
-                                as="span"
-                                animation="border"
-                                size="sm"
-                                role="status"
-                                aria-hidden="true"
-                              />{" "}
-                            </>
-                          ) : (
-                            <>
-                              {service.availability === 1 ||
-                              service.availability > 0
-                                ? "Available"
-                                : "Unavailable"}
-                            </>
-                          )}
-                        </button>
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </>
+              </div>
+            ))}
+          </div>
         </>
       )}
     </section>

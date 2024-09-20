@@ -1,0 +1,16 @@
+.promo {
+  background-image: linear-gradient(
+      to left,
+      rgb(255, 155, 25),
+      rgba(117, 83, 19, 0.73)
+    ),
+    url("../../assets/images/services/img_1.png");
+  height: 200px;
+  width: 100%;
+  background-color: blue;
+  object-fit: fit;
+  border: none;
+}
+
+
+

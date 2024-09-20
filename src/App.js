@@ -7,6 +7,9 @@ import { ToastContainer, toast } from "react-toastify";
 import io from "socket.io-client";
 import "./App.css";
 import { NotificationProvider } from "../src/pages/context/notificationContext";
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
+
 
 import Header from "../src/components/header/Header"
 import Home from "./pages/HomeScreen";

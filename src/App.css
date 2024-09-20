@@ -232,6 +232,13 @@ select {
   padding: 0.5rem 1rem;
   display: inline-block;
 }
+.btn-secondary-clr:hover {
+  color: var(--clr-primary-hover);
+  background-color: #ffe5c8;
+  border: 1px solid var(--clr-primary-hover);
+  padding: 0.5rem 1rem;
+  display: inline-block;
+}
 
 .btn-check:hover + .btn-secondary-clr {
   color: #fff;
@@ -283,14 +290,6 @@ section {
 /* Child of sections and div */
 .items > * {
   margin-bottom: 40px;
-}
-
-/* For general purposes, flexing div */
-.flex-items {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
 }
 
 /* Card modification */
