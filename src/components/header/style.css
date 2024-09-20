@@ -67,6 +67,15 @@
   margin: 0;
   background-color: transparent;
   transition: background-color 0.05s ease;
+  position: relative; /* Allow positioning of children */
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  
 }
 
 .notification-popup {
@@ -155,12 +164,12 @@
 
 .notification-counter {
   position: absolute;
+  top: 0px; /* Adjust as necessary */
+  right: 2px; /* Adjust as necessary */
   color: white;
   background-color: red;
   font-size: 10px;
-  top: 12px;
-  right: 120px;
-  border-radius: 100%;
+  border-radius: 50%;
   width: 20px;
   height: 20px;
   display: flex;

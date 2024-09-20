@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
+import { toast } from "react-toastify";
+import { Spinner } from "react-bootstrap";
 
 const AdminServices = ({
   title,
@@ -13,6 +15,7 @@ const AdminServices = ({
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingBtn, setIsLoadingBtn] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -56,6 +59,7 @@ const AdminServices = ({
 
   const handleDelete = async (id) => {
     try {
+      const deletedService = id;
       const response = await fetch(`http://127.0.0.1:8000/api/services/${id}`, {
         method: "DELETE",
       });
@@ -63,8 +67,10 @@ const AdminServices = ({
         throw new Error("Failed to delete service");
       }
       setServices(services.filter((service) => service.id !== id));
+      toast.success(`Successfully deleted: service: ${deletedService}`);
     } catch (error) {
       setError(error.message);
+      toast.error("Error deleting service.");
     }
   };
 
@@ -72,6 +78,7 @@ const AdminServices = ({
     const newAvailability = availability === 1 ? 0 : 1; // Toggle the availability
 
     try {
+      setIsLoadingBtn(true);
       const response = await fetch(
         `http://127.0.0.1:8000/api/services-availability/${id}`,
         {
@@ -85,6 +92,7 @@ const AdminServices = ({
 
       if (!response.ok) {
         throw new Error("Failed to update service availability");
+        toast.error("Error changing availability.");
       }
 
       // Update the state based on the new availability
@@ -95,9 +103,20 @@ const AdminServices = ({
             : service
         );
       });
+
+      toast.success(`Successfully changed availability for ${id}.`);
     } catch (error) {
       setError(error.message);
+      toast.error("Error changing availability.");
+    } finally {
+      setIsLoadingBtn(false);
     }
+  };
+
+  const navigate = useNavigate();
+
+  const handleEdit = (id) => {
+    navigate(`/admin/edit-service/${id}`);
   };
 
   return (
@@ -173,15 +192,17 @@ const AdminServices = ({
                           </>
                         ) : (
                           <>
-                            <Link
-                              to={`/admin/edit-service/${service.id}`}
+                            <button
+                              onClick={() => handleEdit(service.id)}
                               className="btn btn-primary"
+                              disabled={isLoadingBtn}
                             >
                               Edit
-                            </Link>
+                            </button>
                             <button
                               className="btn btn-danger"
                               onClick={() => handleDelete(service.id)}
+                              disabled={isLoadingBtn}
                             >
                               Delete
                             </button>
@@ -200,11 +221,26 @@ const AdminServices = ({
                               service.availability
                             )
                           }
+                          disabled={isLoadingBtn}
                         >
-                          {service.availability === 1 ||
-                          service.availability > 0
-                            ? "Available"
-                            : "Unavailable"}
+                          {isLoadingBtn ? (
+                            <>
+                              <Spinner
+                                as="span"
+                                animation="border"
+                                size="sm"
+                                role="status"
+                                aria-hidden="true"
+                              />{" "}
+                            </>
+                          ) : (
+                            <>
+                              {service.availability === 1 ||
+                              service.availability > 0
+                                ? "Available"
+                                : "Unavailable"}
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
