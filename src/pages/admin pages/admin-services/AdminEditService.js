@@ -74,50 +74,41 @@ const AdminEditService = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-        return;
+      return;
     }
+    
     try {
-        setLoading(true);
-        const response = await fetch(`http://127.0.0.1:8000/api/services/${id}`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                ...formData,
-                availability: formData.availability ? 1 : 0, // Convert boolean to 1 or 0
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to update service");
-        }
-
-        // Update available seats
-        const availableSeatsResponse = await fetch(`http://127.0.0.1:8000/api/services/${id}/available-seats`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                available_seats: formData.count,
-            }),
-        });
-
-        if (!availableSeatsResponse.ok) {
-            throw new Error("Failed to update available seats");
-        }
-
-        toast.success(`Success! ${formData.name} is updated.`);
-        navigate("/admin/services");
+      setLoading(true);
+      const response = await fetch(`http://127.0.0.1:8000/api/services/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          duration: formData.duration,
+          price: formData.price,
+          images: formData.images,
+          description: formData.description,
+          count: formData.count,
+          availability: formData.availability ? 1 : 0,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to update service");
+      }
+      
+      toast.success(`Success! ${formData.name} is updated.`);
+      navigate("/admin/services");
     } catch (error) {
-        toast.error(`Error! ${error.message}`);
-        setError({ general: error.message });
+      toast.error(`Error! ${error}`);
+      setError({ general: error.message });
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
-
+  };
+  
 
   return (
     <div className="container items mt-5">

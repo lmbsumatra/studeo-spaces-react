@@ -81,7 +81,11 @@ const Service = ({
   };
 
   const renderServiceCard = (service) => {
-    const isAvailable = availableSeats[service.id] > 0;
+    const isAvailable = !(
+      (availableSeats[service.id] > 0 && service.availability === 0) ||
+      availableSeats[service.id] === 0
+    );
+
     return (
       <div className="cards col-lg-4 col-md-6 col-sm-12 mb-4" key={service.id}>
         <Tooltip
@@ -146,7 +150,8 @@ const Service = ({
                       !isAvailable ? "disabled" : ""
                     }`}
                   >
-                    {!isAvailable ? "Unavailable" : "Book"}
+                    {" "}
+                    <>{!isAvailable ? "Unavailable" : "Book"}</>
                   </button>
                 )}
               </div>

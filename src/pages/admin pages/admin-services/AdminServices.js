@@ -30,6 +30,7 @@ const AdminServices = ({
         }
         const data = await response.json();
         setServices(data);
+        
 
         // Fetch available seats from the new endpoint
         const seatsResponse = await fetch(
@@ -83,11 +84,12 @@ const AdminServices = ({
   };
 
   const handleToggleAvailability = async (id, currentAvailability) => {
+    console.log(currentAvailability)
     const newAvailability = currentAvailability >= 1 ? 0 : 1; // Toggle the availability
-  
+
     try {
       setLoadingServiceIds((prev) => ({ ...prev, [id]: true }));
-  
+
       // Optimistically update the state immediately
       setServices((prevServices) =>
         prevServices.map((service) =>
@@ -96,7 +98,7 @@ const AdminServices = ({
             : service
         )
       );
-  
+
       const response = await fetch(
         `http://127.0.0.1:8000/api/services-availability/${id}`,
         {
@@ -107,25 +109,25 @@ const AdminServices = ({
           body: JSON.stringify({ availability: newAvailability }),
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Failed to update service availability");
       }
-  
+
       // After successfully updating, refetch available seats
       const seatsResponse = await fetch(`http://127.0.0.1:8000/api/available`);
       if (!seatsResponse.ok) {
         throw new Error("Failed to fetch available seats");
       }
       const seatsData = await seatsResponse.json();
-  
+
       // Update available seats state
       const availableSeatsMap = {};
       seatsData.forEach((item) => {
         availableSeatsMap[item.service_id] = item.available_seats;
       });
       setAvailableSeats(availableSeatsMap);
-  
+
       toast.success(`Successfully changed availability for ${id}.`);
     } catch (error) {
       setError(error.message);
@@ -142,7 +144,6 @@ const AdminServices = ({
       setLoadingServiceIds((prev) => ({ ...prev, [id]: false }));
     }
   };
-  
 
   const navigate = useNavigate();
 
@@ -236,7 +237,7 @@ const AdminServices = ({
                       )}
                       <button
                         className={`btn ${
-                          availableSeats[service.id] === 0
+                          service.availability === 0
                             ? "btn-outline-danger "
                             : "btn-success"
                         }`}
@@ -258,7 +259,7 @@ const AdminServices = ({
                           />
                         ) : (
                           <>
-                            {availableSeats[service.id] === 0
+                            {service.availability === 0
                               ? "Unavailable"
                               : "Available"}
                           </>
