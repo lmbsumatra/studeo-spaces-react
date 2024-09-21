@@ -5,7 +5,6 @@ import "./style.css";
 import Promo from "../promo/Promo";
 import Tooltip from "@mui/material/Tooltip";
 
-
 const Service = ({
   title,
   show,
@@ -40,10 +39,13 @@ const Service = ({
         const servicesData = await serviceResponse.json();
         const seatsData = await seatsResponse.json();
 
-        const availableSeatsMap = seatsData.reduce((acc, { service_id, available_seats }) => {
-          acc[service_id] = available_seats;
-          return acc;
-        }, {});
+        const availableSeatsMap = seatsData.reduce(
+          (acc, { service_id, available_seats }) => {
+            acc[service_id] = available_seats;
+            return acc;
+          },
+          {}
+        );
 
         setServices(servicesData);
         setAvailableSeats(availableSeatsMap);
@@ -59,7 +61,9 @@ const Service = ({
 
   useEffect(() => {
     if (preselectedServiceId) {
-      const serviceToSelect = services.find(service => service.id === Number(preselectedServiceId));
+      const serviceToSelect = services.find(
+        (service) => service.id === Number(preselectedServiceId)
+      );
       if (serviceToSelect) {
         setSelectedService(serviceToSelect);
         onServiceSelect?.(serviceToSelect);
@@ -81,16 +85,35 @@ const Service = ({
     return (
       <div className="cards col-lg-4 col-md-6 col-sm-12 mb-4" key={service.id}>
         <Tooltip
-          title={isAvailable ? `Available Seats: ${availableSeats[service.id]}` : "This is unavailable."}
+          title={
+            isAvailable
+              ? `Available Seats: ${availableSeats[service.id]}`
+              : "This is unavailable."
+          }
           style={{ backgroundColor: "rgb(0, 255, 30)", color: "#222" }}
           followCursor
         >
-          <div className={`card ${isBookingPage && selectedService?.id === service.id ? "selected" : ""}`} style={{ width: "17rem", height: "24rem" }}>
-            <img src={service.images} className="card-img-top" alt={service.name} />
+          <div
+            className={`card ${
+              isBookingPage && selectedService?.id === service.id
+                ? "selected"
+                : ""
+            }`}
+            style={{ width: "17rem", height: "24rem" }}
+          >
+            <img
+              src={service.images}
+              className="card-img-top"
+              alt={service.name}
+            />
             <div className="card-body d-flex flex-column">
               <h5 className="card-title ff-serif">{service.name}</h5>
-              <p className="card-text text-accent fs-300">{service.description}</p>
-              <p className="card-text fs-500 text-clr-green">₱ {service.price}</p>
+              <p className="card-text text-accent fs-300">
+                {service.description}
+              </p>
+              <p className="card-text fs-500 text-clr-green">
+                ₱ {service.price}
+              </p>
               <div className="mt-auto">
                 {isBookingPage ? (
                   <>
@@ -104,16 +127,24 @@ const Service = ({
                       checked={selectedService?.id === service.id}
                     />
                     <label
-                      className={`btn ${!isAvailable ? "disabled" : "btn-secondary-clr"}`}
+                      className={`btn ${
+                        !isAvailable ? "disabled" : "btn-secondary-clr"
+                      }`}
                       htmlFor={`service${service.id}`}
                     >
-                      {selectedService?.id === service.id ? "Selected" : !isAvailable ? "Unavailable" : "Select"}
+                      {selectedService?.id === service.id
+                        ? "Selected"
+                        : !isAvailable
+                        ? "Unavailable"
+                        : "Select"}
                     </label>
                   </>
                 ) : (
                   <button
                     onClick={() => handleBookClick(service.id)}
-                    className={`btn btn-primary-clr ${!isAvailable ? "disabled" : ""}`}
+                    className={`btn btn-primary-clr ${
+                      !isAvailable ? "disabled" : ""
+                    }`}
                   >
                     {!isAvailable ? "Unavailable" : "Book"}
                   </button>
@@ -137,7 +168,6 @@ const Service = ({
         </div>
       ) : (
         <div className="row flex-items">
-          {date}
           {!isBookingPage && <Promo />}
           {isBookingPage && !currentDate ? (
             <p>Please select a date to view services.</p>

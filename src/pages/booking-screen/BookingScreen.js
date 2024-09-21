@@ -24,10 +24,10 @@ const Book = () => {
   const serviceId = location.state;
 
   useEffect(() => {
-    console.log(serviceId);
     if (serviceId) {
       const now = new Date();
-      setCurrentDate(now.toISOString().split("T")[0]);
+      setCurrentDate(now.toLocaleDateString("en-CA"));
+
       setTime(
         now.toLocaleTimeString("en-US", {
           hour: "2-digit",
@@ -35,28 +35,53 @@ const Book = () => {
           hour12: false,
         })
       );
-      setSelectedService(serviceId);
-    } else {
-      setSelectedService("");
-    }
-  }, [serviceId, selectedService]);
 
-  const resetForm = () => {
-    setSelectedService(null);
-    setCurrentDate("");
-    setTime("");
-  };
+      // Fetch service details here
+      const fetchServiceDetails = async () => {
+        try {
+          const response = await axios.get(
+            `http://127.0.0.1:8000/api/services/${serviceId}`
+          );
+          setSelectedService(response.data);
+        } catch (error) {
+          console.error("Error fetching service details:", error);
+          setSelectedService(null);
+        }
+      };
+
+      fetchServiceDetails();
+    } else {
+      setSelectedService(null);
+    }
+  }, [serviceId]);
 
   const handleBookNowClick = async () => {
-    if (
-      !selectedService ||
-      !currentDate ||
-      !time ||
-      !name ||
-      !email ||
-      !contactNumber ||
-      !paymentMethod
-    ) {
+    const missingFields = [];
+
+    if (!selectedService || !selectedService.id) {
+      missingFields.push("Service");
+    }
+    if (!currentDate) {
+      missingFields.push("Date");
+    }
+    if (!time) {
+      missingFields.push("Time");
+    }
+    if (!name || name.trim() === "") {
+      missingFields.push("Name");
+    }
+    if (!email || email.trim() === "") {
+      missingFields.push("Email");
+    }
+    if (!contactNumber || contactNumber.trim() === "") {
+      missingFields.push("Contact Number");
+    }
+    if (!paymentMethod || paymentMethod.trim() === "") {
+      missingFields.push("Payment Method");
+    }
+
+    if (missingFields.length > 0) {
+      console.log("Missing fields:", missingFields.join(", "));
       alert("Please fill in all required fields.");
       return;
     }
@@ -75,6 +100,7 @@ const Book = () => {
 
     setLoading(true);
     try {
+      console.log(bookingDetails.currentDate);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       navigate("/confirmation", { state: bookingDetails });
     } catch (error) {
@@ -122,6 +148,7 @@ const Book = () => {
 
   const handleServiceSelect = (service) => {
     navigate(`/booking?serviceId=${service.id}`);
+    console.log(selectedService);
     setSelectedService(service);
   };
 

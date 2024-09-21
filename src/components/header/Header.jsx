@@ -17,7 +17,7 @@ const Header = () => {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const socket = io("http://localhost:3003"); // Adjust your socket server URL
+  const socket = io("http://localhost:3002"); // Adjust your socket server URL
 
   const isAdminPath = location.pathname.startsWith("/admin");
 

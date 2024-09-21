@@ -42,6 +42,7 @@ const Payment = () => {
     const bookingDetailsWithRef = {
       ...location.state,
       refNumber: referenceNumber,
+      date: location.state.currentDate, // Using currentDate from location.state
     };
 
     const notificationData = {
@@ -55,6 +56,9 @@ const Payment = () => {
     try {
       setLoading(true);
 
+      console.log(bookingDetailsWithRef);
+
+      // Make the POST request for booking
       const response = await axios.post(
         "http://127.0.0.1:8000/api/bookings",
         bookingDetailsWithRef
@@ -67,13 +71,18 @@ const Payment = () => {
 
       const { customerID } = response.data;
       toast.success("Your booking has been successful!");
-      socket.emit("Notification", {message: "A customer has booked."});
+
+      // Ensure socket is connected before emitting
+      if (socket) {
+        socket.emit("Notification", { message: "A customer has booked." });
+      }
+
       navigate("/booking-successful", {
         state: { ...bookingDetailsWithRef, customerID },
       });
     } catch (error) {
       console.error("There was an error creating the booking!", error);
-      toast.error("Booking Failed. Please try again.");
+      toast.error("Booking failed. Please try again.");
       navigate("/booking", { state: location.state });
     } finally {
       setLoading(false);
@@ -93,7 +102,7 @@ const Payment = () => {
   const {
     service_id,
     price,
-    date,
+    currentDate,
     time,
     name,
     email,
