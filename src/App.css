@@ -227,14 +227,13 @@ select {
 
 .btn-secondary-clr {
   color: var(--clr-primary);
-  background-color: #fff;
+  background-color: none;
   border: 1px solid var(--clr-primary);
   padding: 0.4rem 1rem;
   display: inline-block;
 }
 .btn-secondary-clr:hover {
   color: var(--clr-primary-hover);
-  background-color: #ffe5c8;
   border: 1px solid var(--clr-primary-hover);
   display: inline-block;
 }

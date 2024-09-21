@@ -3,15 +3,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Footer from "../../components/Footer";
 import Service from "../../components/services/Service";
-import Spinner from "react-bootstrap/Spinner"; // Import Spinner component
+import Spinner from "react-bootstrap/Spinner";
 import { toast } from "react-toastify";
 import "./style.css";
 import Promo from "../../components/promo/Promo";
 
 const Book = () => {
-  // State declarations
   const [selectedService, setSelectedService] = useState(null);
-  const [date, setDate] = useState("");
+  const [currentDate, setCurrentDate] = useState("");
   const [time, setTime] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -19,19 +18,16 @@ const Book = () => {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
   const [customerID, setCustomerID] = useState("");
-  const [loading, setLoading] = useState(false); // Loading state
-
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const location = useLocation();
-  // Extract URL parameters
-  const queryParams = new URLSearchParams(location.search);
-  const serviceId = queryParams.get("serviceId");
+  const navigate = useNavigate();
+  const serviceId = location.state;
 
   useEffect(() => {
-    // Set initial date and time if serviceId is present
+    console.log(serviceId);
     if (serviceId) {
       const now = new Date();
-      setDate(now.toISOString().split("T")[0]); // YYYY-MM-DD
+      setCurrentDate(now.toISOString().split("T")[0]);
       setTime(
         now.toLocaleTimeString("en-US", {
           hour: "2-digit",
@@ -39,18 +35,22 @@ const Book = () => {
           hour12: false,
         })
       );
-
-      // Set selected service for auto-selection
       setSelectedService(serviceId);
+    } else {
+      setSelectedService("");
     }
-  }, [location.search]);
+  }, [serviceId, selectedService]);
 
-  // Event handler for booking
+  const resetForm = () => {
+    setSelectedService(null);
+    setCurrentDate("");
+    setTime("");
+  };
+
   const handleBookNowClick = async () => {
-    // Check if all required fields are filled
     if (
       !selectedService ||
-      !date ||
+      !currentDate ||
       !time ||
       !name ||
       !email ||
@@ -61,65 +61,54 @@ const Book = () => {
       return;
     }
 
-    // Prepare booking details
     const bookingDetails = {
       service_id: selectedService.id,
       price: selectedService.price,
-      date,
+      currentDate,
       time,
       name,
       email,
       contact_number: contactNumber,
       payment_method: paymentMethod,
-      customerID: customerID,
+      customerID,
     };
 
-    setLoading(true); // Set loading to true
-
+    setLoading(true);
     try {
-      // Simulate a delay to show loading spinner (remove in production)
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
       navigate("/confirmation", { state: bookingDetails });
     } catch (error) {
       console.error("Error booking:", error);
       alert("Error booking. Please try again.");
     } finally {
-      setLoading(false); // Set loading to false
+      setLoading(false);
     }
   };
 
-  // Event handler for checking bookings
   const handleCheckBookingClick = async () => {
-    setLoading(true); // Set loading to true
-
+    setLoading(true);
     try {
       const response = await axios.get(
         `http://127.0.0.1:8000/api/bookings/${referenceNumber}`
       );
-      if (response.data.message) {
-        alert(response.data.message);
-      } else {
-        navigate("/booking-details", { state: { referenceNumber } });
-      }
+      response.data.message
+        ? alert(response.data.message)
+        : navigate("/booking-details", { state: { referenceNumber } });
     } catch (error) {
       console.error("Error checking booking:", error);
       toast.error("Error: Invalid Booking Id");
     } finally {
-      setLoading(false); // Set loading to false
+      setLoading(false);
     }
   };
 
-  // Event handler for using customer ID
   const handleUseCustomerID = async (e) => {
     e.preventDefault();
-    setLoading(true); // Set loading to true
-
+    setLoading(true);
     try {
-      const response = await axios.get(
+      const { data: customer } = await axios.get(
         `http://127.0.0.1:8000/api/customers/${customerID}`
       );
-      const customer = response.data;
       setName(customer.name);
       setEmail(customer.email);
       setContactNumber(customer.contact_number);
@@ -127,13 +116,12 @@ const Book = () => {
       console.error("Customer ID not found:", error);
       toast.error("Customer ID not found");
     } finally {
-      setLoading(false); // Set loading to false
+      setLoading(false);
     }
   };
 
-  // Callback function to handle service selection
   const handleServiceSelect = (service) => {
-    navigate(`/booking`);
+    navigate(`/booking?serviceId=${service.id}`);
     setSelectedService(service);
   };
 
@@ -142,138 +130,78 @@ const Book = () => {
       <section className="container items">
         <h1 className="fs-700 ff-serif text-center">Booking</h1>
         <hr />
-        {/* Select date */}
         <div className="container">
           <h2 className="fs-600 ff-serif">Select Day</h2>
           <input
             type="date"
-            name="date"
-            id="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
+            value={currentDate}
+            onChange={(e) => setCurrentDate(e.target.value)}
           />
         </div>
         <hr />
-        {/* Select Time */}
         <div className="container">
           <h2 className="fs-600 ff-serif">Select Time</h2>
           <input
             type="time"
-            name="time"
-            id="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
           />
         </div>
         <hr />
-        {/* Select service */}
         <Service
           title="Select Services"
           isBookingPage={true}
           onServiceSelect={handleServiceSelect}
-          date={date}
-          preselectedServiceId={serviceId} // Pass preselected service ID
+          currentDate={currentDate}
+          preselectedServiceId={serviceId}
         />
         <hr />
-        {/* Fill out information */}
         <div className="container">
           <h2 className="fs-600 ff-serif">Fill up Information</h2>
           <div className="row">
             <div className="col-md-6">
-              <form action="#" method="POST">
-                <div className="mb-3">
-                  <label htmlFor="exampleInputName" className="form-label">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="exampleInputName"
-                    placeholder="Enter your name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="exampleInputEmail1" className="form-label">
-                    Email address
-                  </label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="exampleInputEmail1"
-                    aria-describedby="emailHelp"
-                    placeholder="Enter email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label
-                    htmlFor="exampleInputContactNumber"
-                    className="form-label"
-                  >
-                    Contact Number
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="exampleInputContactNumber"
-                    placeholder="Enter contact number"
-                    value={contactNumber}
-                    onChange={(e) => setContactNumber(e.target.value)}
-                    required
-                  />
-                </div>
+              <form>
+                {renderInput("Name", "text", name, setName, "Enter your name")}
+                {renderInput(
+                  "Email address",
+                  "email",
+                  email,
+                  setEmail,
+                  "Enter email"
+                )}
+                {renderInput(
+                  "Contact Number",
+                  "text",
+                  contactNumber,
+                  setContactNumber,
+                  "Enter contact number"
+                )}
               </form>
             </div>
             <div className="panel-2 col-md-6">
               <div className="card">
-                <h1 className="pb-3">
-                  Have you got 15 day pass?
-                </h1>
+                <h1 className="pb-3">Have you got a 15-day pass?</h1>
                 <div>
-                <button className="btn btn-primary-clr">Use</button>
-                <button className="btn btn-secondary-clr">Learn more</button>
+                  <button className="btn btn-primary-clr">Use</button>
+                  <button className="btn btn-secondary-clr">Learn more</button>
                 </div>
-                
               </div>
               <form onSubmit={handleUseCustomerID}>
-                <div className="mb-3">
-                  <label htmlFor="customerID" className="form-label">
-                    Use your Customer ID?
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="customerID"
-                    placeholder="Enter Customer ID"
-                    value={customerID}
-                    onChange={(e) => setCustomerID(e.target.value)}
-                  />
-                </div>
+                {renderInput(
+                  "Use your Customer ID?",
+                  "text",
+                  customerID,
+                  setCustomerID,
+                  "Enter Customer ID",
+                  false
+                )}
                 <div className="text-center">
                   <button
                     type="submit"
                     className="btn btn-primary-clr"
                     disabled={loading}
                   >
-                    {loading ? (
-                      <>
-                        <Spinner
-                          as="span"
-                          animation="border"
-                          size="sm"
-                          role="status"
-                          aria-hidden="true"
-                        />{" "}
-                        Loading...
-                      </>
-                    ) : (
-                      "Submit"
-                    )}
+                    {loading ? <LoadingSpinner text="Loading..." /> : "Submit"}
                   </button>
                 </div>
               </form>
@@ -281,51 +209,27 @@ const Book = () => {
           </div>
         </div>
         <hr />
-        {/* Select Payment Method */}
         <div className="container">
           <h2 className="fs-600 ff-serif">Select Payment Method</h2>
-          <div>
-            <input
-              type="radio"
-              className="btn-check"
-              name="paymentMethod"
-              id="bankCard"
-              autoComplete="off"
-              value="Bank Card"
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            />
-            <label className="btn btn-secondary-clr mb-2" htmlFor="bankCard">
-              Bank Card
-            </label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              className="btn-check"
-              name="paymentMethod"
-              id="gcash"
-              autoComplete="off"
-              value="GCash"
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            />
-            <label className="btn btn-secondary-clr mb-2" htmlFor="gcash">
-              GCash
-            </label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              className="btn-check"
-              name="paymentMethod"
-              id="handOn"
-              autoComplete="off"
-              value="Pay on Counter"
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            />
-            <label className="btn btn-secondary-clr" htmlFor="handOn">
-              Pay on Counter
-            </label>
-          </div>
+          {["Bank Card", "GCash", "Pay on Counter"].map((method) => (
+            <div key={method}>
+              <input
+                type="radio"
+                className="btn-check"
+                name="paymentMethod"
+                id={method.replace(" ", "").toLowerCase()}
+                autoComplete="off"
+                value={method}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              />
+              <label
+                className="btn btn-secondary-clr mb-2"
+                htmlFor={method.replace(" ", "").toLowerCase()}
+              >
+                {method}
+              </label>
+            </div>
+          ))}
         </div>
         <div className="container text-center">
           <button
@@ -333,25 +237,11 @@ const Book = () => {
             onClick={handleBookNowClick}
             disabled={loading}
           >
-            {loading ? (
-              <>
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
-                />{" "}
-                Processing...
-              </>
-            ) : (
-              "Book Now!"
-            )}
+            {loading ? <LoadingSpinner text="Processing..." /> : "Book Now!"}
           </button>
         </div>
       </section>
       <hr />
-      {/* Reference Number Section */}
       <div className="container items">
         <h1 className="fs-700 ff-serif text-center">Check Booking</h1>
         <div className="container">
@@ -375,20 +265,7 @@ const Book = () => {
             onClick={handleCheckBookingClick}
             disabled={loading}
           >
-            {loading ? (
-              <>
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
-                />{" "}
-                Checking...
-              </>
-            ) : (
-              "Check Booking"
-            )}
+            {loading ? <LoadingSpinner text="Checking..." /> : "Check Booking"}
           </button>
         </div>
       </div>
@@ -396,5 +273,39 @@ const Book = () => {
     </div>
   );
 };
+
+const renderInput = (
+  label,
+  type,
+  value,
+  onChange,
+  placeholder,
+  required = true
+) => (
+  <div className="mb-3">
+    <label className="form-label">{label}</label>
+    <input
+      type={type}
+      className="form-control"
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      required={required}
+    />
+  </div>
+);
+
+const LoadingSpinner = ({ text }) => (
+  <>
+    <Spinner
+      as="span"
+      animation="border"
+      size="sm"
+      role="status"
+      aria-hidden="true"
+    />{" "}
+    {text}
+  </>
+);
 
 export default Book;

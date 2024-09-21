@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css"; // Import styles
 
 const AdminDashboard = () => {
   const [isLoading, setLoading] = useState(true);
-  // Subtract one day from the current date
-  const initialDate = new Date();
-  initialDate.setDate(initialDate.getDate() + 1);
-
-  const [date, setDate] = useState(initialDate.toISOString().split("T")[0]); // Initialize date as a string
+  const [date, setDate] = useState(new Date()); // Use a Date object
   const [data, setData] = useState({
     availableSeats: 0,
     bookedSeats: 0,
@@ -18,7 +16,7 @@ const AdminDashboard = () => {
   });
 
   useEffect(() => {
-    fetchData(date);
+    fetchData(date.toISOString().split("T")[0]); // Fetch data using the formatted date
   }, [date]);
 
   const fetchData = (selectedDate) => {
@@ -33,35 +31,28 @@ const AdminDashboard = () => {
       .catch((error) => {
         console.error("There was an error fetching the data!", error);
       })
-      .finally(setLoading(false));
+      .finally(() => setLoading(false)); // Make sure to call setLoading in a function
   };
 
   return (
     <div className="container mt-5" id="dashboard">
       <h1 className="mb-4">Admin Dashboard</h1>
+      <div className="container mb-2">
+        <h2 className="fs-600 ff-serif">Select Day</h2>
+      </div>
+      <Calendar
+        onChange={setDate}
+        value={date}
+        className="calendar" // Add any custom classes for styling
+      />
       {isLoading ? (
-        <>
-          <p>
-            <div className="text-center">
-              <div className="spinner-border" role="status">
-                <span className="sr-only">Loading...</span>
-              </div>
-            </div>
-          </p>
-        </>
+        <div className="text-center">
+          <div className="spinner-border" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
+        </div>
       ) : (
         <>
-          <div className="container mb-2">
-            <h2 className="fs-600 ff-serif">Select Day</h2>
-            <input
-              type="date"
-              name="date"
-              id="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)} // Correctly handle string value
-            />
-          </div>
-
           <div className="row">
             <div className="col-md-4 mb-4">
               <div className="card text-white bg-primary h-100">
