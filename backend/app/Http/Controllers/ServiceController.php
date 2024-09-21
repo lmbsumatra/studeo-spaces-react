@@ -52,24 +52,58 @@ class ServiceController extends Controller
     {
         $date = $request->query('date');
 
-        // Fetch services with available_seats information for the selected date, excluding those with availability 0 in services table
-        $services = Service::leftJoin('service_availability', function ($join) use ($date) {
-            $join->on('services.id', '=', 'service_availability.service_id')
-                ->where('service_availability.date', '=', $date);
+        // Fetch services and calculate bookings count for the selected date
+        $services = Service::leftJoin('bookings', function ($join) use ($date) {
+            $join->on('services.id', '=', 'bookings.service_id')
+                ->where('bookings.date', '=', $date);
         })
-            ->where('services.availability', '>', 0) // Exclude services with availability 0
-            ->where(function ($query) {
-                $query->whereNull('service_availability.service_id')
-                    ->orWhere(function ($query) {
-                        $query->where('service_availability.available_seats', '>', 0);
-                    });
-            })
-            ->select('services.*', 'service_availability.available_seats')
+            ->select('services.id', 'services.name', 'services.count') // Select relevant fields
+            ->selectRaw('COUNT(bookings.id) as bookings_count') // Count the number of bookings
+            ->groupBy('services.id', 'services.name', 'services.count') // Group by necessary columns
             ->get();
 
-        return response()->json($services);
+        $result = $services->map(function ($service) {
+            // Assuming 'default_count' holds the total available count for each service
+            $availableSeats = $service->count ?? 0; // Default available count
+            $bookingsCount = $service->bookings_count ?? 0; // Count of bookings for the date
+
+            // Calculate available seats
+            $finalAvailableSeats = max($availableSeats - $bookingsCount, 0); // Ensure non-negative value
+
+            return [
+                'service_id' => $service->id,
+                'available_seats' => $finalAvailableSeats,
+            ];
+        });
+
+        return response()->json($result);
     }
 
+
+
+    public function updateAvailableSeats(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'available_seats' => 'required|integer|min:0',
+        ]);
+
+        $availability = ServiceAvailability::where('service_id', $id)
+            ->where('date', Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d')) // Use today's date
+            ->first();
+
+        if ($availability) {
+            $availability->update(['available_seats' => $validatedData['available_seats']]);
+        } else {
+            // If no entry exists, you might want to create one or handle this case as needed
+            ServiceAvailability::create([
+                'service_id' => $id,
+                'date' => Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d'),
+                'available_seats' => $validatedData['available_seats'],
+            ]);
+        }
+
+        return response()->json(['message' => 'Available seats updated successfully'], 200);
+    }
 
 
     public function create(Request $request)
@@ -149,13 +183,13 @@ class ServiceController extends Controller
 
 
         // Debugging
-       // echo "Current Date: $currentDate"; // Output current date for debugging
+        // echo "Current Date: $currentDate"; // Output current date for debugging
 
         // Query for available seats for today's date
         $availability = ServiceAvailability::where('date', $currentDate)->get();
 
         // Debugging
-       // echo "Availability: " . json_encode($availability); // Output availability for debugging
+        // echo "Availability: " . json_encode($availability); // Output availability for debugging
 
         // Return response as JSON
         return response()->json($availability);

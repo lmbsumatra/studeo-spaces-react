@@ -13,6 +13,7 @@ const AdminServices = ({
   date,
 }) => {
   const [services, setServices] = useState([]);
+  const [availableSeats, setAvailableSeats] = useState({});
   const [selectedService, setSelectedService] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingServiceIds, setLoadingServiceIds] = useState({});
@@ -23,21 +24,28 @@ const AdminServices = ({
       setIsLoading(true);
       setError(null);
       try {
-        let response;
-        if (isBookingPage) {
-          response = await fetch(
-            `http://127.0.0.1:8000/api/available?date=${date}`
-          );
-        } else {
-          response = await fetch(`http://127.0.0.1:8000/api/services`);
-        }
-
+        const response = await fetch(`http://127.0.0.1:8000/api/services`);
         if (!response.ok) {
           throw new Error("Failed to fetch services");
         }
-
         const data = await response.json();
         setServices(data);
+
+        // Fetch available seats from the new endpoint
+        const seatsResponse = await fetch(
+          `http://127.0.0.1:8000/api/available`
+        );
+        if (!seatsResponse.ok) {
+          throw new Error("Failed to fetch available seats");
+        }
+        const seatsData = await seatsResponse.json();
+
+        // Transform available seats data into an object
+        const availableSeatsMap = {};
+        seatsData.forEach((item) => {
+          availableSeatsMap[item.service_id] = item.available_seats;
+        });
+        setAvailableSeats(availableSeatsMap);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -74,11 +82,21 @@ const AdminServices = ({
     }
   };
 
-  const handleToggleAvailability = async (id, availability) => {
-    const newAvailability = availability === 1 ? 0 : 1; // Toggle the availability
-
+  const handleToggleAvailability = async (id, currentAvailability) => {
+    const newAvailability = currentAvailability >= 1 ? 0 : 1; // Toggle the availability
+  
     try {
       setLoadingServiceIds((prev) => ({ ...prev, [id]: true }));
+  
+      // Optimistically update the state immediately
+      setServices((prevServices) =>
+        prevServices.map((service) =>
+          service.id === id
+            ? { ...service, availability: newAvailability }
+            : service
+        )
+      );
+  
       const response = await fetch(
         `http://127.0.0.1:8000/api/services-availability/${id}`,
         {
@@ -86,31 +104,45 @@ const AdminServices = ({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ availability: newAvailability }), // Send the new availability value
+          body: JSON.stringify({ availability: newAvailability }),
         }
       );
-
+  
       if (!response.ok) {
         throw new Error("Failed to update service availability");
       }
-
-      // Update the state based on the new availability
-      setServices((prevServices) => {
-        return prevServices.map((service) =>
-          service.id === id
-            ? { ...service, availability: newAvailability }
-            : service
-        );
+  
+      // After successfully updating, refetch available seats
+      const seatsResponse = await fetch(`http://127.0.0.1:8000/api/available`);
+      if (!seatsResponse.ok) {
+        throw new Error("Failed to fetch available seats");
+      }
+      const seatsData = await seatsResponse.json();
+  
+      // Update available seats state
+      const availableSeatsMap = {};
+      seatsData.forEach((item) => {
+        availableSeatsMap[item.service_id] = item.available_seats;
       });
-
+      setAvailableSeats(availableSeatsMap);
+  
       toast.success(`Successfully changed availability for ${id}.`);
     } catch (error) {
       setError(error.message);
       toast.error("Error changing availability.");
+      // Revert optimistic update on error
+      setServices((prevServices) =>
+        prevServices.map((service) =>
+          service.id === id
+            ? { ...service, availability: currentAvailability }
+            : service
+        )
+      );
     } finally {
       setLoadingServiceIds((prev) => ({ ...prev, [id]: false }));
     }
   };
+  
 
   const navigate = useNavigate();
 
@@ -127,13 +159,11 @@ const AdminServices = ({
         </Link>
       </div>
       {isLoading ? (
-        <p>
-          <div className="text-center">
-            <div className="spinner-border" role="status">
-              <span className="sr-only">Loading...</span>
-            </div>
+        <div className="text-center">
+          <div className="spinner-border" role="status">
+            <span className="sr-only">Loading...</span>
           </div>
-        </p>
+        </div>
       ) : (
         <>
           {error && <p>Error: {error}</p>}
@@ -174,7 +204,7 @@ const AdminServices = ({
                             id={`service${service.id}`}
                             autoComplete="off"
                             onChange={() => handleServiceSelect(service)}
-                            disabled={service.count === 0}
+                            disabled={availableSeats[service.id] === 0}
                           />
                           <label
                             className="btn btn-secondary-clr"
@@ -184,7 +214,7 @@ const AdminServices = ({
                               ? "Selected"
                               : "Select"}
                           </label>
-                          {!service.count && (
+                          {availableSeats[service.id] === 0 && (
                             <span className="text-danger">Unavailable</span>
                           )}
                         </>
@@ -206,9 +236,9 @@ const AdminServices = ({
                       )}
                       <button
                         className={`btn ${
-                          service.availability === 1 || service.availability > 0
-                            ? "btn-success"
-                            : "btn-outline-danger"
+                          availableSeats[service.id] === 0
+                            ? "btn-outline-danger "
+                            : "btn-success"
                         }`}
                         onClick={() =>
                           handleToggleAvailability(
@@ -228,10 +258,9 @@ const AdminServices = ({
                           />
                         ) : (
                           <>
-                            {service.availability === 1 ||
-                            service.availability > 0
-                              ? "Available"
-                              : "Unavailable"}
+                            {availableSeats[service.id] === 0
+                              ? "Unavailable"
+                              : "Available"}
                           </>
                         )}
                       </button>

@@ -11,11 +11,12 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 
+
 import Header from "../src/components/header/Header"
 import Home from "./pages/HomeScreen";
 import Blog from "./pages/BlogsScreen";
 import Services from "./pages/ServicesScreen";
-import Book from "./pages/BookingScreen";
+import Book from "./pages/booking-screen/BookingScreen";
 import FAQs from "./pages/FAQs";
 import Confirmation from "./pages/ConfirmationScreen";
 import Payment from "./pages/PaymentScreen";

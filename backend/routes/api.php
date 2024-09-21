@@ -40,6 +40,8 @@ Route::patch('/services-availability/{id}', [ServiceController::class, 'updateAv
 Route::get('/services-availability', [ServiceController::class, 'getAvailableSeats']);
 Route::delete('/services/{id}', [ServiceController::class, 'delete']);
 Route::get('/available', [ServiceController::class, 'available']);
+Route::patch('/services/{id}/available-seats', [ServiceController::class, 'updateAvailableSeats']);
+
 
 Route::post('/bookings/cancel/{refNumber}', [BookingController::class, 'cancel']);
 Route::put('/bookings/{id}/status', [BookingController::class, 'updateStatus']);

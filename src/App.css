@@ -229,14 +229,13 @@ select {
   color: var(--clr-primary);
   background-color: #fff;
   border: 1px solid var(--clr-primary);
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 1rem;
   display: inline-block;
 }
 .btn-secondary-clr:hover {
   color: var(--clr-primary-hover);
   background-color: #ffe5c8;
   border: 1px solid var(--clr-primary-hover);
-  padding: 0.5rem 1rem;
   display: inline-block;
 }
 

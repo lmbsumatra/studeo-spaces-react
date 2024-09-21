@@ -1,0 +1,19 @@
+.panel-2 {
+  background-color: rgba(241, 190, 123, 0.342);
+  justify-self: center;
+  align-content: center;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.panel-2 > .card {
+  background-image: linear-gradient(
+      to left,
+      rgba(255, 155, 25, 0),
+      rgb(117, 83, 19)
+    ),
+    url("../../assets/images/services/img_1.png");
+  border: none;
+  color: white;
+  padding: 10px;
+}
