@@ -117,7 +117,7 @@ const AdminServices = () => {
   };
 
   return (
-    <section className="container items mt-5">
+    <section className="container items mt-5" id="admin-services">
       <h1 className="fs-700 ff-serif text-center">Admin Services</h1>
       <div className="mt-4">
         <Link to="/admin/add-service" className="btn btn-success">
@@ -143,7 +143,10 @@ const AdminServices = () => {
                   className="col-lg-4 col-md-6 col-sm-12 mb-4"
                   key={service.id}
                 >
-                  <div className="card" style={{ width: "17rem", height: "26rem" }}>
+                  <div
+                    className="card"
+                    style={{ width: "17rem", height: "26rem" }}
+                  >
                     <img
                       src={service.images}
                       className="card-img-top"
@@ -198,8 +201,12 @@ const AdminServices = () => {
                           )}
                         </button>
                       </div>
-                      <span className="disabled">Available Seats Today: {availableCount}</span>
-                      <span className="disabled">Availability: {service.availability}</span>
+                      <span className="d-flex">
+                        Available Seats Today: {availableCount}
+                      </span>
+                      <span className="d-flex">
+                        Availability: {service.availability === 1 ? <p className="text-success"> Available</p> : <p className="text-danger"> Not Available</p>}
+                      </span>
                     </div>
                   </div>
                 </div>

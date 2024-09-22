@@ -31,6 +31,6 @@
   }
 }
 
-.card:hover {
+#admin-services .card:hover {
   border: #db8523 solid 0.1px;
 }

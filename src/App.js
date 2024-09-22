@@ -1,18 +1,22 @@
 // App.js
 import React, { useState, useEffect, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import io from "socket.io-client";
 import "./App.css";
 import { NotificationProvider } from "../src/pages/context/notificationContext";
-import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-
-
-import Header from "../src/components/header/Header"
+import Header from "../src/components/header/Header";
 import Home from "./pages/HomeScreen";
 import Blog from "./pages/BlogsScreen";
 import Services from "./pages/ServicesScreen";
@@ -33,14 +37,14 @@ import AdminAddService from "./pages/admin pages/admin-services/AdminAddService"
 import AdminEditService from "./pages/admin pages/admin-services/AdminEditService";
 import PrivateRoute from "./PrivateRoute";
 import Card from "./Card";
-import Admin from "../src/pages/admin pages/Admin"
+import Admin from "../src/pages/admin pages/Admin";
+
+import PageNotAvailable from "./pages/PageNotAvailable";
 
 const App = () => {
-  
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith("/admin");
   const isLoginPage = location.pathname === "/login";
-
 
   return (
     <div>
@@ -58,54 +62,49 @@ const App = () => {
         <Route path="/booking-successful" element={<BookingSummary />} />
         <Route path="/booking-details" element={<BookingDetails />} />
 
-
-
         <Route path="/login" element={<AdminLogin />} />
         <Route
           path="/admin"
-          element={<PrivateRoute><Admin /></PrivateRoute>}
+          element={
+            <PrivateRoute>
+              <Admin />
+            </PrivateRoute>
+          }
         >
           {/* <Route
             path="/*"
             element={<Admin isSidebarExpanded={isSidebarExpanded} toggleSidebar={toggleSidebar} />}
           > */}
-            <Route
-              path="dashboard"
-              element={<AdminDashboard />}
-            />
-            <Route
-              path="bookings"
-              element={<AdminBookings />}
-            />
-            <Route
-              path="payments"
-              element={<AdminPayments />}
-            />
-            <Route
-              path="customers"
-              element={<AdminCustomers />}
-            />
-            <Route
-              path="messages"
-              element={<AdminMessagesScreen />}
-            />
-            <Route
-              path="services"
-              element={<AdminServices title="Admin Services Management" />}
-            />
-            <Route
-              path="/admin/add-service"
-              element={<AdminAddService />}
-            />
-            <Route
-              path="/admin/edit-service/:id"
-              element={<AdminEditService />}
-            />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="bookings" element={<AdminBookings />} />
+          <Route path="payments" element={<AdminPayments />} />
+          <Route path="customers" element={<AdminCustomers />} />
+          <Route path="messages" element={<AdminMessagesScreen />} />
+          <Route
+            path="services"
+            element={<AdminServices title="Admin Services Management" />}
+          />
+          <Route path="/admin/add-service" element={<AdminAddService />} />
+          <Route
+            path="/admin/edit-service/:id"
+            element={<AdminEditService />}
+          />
+          <Route
+            path="/admin/content-management"
+            element={<PageNotAvailable />}
+          />
+          <Route path="/admin/blogs" element={<PageNotAvailable />} />
+          <Route path="/admin/*" element={<PageNotAvailable />} />
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" />} />
+
+
           {/* </Route> */}
         </Route>
+        
         <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/*" element={<PageNotAvailable/>} />
+        <Route path="/*/*" element={<PageNotAvailable/>} />
       </Routes>
-      
     </div>
   );
 };
