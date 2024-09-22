@@ -5,7 +5,7 @@ const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [statuses, setStatuses] = useState({});
   const [sortedBookings, setSortedBookings] = useState([]);
-  const [sortOption, setSortOption] = useState("default"); // Default sorting option
+  const [sortOption, setSortOption] = useState("default");
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,7 +15,7 @@ const AdminBookings = () => {
         const response = await axios.get("http://127.0.0.1:8000/api/bookings");
         setBookings(response.data);
         const initialStatuses = response.data.reduce((acc, booking) => {
-          acc[booking.id] = booking.status; // Initialize with actual status
+          acc[booking.id] = booking.status;
           return acc;
         }, {});
         setStatuses(initialStatuses);
@@ -28,7 +28,7 @@ const AdminBookings = () => {
     };
 
     fetchBookings();
-  }, [sortOption]); // Fetch bookings whenever sort option changes
+  }, [sortOption]);
 
   const sortBookings = (data, option) => {
     let sortedData = [...data];
@@ -70,19 +70,16 @@ const AdminBookings = () => {
         console.log("Booking status updated successfully");
 
         if (newStatus === "Completed") {
-          // Retrieve the details of the booking
           const bookingDetails = bookings.find(
             (booking) => booking.id === bookingId
           );
 
-          // Create payment data from booking details
           const paymentData = {
             customerName: bookingDetails.customer?.name,
             amount: bookingDetails.service?.price,
             date: bookingDetails.date,
           };
 
-          // Add payment to the payment table
           const paymentResponse = await axios.post(
             "http://127.0.0.1:8000/api/payments",
             paymentData
@@ -99,7 +96,6 @@ const AdminBookings = () => {
       }
     } catch (error) {
       console.error("Error updating booking status:", error);
-      // Revert to previous status if the request fails
       setStatuses((prevStatuses) => ({
         ...prevStatuses,
         [bookingId]: prevStatuses[bookingId],
@@ -117,7 +113,7 @@ const AdminBookings = () => {
           <select
             value={sortOption}
             onChange={handleSortChange}
-            className="form-control form-control-sm" // Adjust the size using Bootstrap classes
+            className="form-control form-control-sm"
           >
             <option value="default">Default</option>
             <option value="dateAscend">Date (Ascending)</option>
@@ -126,15 +122,11 @@ const AdminBookings = () => {
         </div>
       </div>
       {isLoading ? (
-        <>
-          <p>
-            <div className="text-center">
-              <div className="spinner-border" role="status">
-                <span className="sr-only">Loading...</span>
-              </div>
-            </div>
-          </p>
-        </>
+        <div className="text-center">
+          <div className="spinner-border" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
+        </div>
       ) : bookings.length === 0 ? (
         <p>No bookings to show</p>
       ) : (
@@ -146,7 +138,6 @@ const AdminBookings = () => {
                 <th scope="col">Customer Name</th>
                 <th scope="col">Service</th>
                 <th scope="col">Payment</th>
-                <th scope="col">Date</th>
                 <th scope="col">Time</th>
                 <th scope="col">Payment Status</th>
               </tr>
@@ -158,7 +149,6 @@ const AdminBookings = () => {
                   <td>{booking.customer?.name}</td>
                   <td>{booking.service?.name}</td>
                   <td>{booking.service?.price}</td>
-                  <td>{booking.date}</td>
                   <td>{booking.time}</td>
                   <td>
                     <select

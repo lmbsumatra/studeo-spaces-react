@@ -40,11 +40,13 @@
 
 .sidebar-item {
   padding: 10px;
+  
 }
 
 .sidebar-link {
   color: hsl(var(--clr-light));
   text-decoration: none;
+  width: 100%;
 }
 
 .sidebar-link.active-nav {
@@ -52,7 +54,21 @@
 }
 
 .sidebar-item.indent {
-  padding-left: 40px;
+  padding-left: 32px;
+}
+
+.sidebar-icon {
+  height: 24px;
+  width: auto;
+  display: inline;
+}
+
+.sidebar-item.no-indent{
+  padding-left: 4px;
+}
+
+.icon-indent{
+  width: 100%;
 }
 
 /* Notification Button Styling */
@@ -75,12 +91,11 @@
   align-items: center;
   justify-content: center;
   background-color: transparent;
-  
 }
 
 .notification-popup {
   position: absolute;
-  top: 60px; 
+  top: 60px;
   right: 20px;
   width: 400px;
   max-height: 500px;
@@ -121,7 +136,6 @@
 
 .popup-content ul li {
   margin-bottom: 8px;
-  
 }
 .notification-item {
   padding: 10px;
@@ -176,4 +190,3 @@
   justify-content: center;
   align-items: center;
 }
-
