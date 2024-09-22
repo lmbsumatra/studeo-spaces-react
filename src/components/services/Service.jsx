@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
 import Promo from "../promo/Promo";
 import Tooltip from "@mui/material/Tooltip";
+import { baseApiUrl } from "../../App";
 
 const Service = ({
   title,
@@ -20,6 +21,8 @@ const Service = ({
   const [date, setDate] = useState("");
   const navigate = useNavigate();
 
+
+
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -28,8 +31,8 @@ const Service = ({
         setLoading(true);
 
         const [serviceResponse, seatsResponse] = await Promise.all([
-          fetch("http://127.0.0.1:8000/api/services"),
-          fetch(`http://127.0.0.1:8000/api/available?date=${today}`),
+          fetch(`${baseApiUrl}services`),
+          fetch(`${baseApiUrl}available?date=${today}`),
         ]);
 
         if (!serviceResponse.ok || !seatsResponse.ok) {

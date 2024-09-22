@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { toast } from "react-toastify";
 import { io } from "socket.io-client";
+import { baseApiUrl, baseSocketUrl } from "../../App";
 
 dayjs.extend(relativeTime);
 
@@ -17,7 +18,8 @@ const Header = () => {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const socket = io("http://localhost:3002"); // Adjust your socket server URL
+  const socket = io(`${baseSocketUrl}:3002`, { transports: ['websocket'] });
+
 
   const isAdminPath = location.pathname.startsWith("/admin");
 
@@ -29,7 +31,7 @@ const Header = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/notifications");
+        const response = await axios.get(`${baseApiUrl}notifications`);
         setNotifications(response.data);
         setUnreadCount(response.data.filter((notif) => !notif.is_read).length);
       } catch (error) {
@@ -45,7 +47,7 @@ const Header = () => {
   
     // Socket connection
     socket.on("connect", () => {
-      console.log("Socket connected");
+      // console.log("Socket connected");
       // Optionally fetch notifications again to ensure the latest state
     });
   
@@ -72,7 +74,7 @@ const Header = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/notifications/${id}`);
+      await axios.delete(`${baseApiUrl}notifications/${id}`);
       setNotifications(notifications.filter((notif) => notif.id !== id));
       setUnreadCount(unreadCount - 1);
       toast.info("Notification removed.");
@@ -99,7 +101,7 @@ const Header = () => {
   return (
     <nav className="navbar">
       <div className="container-fluid">
-        <NavLink to="/" className="navbar-brand"></NavLink>
+        <NavLink to="/" className="navbar-brand" ></NavLink>
         <div>
           <ul className="navbar-nav">
             {isAdminPath ? (
@@ -125,7 +127,7 @@ const Header = () => {
             ) : (
               <>
                 <li className="nav-item">
-                  <NavLink exact to="/" className={({ isActive }) => (isActive ? "nav-link active-nav" : "nav-link")}>
+                  <NavLink to="/" className={({ isActive }) => (isActive ? "nav-link active-nav" : "nav-link")}>
                     Home
                   </NavLink>
                 </li>

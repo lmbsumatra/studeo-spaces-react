@@ -7,6 +7,7 @@ import Spinner from "react-bootstrap/Spinner";
 import { toast } from "react-toastify";
 import "./style.css";
 import Promo from "../../components/promo/Promo";
+import { baseApiUrl } from "../../App";
 
 const Book = () => {
   const [selectedService, setSelectedService] = useState(null);
@@ -40,7 +41,7 @@ const Book = () => {
       const fetchServiceDetails = async () => {
         try {
           const response = await axios.get(
-            `http://127.0.0.1:8000/api/services/${serviceId}`
+            `${baseApiUrl}services/${serviceId}`
           );
           setSelectedService(response.data);
         } catch (error) {
@@ -115,7 +116,7 @@ const Book = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://127.0.0.1:8000/api/bookings/${referenceNumber}`
+        `${baseApiUrl}bookings/${referenceNumber}`
       );
       response.data.message
         ? alert(response.data.message)
@@ -133,7 +134,7 @@ const Book = () => {
     setLoading(true);
     try {
       const { data: customer } = await axios.get(
-        `http://127.0.0.1:8000/api/customers/${customerID}`
+        `${baseApiUrl}customers/${customerID}`
       );
       setName(customer.name);
       setEmail(customer.email);

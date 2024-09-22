@@ -97,13 +97,12 @@ const App = () => {
           <Route path="/admin/*" element={<PageNotAvailable />} />
           <Route path="/admin" element={<Navigate to="/admin/dashboard" />} />
 
-
           {/* </Route> */}
         </Route>
-        
+
         <Route path="/admin-login" element={<AdminLogin />} />
-        <Route path="/*" element={<PageNotAvailable/>} />
-        <Route path="/*/*" element={<PageNotAvailable/>} />
+        <Route path="/*" element={<PageNotAvailable />} />
+        <Route path="/*/*" element={<PageNotAvailable />} />
       </Routes>
     </div>
   );
@@ -111,10 +110,13 @@ const App = () => {
 
 const AppWrapper = () => (
   <Router>
-    <NotificationProvider>
+      <ToastContainer />
       <App />
-    </NotificationProvider>
   </Router>
 );
 
 export default AppWrapper;
+
+export const baseApiUrl = `http://${window.location.hostname}:8000/api/`;
+// console.log(baseApiUrl);
+export const baseSocketUrl = `http://${window.location.hostname}`;

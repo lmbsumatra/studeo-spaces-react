@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../../assets/images/studeo-spaces-logo.png";
 import { toast } from "react-toastify";
+import { baseApiUrl } from "../../App";
 
 const AdminLoginScreen = () => {
   const [username, setUsername] = useState("");
@@ -22,7 +23,7 @@ const AdminLoginScreen = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/admins", {
+      const response = await axios.post(`${baseApiUrl}admins`, {
         username,
         password,
       });

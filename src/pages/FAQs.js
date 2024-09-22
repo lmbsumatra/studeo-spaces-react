@@ -12,6 +12,7 @@ import {
 import axios from "axios";
 import io from "socket.io-client";
 import { toast } from "react-toastify";
+import {baseApiUrl, baseSocketUrl} from "../App.js"
 
 const FAQs = () => {
   const [formData, setFormData] = useState({
@@ -21,15 +22,15 @@ const FAQs = () => {
   });
   const [loading, setLoading] = useState(false); // Loading state
 
-  const socket = io("http://localhost:3002");
+  const socket = io(`${baseSocketUrl}:3002`, { transports: ['websocket'] });
 
   const testNotificationData = {
     customer_id: null,
     customer_name: "Customer",
-    message: formData.message,
+    message: `${formData.name} has sent you a message: ${formData.message}`,
     type: "customer_message", // Match this type with the keys in notificationTypes
   };
-  
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -40,9 +41,9 @@ const FAQs = () => {
     setLoading(true); // Set loading to true when form is submitted
     try {
       // Sending the message
-      await axios.post("http://127.0.0.1:8000/api/messages", formData);
+      await axios.post(`${baseApiUrl}messages`, formData);
       await axios.post(
-        "http://127.0.0.1:8000/api/notifications",
+        `${baseApiUrl}notifications`,
         testNotificationData
       );
 

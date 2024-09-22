@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
 import { toast } from 'react-toastify';
+import {baseApiUrl} from "../../../App"
 
 const AdminAddService = () => {
   const [formData, setFormData] = useState({
@@ -42,7 +43,7 @@ const AdminAddService = () => {
       return;
     }
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/services", {
+      const response = await fetch(`${baseApiUrl}services`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

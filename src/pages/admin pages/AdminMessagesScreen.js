@@ -1,6 +1,7 @@
 // AdminMessagesScreen.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { baseApiUrl } from "../../App";
 
 const AdminMessagesScreen = () => {
   const [messages, setMessages] = useState([]);
@@ -11,7 +12,7 @@ const AdminMessagesScreen = () => {
     const fetchMessages = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://127.0.0.1:8000/api/messages");
+        const response = await axios.get(`${baseApiUrl}messages`);
         setMessages(response.data);
       } catch (error) {
         console.error("Error fetching messages:", error);

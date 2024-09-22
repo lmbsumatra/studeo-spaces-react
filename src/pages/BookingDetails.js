@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { baseApiUrl } from "../App";
 
 const BookingDetails = () => {
   const location = useLocation();
@@ -20,7 +21,7 @@ const BookingDetails = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `http://127.0.0.1:8000/api/bookings/${refNumber}`
+          `${baseApiUrl}/bookings/${refNumber}`
         );
         setBookingDetails(response.data);
       } catch (error) {
@@ -42,7 +43,7 @@ const BookingDetails = () => {
     if (confirmCancel) {
       try {
         await axios.post(
-          `http://127.0.0.1:8000/api/bookings/cancel/${bookingDetails.refNumber}`
+          `${baseApiUrl}bookings/cancel/${bookingDetails.refNumber}`
         );
         alert("Booking cancelled successfully.");
         navigate("/booking");

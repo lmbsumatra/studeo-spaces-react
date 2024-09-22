@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
 import { Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
+import { baseApiUrl } from "../../../App";
 
 const AdminEditService = () => {
   const { id } = useParams();
@@ -79,7 +80,7 @@ const AdminEditService = () => {
     
     try {
       setLoading(true);
-      const response = await fetch(`http://127.0.0.1:8000/api/services/${id}`, {
+      const response = await fetch(`${baseApiUrl}services/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

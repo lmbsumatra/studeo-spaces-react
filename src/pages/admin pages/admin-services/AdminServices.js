@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
 import { toast } from "react-toastify";
 import { Spinner } from "react-bootstrap";
+import { baseApiUrl } from "../../../App";
 
 const AdminServices = () => {
   const [services, setServices] = useState([]);
@@ -20,7 +21,7 @@ const AdminServices = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/services`);
+        const response = await fetch(`${baseApiUrl}services`);
         if (!response.ok) throw new Error("Failed to fetch services");
         const data = await response.json();
         setServices(data);
@@ -39,7 +40,7 @@ const AdminServices = () => {
       if (formattedDate) {
         try {
           const response = await fetch(
-            `http://127.0.0.1:8000/api/available?date=${formattedDate}`
+            `${baseApiUrl}available?date=${formattedDate}`
           );
           if (!response.ok) throw new Error("Failed to fetch available seats.");
           const data = await response.json();
@@ -51,15 +52,10 @@ const AdminServices = () => {
     };
     fetchAvailableSeats();
   }, [date]);
-
-  const handleServiceSelect = (service) => {
-    setSelectedService(service);
-  };
-
   const handleDelete = async (id) => {
     setLoadingServiceIds((prev) => ({ ...prev, [id]: true }));
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/services/${id}`, {
+      const response = await fetch(`${baseApiUrl}services/${id}`, {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Failed to delete service");
@@ -87,7 +83,7 @@ const AdminServices = () => {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/api/services-availability/${id}`,
+        `${baseApiUrl}services-availability/${id}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -205,7 +201,12 @@ const AdminServices = () => {
                         Available Seats Today: {availableCount}
                       </span>
                       <span className="d-flex">
-                        Availability: {service.availability === 1 ? <p className="text-success"> Available</p> : <p className="text-danger"> Not Available</p>}
+                        Availability:{" "}
+                        {service.availability === 1 ? (
+                          <p className="text-success"> Available</p>
+                        ) : (
+                          <p className="text-danger"> Not Available</p>
+                        )}
                       </span>
                     </div>
                   </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { baseApiUrl } from "../../App";
 
 const AdminCustomers = () => {
   const [customers, setCustomers] = useState([]);
@@ -9,7 +10,7 @@ const AdminCustomers = () => {
     const fetchCustomers = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://127.0.0.1:8000/api/customers");
+        const response = await axios.get(`${baseApiUrl}customers`);
         setCustomers(response.data);
       } catch (error) {
         console.error("Error fetching customers:", error);

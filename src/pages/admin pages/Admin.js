@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/header/Sidebar";
 import { Outlet, useNavigate } from "react-router-dom";
 import io from "socket.io-client";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./style.css"; 
+import "./style.css";
+import { baseSocketUrl } from "../../App";
 
 const notificationTypes = {
   new_booking: "success",
@@ -27,7 +28,7 @@ const notificationTypes = {
   policy_change: "info",
   error_alert: "error",
   warning_message: "warning",
-  customer_message: "warning",
+  customer_message: "info",
   admin_add_service: "success",
   admin_edit_service: "info",
   admin_delete_service: "success",
@@ -38,20 +39,26 @@ const notificationTypes = {
 const Admin = () => {
   const [isSidebarExpanded, setSidebarExpanded] = useState(true);
   const navigate = useNavigate();
-  
+
   // Initialize socket
-  const socket = io("http://localhost:3002");
+  const socket = io(`${baseSocketUrl}:3002`, { transports: ['websocket'] });
 
   const toggleSidebar = () => {
     setSidebarExpanded(!isSidebarExpanded);
   };
 
   useEffect(() => {
+    // Log connection status
+    socket.on("connect", () => {
+      // console.log("Socket connected:", socket.id);
+    });
+
     // Listen for the 'Notification' event
     socket.on("Notification", (data) => {
+      // console.log("Notification received:", data);
       const { message, type } = data;
       const category = notificationTypes[type] || "info"; // Get notification category
-      
+
       // Show appropriate toast based on category
       switch (category) {
         case "success":
@@ -76,8 +83,15 @@ const Admin = () => {
       }
     });
 
+    // Handle disconnect
+    socket.on("disconnect", () => {
+      // console.log("Socket disconnected");
+    });
+
     return () => {
       socket.off("Notification");
+      socket.off("connect");
+      socket.off("disconnect");
     };
   }, [navigate, socket]);
 
@@ -88,6 +102,7 @@ const Admin = () => {
       </div>
       <main className={`main-content ${isSidebarExpanded ? "expanded" : "collapsed"}`}>
         <Outlet />
+        {/* <ToastContainer /> */}
       </main>
     </div>
   );

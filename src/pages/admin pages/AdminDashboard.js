@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import { baseApiUrl } from "../../App";
 
 const AdminDashboard = () => {
   const [isLoading, setLoading] = useState(true);
@@ -22,12 +23,9 @@ const AdminDashboard = () => {
   const fetchData = async (selectedDate) => {
     setLoading(true);
     const formattedDate = selectedDate.toLocaleDateString("en-CA");
-
-    console.log("Fetching data for date:", formattedDate);
-
     try {
       const response = await axios.get(
-        `http://127.0.0.1:8000/api/admin-dashboard-data?date=${formattedDate}`
+        `${baseApiUrl}admin-dashboard-data?date=${formattedDate}`
       );
       setData(response.data);
     } catch (error) {

@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import io from "socket.io-client";
 import { Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
+import { baseApiUrl, baseSocketUrl} from "../App.js"
 
 const Payment = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const Payment = () => {
 
   useEffect(() => {
     // Initialize the socket connection once
-    const newSocket = io("http://localhost:3002");
+    const newSocket = io(`${baseSocketUrl}:3002`, { transports: ['websocket'] });
     setSocket(newSocket);
 
     // Clean up socket connection on component unmount
@@ -60,12 +61,12 @@ const Payment = () => {
 
       // Make the POST request for booking
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/bookings",
+        `${baseApiUrl}bookings`,
         bookingDetailsWithRef
       );
 
       await axios.post(
-        "http://127.0.0.1:8000/api/notifications",
+        `${baseApiUrl}notifications`,
         notificationData
       );
 

@@ -36,12 +36,6 @@ class ServiceController extends Controller
                 ->where('date', Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d')) // Or any specific date
                 ->first();
 
-            // If no availability data is found in service_availability, use the count from the services table
-            if ($availability) {
-                $service->availability = $availability->available_seats;
-            } else {
-                $service->availability = $service->availability;
-            }
         }
 
         return response()->json($services);

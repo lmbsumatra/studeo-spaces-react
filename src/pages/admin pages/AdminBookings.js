@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { baseApiUrl } from "../../App";
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -12,7 +13,7 @@ const AdminBookings = () => {
     const fetchBookings = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://127.0.0.1:8000/api/bookings");
+        const response = await axios.get(`${baseApiUrl}bookings`);
         setBookings(response.data);
         const initialStatuses = response.data.reduce((acc, booking) => {
           acc[booking.id] = booking.status;
