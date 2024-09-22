@@ -47,6 +47,11 @@
   color: hsl(var(--clr-light));
   text-decoration: none;
   width: 100%;
+  display: flex; /* Use flexbox for alignment */
+  align-items: center; /* Center items vertically */
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Add ellipsis for overflowing text */
 }
 
 .sidebar-link.active-nav {
@@ -61,6 +66,7 @@
   height: 24px;
   width: auto;
   display: inline;
+  margin: 2px 0 1px 0 ;
 }
 
 .sidebar-item.no-indent{

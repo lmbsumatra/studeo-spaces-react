@@ -274,7 +274,7 @@ select {
 /* active nav indicator */
 .active-nav {
   border-bottom: #db8523 3px solid;
-  padding: 10px 2px;
+  padding: 5px 0px;
   color: hsl(var(--clr-dark));
 }
 
