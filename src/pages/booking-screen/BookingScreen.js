@@ -9,6 +9,10 @@ import "./style.css";
 import Promo from "../../components/promo/Promo";
 import { baseApiUrl } from "../../App";
 
+import Modal from 'react-bootstrap/Modal'; // Import Bootstrap Modal
+import logo from "../../assets/images/studeo-spaces-logo.jpg"
+
+
 const Book = () => {
   const [selectedService, setSelectedService] = useState(null);
   const [currentDate, setCurrentDate] = useState("");
@@ -23,6 +27,11 @@ const Book = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const serviceId = location.state;
+
+  //15 DAY PASS
+  const [showPassModal, setShowPassModal] = useState(false);
+  const [showCardModal, setShowCardModal] = useState(false);
+  const [passID, setPassID] = useState('');
 
   useEffect(() => {
     if (serviceId) {
@@ -153,6 +162,19 @@ const Book = () => {
     setSelectedService(service);
   };
 
+  //15 DAY PASS  
+  const handleClosePassModal = () => setShowPassModal(false);
+  const handleShowPassModal = () => setShowPassModal(true);
+
+  const handleCloseCardModal = () => setShowCardModal(false);
+  const handleShowCardModal = () => setShowCardModal(true);
+
+  const handleCheckPass = () => {
+    
+  handleClosePassModal(); // Close the pass modal
+  handleShowCardModal(); // Show the card modal
+};
+
   return (
     <div className="container mt-5">
       <section className="container items">
@@ -210,7 +232,7 @@ const Book = () => {
               <div className="card">
                 <h1 className="pb-3">Have you got a 15-day pass?</h1>
                 <div>
-                  <button className="btn btn-primary-clr">Use</button>
+                  <button className="btn btn-primary-clr" onClick={handleShowPassModal}>Use</button>
                   <button className="btn btn-secondary-clr">Learn more</button>
                 </div>
               </div>
@@ -235,7 +257,117 @@ const Book = () => {
               </form>
             </div>
           </div>
-        </div>
+        </div> 
+        {/* POP UP 15 DAY PASS */}
+        <Modal show={showPassModal} onHide={handleClosePassModal} centered>
+          <Modal.Header closeButton>
+            <Modal.Title className="w-100 text-center">Use 15 Day Pass</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <form>
+              <div className="mb-3">
+                <label className="form-label">Enter Pass ID</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter Pass ID"
+                  value={passID}
+                  onChange={(e) => setPassID(e.target.value)}
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Enter your Customer ID</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter Customer ID"
+                  value={customerID}
+                  onChange={(e) => setCustomerID(e.target.value)}
+                />
+              </div>
+            </form>
+          </Modal.Body>
+          <Modal.Footer>
+            <button className="btn btn-secondary-clr" onClick={handleClosePassModal}>
+              Close
+            </button>
+            <button className="btn btn-primary-clr" onClick={handleCheckPass}>
+              Check
+            </button>
+          </Modal.Footer>
+        </Modal>
+        {/* POP UP 15 DAY PASS END*/}
+        
+         {/* POP UP CARD */}
+      <Modal show={showCardModal} onHide={handleCloseCardModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title className="w-100 text-center">Card Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="d-flex justify-content-center">
+          <div className="pass">
+            <div className="header d-flex">
+              <div>
+                <img src={logo} height="40px" alt="Logo" />
+              </div>
+              <div>Studeo Spaces</div>
+            </div>
+            <div className="body">
+              <div className="center d-flex">
+                <div className="bullets-1">
+                  <div className="bullet">1</div>
+                  <div className="bullet">2</div>
+                  <div className="bullet">3</div>
+                  <div className="bullet">4</div>
+                  <div className="bullet">5</div>
+                </div>
+                <div className="user-id text-center">
+                  <div className="id-picture"></div>
+                  <div className="name title">Name</div>
+                  <div className="name sub-title">Name</div>
+                  <div className="id title">ID No.</div>
+                  <div className="id sub-title">ID No.</div>
+                  <div className="address title">Address</div>
+                  <div className="address sub-title">Address</div>
+                  <div className="contactNo title">Contact No.</div>
+                  <div className="contactNo sub-title">Contact No.</div>
+                </div>
+                <div className="bullets-1">
+                  <div className="bullet">11</div>
+                  <div className="bullet">12</div>
+                  <div className="bullet">13</div>
+                  <div className="bullet">14</div>
+                  <div className="bullet">15</div>
+                </div>
+              </div>
+              <div className="bottom bullets-2 d-flex justify-content-between">
+                <div className="bullet">6</div>
+                <div className="bullet">7</div>
+                <div className="bullet">8</div>
+                <div className="bullet">9</div>
+                <div className="bullet">10</div>
+              </div>
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+        <button className="btn btn-secondary-clr" onClick={() => {
+                  setShowCardModal(false); // Close the card modal
+                  setShowPassModal(true); // Open the "15 Day Pass" modal
+        }}>
+              Close
+          </button>
+          <button className="btn btn-primary-clr" onClick={handleCheckPass}>
+              Share 
+          </button>
+          <button className="btn btn-primary-clr" onClick={handleCheckPass}>
+              Use 
+          </button>
+        </Modal.Footer>
+      </Modal>
+      {/* POP UP CARD END */}
+
+        <hr />
+        {/* Select Payment Method */}
         <hr />
         <div className="container">
           <h2 className="fs-600 ff-serif">Select Payment Method</h2>
