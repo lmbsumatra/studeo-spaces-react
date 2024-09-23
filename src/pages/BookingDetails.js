@@ -21,7 +21,7 @@ const BookingDetails = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `${baseApiUrl}/bookings/${refNumber}`
+          `${baseApiUrl}bookings/${refNumber}`
         );
         setBookingDetails(response.data);
       } catch (error) {

@@ -31,7 +31,7 @@ import AdminDashboard from "./pages/admin pages/AdminDashboard";
 import AdminBookings from "./pages/admin pages/AdminBookings";
 import AdminCustomers from "./pages/admin pages/AdminCustomers";
 import AdminPayments from "./pages/admin pages/AdminPayments";
-import AdminMessagesScreen from "./pages/admin pages/AdminMessagesScreen";
+import AdminMessagesScreen from "./pages/admin pages/AdminMessagesScreen/AdminMessagesScreen";
 import AdminServices from "./pages/admin pages/admin-services/AdminServices";
 import AdminAddService from "./pages/admin pages/admin-services/AdminAddService";
 import AdminEditService from "./pages/admin pages/admin-services/AdminEditService";
