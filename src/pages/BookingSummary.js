@@ -7,6 +7,29 @@ const BookingSummary = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      window.location.reload();
+      navigate("/booking");
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [navigate]);
+
+  const formatTimeTo12Hour = (time) => {
+    let [hours, minutes] = time.split(":");
+    hours = parseInt(hours, 10);
+    const period = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12; // Convert to 12-hour format
+    return `${hours}:${minutes} ${period}`;
+  };
+
+  useEffect(() => {
     if (!location.state) {
       navigate("/booking");
     }
@@ -22,7 +45,7 @@ const BookingSummary = () => {
     contact_number = "N/A",
     payment_method = "N/A",
     refNumber = "N/A",
-    customerID = "N/A"
+    customerID = "N/A",
   } = location.state || {};
 
   if (!location.state) {
@@ -51,7 +74,7 @@ const BookingSummary = () => {
               <strong>Date:</strong> {date}
             </p>
             <p>
-              <strong>Time:</strong> {time}
+              <strong>Time:</strong> {formatTimeTo12Hour(time)}
             </p>
             <hr />
             <h3 className="fs-500 ff-serif">Personal Information</h3>

@@ -10,6 +10,14 @@ const BookingDetails = () => {
   const [bookingDetails, setBookingDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const formatTimeTo12Hour = (time) => {
+    let [hours, minutes] = time.split(":");
+    hours = parseInt(hours, 10);
+    const period = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12; // Convert to 12-hour format
+    return `${hours}:${minutes} ${period}`;
+  };
+
   useEffect(() => {
     const fetchBookingDetails = async () => {
       const refNumber = location.state?.referenceNumber;
@@ -20,9 +28,7 @@ const BookingDetails = () => {
 
       try {
         setLoading(true);
-        const response = await axios.get(
-          `${baseApiUrl}bookings/${refNumber}`
-        );
+        const response = await axios.get(`${baseApiUrl}bookings/${refNumber}`);
         setBookingDetails(response.data);
       } catch (error) {
         console.error("Error fetching booking details:", error);
@@ -78,7 +84,9 @@ const BookingDetails = () => {
   }
 
   if (!bookingDetails) {
-    return toast.error("Error loading booking details. Please try again later.");
+    return toast.error(
+      "Error loading booking details. Please try again later."
+    );
   }
 
   const {
@@ -111,13 +119,13 @@ const BookingDetails = () => {
             </p>
             <p>
               <strong>Service Price:</strong>{" "}
-              {service ? `$${service.price}` : "Loading..."}
+              {service ? `${service.price}` : "Loading..."}
             </p>
             <p>
               <strong>Date:</strong> {date}
             </p>
             <p>
-              <strong>Time:</strong> {time}
+              <strong>Time:</strong> {formatTimeTo12Hour(time)}
             </p>
             <hr />
             <h3 className="fs-500 ff-serif">Personal Information</h3>

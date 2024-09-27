@@ -9,6 +9,14 @@ const AdminBookings = () => {
   const [sortOption, setSortOption] = useState("default");
   const [isLoading, setLoading] = useState(true);
 
+  const formatTimeTo12Hour = (time) => {
+    let [hours, minutes] = time.split(":");
+    hours = parseInt(hours, 10);
+    const period = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12; // Convert to 12-hour format
+    return `${hours}:${minutes} ${period}`;
+  };
+
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -150,7 +158,7 @@ const AdminBookings = () => {
                   <td>{booking.customer?.name}</td>
                   <td>{booking.service?.name}</td>
                   <td>{booking.service?.price}</td>
-                  <td>{booking.time}</td>
+                  <td>{formatTimeTo12Hour(booking.time)}</td>
                   <td>
                     <select
                       value={statuses[booking.id] || "Pending"}

@@ -9,17 +9,18 @@ import "./style.css";
 import Promo from "../../components/promo/Promo";
 import { baseApiUrl } from "../../App";
 
-import Modal from 'react-bootstrap/Modal'; // Import Bootstrap Modal
-import logo from "../../assets/images/studeo-spaces-logo.jpg"
-
+import Modal from "react-bootstrap/Modal"; // Import Bootstrap Modal
+import logo from "../../assets/images/studeo-spaces-logo.jpg";
 
 const Book = () => {
   const [selectedService, setSelectedService] = useState(null);
   const [currentDate, setCurrentDate] = useState("");
   const [time, setTime] = useState("");
+  const [errorTime, setErrorTime] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [contactNumber, setContactNumber] = useState("");
+  const [errorContactNumber, setErrorContactNumber] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
   const [customerID, setCustomerID] = useState("");
@@ -31,7 +32,23 @@ const Book = () => {
   //15 DAY PASS
   const [showPassModal, setShowPassModal] = useState(false);
   const [showCardModal, setShowCardModal] = useState(false);
-  const [passID, setPassID] = useState('');
+  const [passID, setPassID] = useState("");
+
+  useEffect(() => {
+    const now = new Date();
+    const selectedDateTime = new Date(`${currentDate}T${time}`);
+
+    if (selectedDateTime <= new Date(now.getTime() - 60 * 60 * 1000)) {
+      setErrorTime(true);
+    } else {
+      setErrorTime(false);
+    }
+  }, [currentDate, time]);
+
+  useEffect(() => {
+    const isValid = /^\d{11}$/.test(contactNumber); // Check if the number has exactly 11 digits and is numeric
+    setErrorContactNumber(!isValid);
+  }, [contactNumber]);
 
   useEffect(() => {
     if (serviceId) {
@@ -149,6 +166,9 @@ const Book = () => {
       setEmail(customer.email);
       setContactNumber(customer.contact_number);
     } catch (error) {
+      setName("");
+      setEmail("");
+      setContactNumber("");
       console.error("Customer ID not found:", error);
       toast.error("Customer ID not found");
     } finally {
@@ -162,7 +182,7 @@ const Book = () => {
     setSelectedService(service);
   };
 
-  //15 DAY PASS  
+  //15 DAY PASS
   const handleClosePassModal = () => setShowPassModal(false);
   const handleShowPassModal = () => setShowPassModal(true);
 
@@ -170,10 +190,9 @@ const Book = () => {
   const handleShowCardModal = () => setShowCardModal(true);
 
   const handleCheckPass = () => {
-    
-  handleClosePassModal(); // Close the pass modal
-  handleShowCardModal(); // Show the card modal
-};
+    handleClosePassModal(); // Close the pass modal
+    handleShowCardModal(); // Show the card modal
+  };
 
   return (
     <div className="container mt-5">
@@ -186,6 +205,7 @@ const Book = () => {
             type="date"
             value={currentDate}
             onChange={(e) => setCurrentDate(e.target.value)}
+            min={new Date().toISOString().split("T")[0]}
           />
         </div>
         <hr />
@@ -196,6 +216,11 @@ const Book = () => {
             value={time}
             onChange={(e) => setTime(e.target.value)}
           />
+          {errorTime && (
+            <p className="text-danger">
+              Please select a time at least one hour from now.
+            </p>
+          )}
         </div>
         <hr />
         <Service
@@ -219,20 +244,35 @@ const Book = () => {
                   setEmail,
                   "Enter email"
                 )}
-                {renderInput(
-                  "Contact Number",
-                  "text",
-                  contactNumber,
-                  setContactNumber,
-                  "Enter contact number"
-                )}
+                <div className="mb-3">
+                  <label className="form-label">Contact Number</label>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      errorContactNumber ? "is-invalid" : ""
+                    }`}
+                    placeholder="Enter contact number"
+                    value={contactNumber}
+                    onChange={(e) => setContactNumber(e.target.value)}
+                  />
+                  {errorContactNumber && (
+                    <div className="invalid-feedback">
+                      Contact number must be valid.
+                    </div>
+                  )}
+                </div>
               </form>
             </div>
             <div className="panel-2 col-md-6">
               <div className="card">
                 <h1 className="pb-3">Have you got a 15-day pass?</h1>
                 <div>
-                  <button className="btn btn-primary-clr" onClick={handleShowPassModal}>Use</button>
+                  <button
+                    className="btn btn-primary-clr"
+                    onClick={handleShowPassModal}
+                  >
+                    Use
+                  </button>
                   <button className="btn btn-secondary-clr">Learn more</button>
                 </div>
               </div>
@@ -257,11 +297,13 @@ const Book = () => {
               </form>
             </div>
           </div>
-        </div> 
+        </div>
         {/* POP UP 15 DAY PASS */}
         <Modal show={showPassModal} onHide={handleClosePassModal} centered>
           <Modal.Header closeButton>
-            <Modal.Title className="w-100 text-center">Use 15 Day Pass</Modal.Title>
+            <Modal.Title className="w-100 text-center">
+              Use 15 Day Pass
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <form>
@@ -288,7 +330,10 @@ const Book = () => {
             </form>
           </Modal.Body>
           <Modal.Footer>
-            <button className="btn btn-secondary-clr" onClick={handleClosePassModal}>
+            <button
+              className="btn btn-secondary-clr"
+              onClick={handleClosePassModal}
+            >
               Close
             </button>
             <button className="btn btn-primary-clr" onClick={handleCheckPass}>
@@ -297,76 +342,79 @@ const Book = () => {
           </Modal.Footer>
         </Modal>
         {/* POP UP 15 DAY PASS END*/}
-        
-         {/* POP UP CARD */}
-      <Modal show={showCardModal} onHide={handleCloseCardModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title className="w-100 text-center">Card Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="d-flex justify-content-center">
-          <div className="pass">
-            <div className="header d-flex">
-              <div>
-                <img src={logo} height="40px" alt="Logo" />
-              </div>
-              <div>Studeo Spaces</div>
-            </div>
-            <div className="body">
-              <div className="center d-flex">
-                <div className="bullets-1">
-                  <div className="bullet">1</div>
-                  <div className="bullet">2</div>
-                  <div className="bullet">3</div>
-                  <div className="bullet">4</div>
-                  <div className="bullet">5</div>
-                </div>
-                <div className="user-id text-center">
-                  <div className="id-picture"></div>
-                  <div className="name title">Name</div>
-                  <div className="name sub-title">Name</div>
-                  <div className="id title">ID No.</div>
-                  <div className="id sub-title">ID No.</div>
-                  <div className="address title">Address</div>
-                  <div className="address sub-title">Address</div>
-                  <div className="contactNo title">Contact No.</div>
-                  <div className="contactNo sub-title">Contact No.</div>
-                </div>
-                <div className="bullets-1">
-                  <div className="bullet">11</div>
-                  <div className="bullet">12</div>
-                  <div className="bullet">13</div>
-                  <div className="bullet">14</div>
-                  <div className="bullet">15</div>
-                </div>
-              </div>
-              <div className="bottom bullets-2 d-flex justify-content-between">
-                <div className="bullet">6</div>
-                <div className="bullet">7</div>
-                <div className="bullet">8</div>
-                <div className="bullet">9</div>
-                <div className="bullet">10</div>
-              </div>
-            </div>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-        <button className="btn btn-secondary-clr" onClick={() => {
-                  setShowCardModal(false); // Close the card modal
-                  setShowPassModal(true); // Open the "15 Day Pass" modal
-        }}>
-              Close
-          </button>
-          <button className="btn btn-primary-clr" onClick={handleCheckPass}>
-              Share 
-          </button>
-          <button className="btn btn-primary-clr" onClick={handleCheckPass}>
-              Use 
-          </button>
-        </Modal.Footer>
-      </Modal>
-      {/* POP UP CARD END */}
 
-        <hr />
+        {/* POP UP CARD */}
+        <Modal show={showCardModal} onHide={handleCloseCardModal} centered>
+          <Modal.Header closeButton>
+            <Modal.Title className="w-100 text-center">
+              Card Details
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="d-flex justify-content-center">
+            <div className="pass">
+              <div className="header d-flex">
+                <div>
+                  <img src={logo} height="40px" alt="Logo" />
+                </div>
+                <div>Studeo Spaces</div>
+              </div>
+              <div className="body">
+                <div className="center d-flex">
+                  <div className="bullets-1">
+                    <div className="bullet">1</div>
+                    <div className="bullet">2</div>
+                    <div className="bullet">3</div>
+                    <div className="bullet">4</div>
+                    <div className="bullet">5</div>
+                  </div>
+                  <div className="user-id text-center">
+                    <div className="id-picture"></div>
+                    <div className="name title">Name</div>
+                    <div className="name sub-title">Name</div>
+                    <div className="id title">ID No.</div>
+                    <div className="id sub-title">ID No.</div>
+                    <div className="address title">Address</div>
+                    <div className="address sub-title">Address</div>
+                    <div className="contactNo title">Contact No.</div>
+                    <div className="contactNo sub-title">Contact No.</div>
+                  </div>
+                  <div className="bullets-1">
+                    <div className="bullet">11</div>
+                    <div className="bullet">12</div>
+                    <div className="bullet">13</div>
+                    <div className="bullet">14</div>
+                    <div className="bullet">15</div>
+                  </div>
+                </div>
+                <div className="bottom bullets-2 d-flex justify-content-between">
+                  <div className="bullet">6</div>
+                  <div className="bullet">7</div>
+                  <div className="bullet">8</div>
+                  <div className="bullet">9</div>
+                  <div className="bullet">10</div>
+                </div>
+              </div>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <button
+              className="btn btn-secondary-clr"
+              onClick={() => {
+                setShowCardModal(false); // Close the card modal
+                setShowPassModal(true); // Open the "15 Day Pass" modal
+              }}
+            >
+              Close
+            </button>
+            <button className="btn btn-primary-clr" onClick={handleCheckPass}>
+              Share
+            </button>
+            <button className="btn btn-primary-clr" onClick={handleCheckPass}>
+              Use
+            </button>
+          </Modal.Footer>
+        </Modal>
+        {/* POP UP CARD END */}
         {/* Select Payment Method */}
         <hr />
         <div className="container">
