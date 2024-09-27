@@ -20,7 +20,7 @@ const Book = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [contactNumber, setContactNumber] = useState("");
-  const [errorContactNumber, setErrorContactNumber] = useState(false);
+  const [errorContactNumber, setErrorContactNumber] = useState();
   const [paymentMethod, setPaymentMethod] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
   const [customerID, setCustomerID] = useState("");
@@ -45,10 +45,12 @@ const Book = () => {
     }
   }, [currentDate, time]);
 
-  useEffect(() => {
-    const isValid = /^\d{11}$/.test(contactNumber); // Check if the number has exactly 11 digits and is numeric
+  const handleContactNumberChange = (e) => {
+    const value = e.target.value.replace(/\D/g, ""); // Remove non-digit characters
+    setContactNumber(value);
+    const isValid = /^\d{11}$/.test(value); // Validate the updated value
     setErrorContactNumber(!isValid);
-  }, [contactNumber]);
+  };
 
   useEffect(() => {
     if (serviceId) {
@@ -253,11 +255,12 @@ const Book = () => {
                     }`}
                     placeholder="Enter contact number"
                     value={contactNumber}
-                    onChange={(e) => setContactNumber(e.target.value)}
+                    onChange={handleContactNumberChange}
                   />
                   {errorContactNumber && (
                     <div className="invalid-feedback">
-                      Contact number must be valid.
+                      Contact number must be exactly 11 digits and contain only
+                      numbers.
                     </div>
                   )}
                 </div>
