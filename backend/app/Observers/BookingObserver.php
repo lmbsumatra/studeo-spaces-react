@@ -49,6 +49,7 @@ class BookingObserver
      */
     protected function updateServiceAvailability(Booking $booking)
     {
+        /*
         $service = $booking->service;
 
         $bookings = Booking::where('service_id', $service->id)
@@ -68,5 +69,6 @@ class BookingObserver
                 'available_seats' => $availableSeats,
             ]
         );
+    */
     }
 }

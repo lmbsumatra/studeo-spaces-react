@@ -33,6 +33,7 @@ const Book = () => {
   const [showPassModal, setShowPassModal] = useState(false);
   const [showCardModal, setShowCardModal] = useState(false);
   const [passID, setPassID] = useState("");
+  const [customerDetails, setCustomerDetails] = useState({});
 
   useEffect(() => {
     const now = new Date();
@@ -191,9 +192,22 @@ const Book = () => {
   const handleCloseCardModal = () => setShowCardModal(false);
   const handleShowCardModal = () => setShowCardModal(true);
 
-  const handleCheckPass = () => {
-    handleClosePassModal(); // Close the pass modal
-    handleShowCardModal(); // Show the card modal
+  const handleCheckPass = async () => {
+    try {
+      const response = await axios.post(`${baseApiUrl}check-pass`, {
+        customer_id: customerID,
+        pass_id: passID,
+      });
+      setPassID(response.data.pass);
+      setCustomerDetails(response.data.customer); // Store customer details
+      handleShowCardModal();
+    } catch (error) {
+      console.error("Error checking pass:", error);
+      toast.error(error.response?.data?.error || "Error checking pass");
+      handleClosePassModal();
+    } finally {
+      setLoading(false);
+  }
   };
 
   return (
@@ -306,7 +320,7 @@ const Book = () => {
           <Modal.Header closeButton>
             <Modal.Title className="w-100 text-center">
               Use 15 Day Pass
-            </Modal.Title>
+            </Modal.Title>    
           </Modal.Header>
           <Modal.Body>
             <form>
@@ -320,7 +334,7 @@ const Book = () => {
                   onChange={(e) => setPassID(e.target.value)}
                 />
               </div>
-              <div className="mb-3">
+              <div className="mb-3">  
                 <label className="form-label">Enter your Customer ID</label>
                 <input
                   type="text"
@@ -348,75 +362,74 @@ const Book = () => {
 
         {/* POP UP CARD */}
         <Modal show={showCardModal} onHide={handleCloseCardModal} centered>
-          <Modal.Header closeButton>
-            <Modal.Title className="w-100 text-center">
-              Card Details
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body className="d-flex justify-content-center">
-            <div className="pass">
-              <div className="header d-flex">
-                <div>
-                  <img src={logo} height="40px" alt="Logo" />
-                </div>
-                <div>Studeo Spaces</div>
-              </div>
-              <div className="body">
-                <div className="center d-flex">
-                  <div className="bullets-1">
-                    <div className="bullet">1</div>
-                    <div className="bullet">2</div>
-                    <div className="bullet">3</div>
-                    <div className="bullet">4</div>
-                    <div className="bullet">5</div>
-                  </div>
-                  <div className="user-id text-center">
-                    <div className="id-picture"></div>
-                    <div className="name title">Name</div>
-                    <div className="name sub-title">Name</div>
-                    <div className="id title">ID No.</div>
-                    <div className="id sub-title">ID No.</div>
-                    <div className="address title">Address</div>
-                    <div className="address sub-title">Address</div>
-                    <div className="contactNo title">Contact No.</div>
-                    <div className="contactNo sub-title">Contact No.</div>
-                  </div>
-                  <div className="bullets-1">
-                    <div className="bullet">11</div>
-                    <div className="bullet">12</div>
-                    <div className="bullet">13</div>
-                    <div className="bullet">14</div>
-                    <div className="bullet">15</div>
-                  </div>
-                </div>
-                <div className="bottom bullets-2 d-flex justify-content-between">
-                  <div className="bullet">6</div>
-                  <div className="bullet">7</div>
-                  <div className="bullet">8</div>
-                  <div className="bullet">9</div>
-                  <div className="bullet">10</div>
-                </div>
-              </div>
-            </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <button
-              className="btn btn-secondary-clr"
-              onClick={() => {
-                setShowCardModal(false); // Close the card modal
-                setShowPassModal(true); // Open the "15 Day Pass" modal
-              }}
-            >
-              Close
-            </button>
-            <button className="btn btn-primary-clr" onClick={handleCheckPass}>
-              Share
-            </button>
-            <button className="btn btn-primary-clr" onClick={handleCheckPass}>
-              Use
-            </button>
-          </Modal.Footer>
-        </Modal>
+           <Modal.Header closeButton>
+            <Modal.Title className="w-100 text-center">Card Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="d-flex justify-content-center">
+      <div className="pass">
+      <div className="header d-flex">
+        <div>
+          <img src={logo} height="40px" alt="Logo" />
+        </div>
+        <div>Studeo Spaces</div>
+      </div>
+      <div className="body">
+        <div className="center d-flex">
+          <div className="bullets-1">
+            <div className="bullet">1</div>
+            <div className="bullet">2</div>
+            <div className="bullet">3</div>
+            <div className="bullet">4</div>
+            <div className="bullet">5</div>
+          </div>
+          <div className="user-id text-center">
+            <div className="id-picture"></div>
+            <div className="name title">Name</div>
+            <div className="name sub-title">{customerDetails?.name || 'N/A'}</div>
+            <div className="id title">ID No.</div>
+            <div className="id sub-title">{customerDetails?.id || 'N/A'}</div>
+            <div className="address title">Address</div>
+            <div className="address sub-title">{customerDetails?.address || 'N/A'}</div>
+            <div className="contactNo title">Contact No.</div>
+            <div className="contactNo sub-title">{customerDetails?.contactNo || 'N/A'}</div>
+          </div>
+          <div className="bullets-1">
+            <div className="bullet">11</div>
+            <div className="bullet">12</div>
+            <div className="bullet">13</div>
+            <div className="bullet">14</div>
+            <div className="bullet">15</div>
+          </div>
+        </div>
+        <div className="bottom bullets-2 d-flex justify-content-between">
+          <div className="bullet">6</div>
+          <div className="bullet">7</div>
+          <div className="bullet">8</div>
+          <div className="bullet">9</div>
+          <div className="bullet">10</div>
+        </div>
+      </div>
+    </div>
+  </Modal.Body>
+  <Modal.Footer>
+    <button
+      className="btn btn-secondary-clr"
+      onClick={() => {
+        setShowCardModal(false); // Close the card modal
+        setShowPassModal(true); // Open the "15 Day Pass" modal
+      }}
+    >
+      Close
+    </button>
+    <button className="btn btn-primary-clr" onClick={handleCheckPass}>
+      Share
+    </button>
+    <button className="btn btn-primary-clr" onClick={handleCheckPass}>
+      Use
+    </button>
+  </Modal.Footer>
+</Modal>
+
         {/* POP UP CARD END */}
         {/* Select Payment Method */}
         <hr />
