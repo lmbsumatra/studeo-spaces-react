@@ -19,6 +19,8 @@
     "react-calendar": "^5.0.0",
     "react-datepicker": "^6.9.0",
     "react-dom": "^18.3.1",
+    "react-facebook": "^9.0.12",
+    "react-messenger-chat-plugin": "^3.0.5",
     "react-router-dom": "^6.23.1",
     "react-scripts": "^5.0.1",
     "react-slick": "^0.30.2",

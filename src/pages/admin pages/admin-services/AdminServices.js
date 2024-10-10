@@ -15,6 +15,7 @@ const AdminServices = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [date, setDate] = useState(new Date());
+  const [isMappingActive, setMappingActive] = useState(false);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -82,14 +83,11 @@ const AdminServices = () => {
     );
 
     try {
-      const response = await fetch(
-        `${baseApiUrl}services-availability/${id}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ availability: newAvailability }),
-        }
-      );
+      const response = await fetch(`${baseApiUrl}services-availability/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ availability: newAvailability }),
+      });
 
       if (!response.ok) throw new Error("Failed to update availability");
 
@@ -112,6 +110,11 @@ const AdminServices = () => {
     navigate(`/admin/edit-service/${id}`);
   };
 
+  const handleViewMapping = () => {
+    setMappingActive(!isMappingActive);
+    console.log(isMappingActive);
+  };
+
   return (
     <section className="container items mt-5" id="admin-services">
       <h1 className="fs-700 ff-serif text-center">Admin Services</h1>
@@ -119,7 +122,11 @@ const AdminServices = () => {
         <Link to="/admin/add-service" className="btn btn-success">
           Add Service
         </Link>
+        <button className="btn btn-primary" onClick={handleViewMapping}>
+          Overview
+        </button>
       </div>
+
       {isLoading ? (
         <div className="text-center">
           <Spinner animation="border" />
@@ -216,6 +223,39 @@ const AdminServices = () => {
           </div>
         </>
       )}
+      <div className={`container-map ${isMappingActive ? "active" : ""}`}>
+        <div className="bg-white w-100 h-100">
+          Mapping
+          <div className="d-flex">
+            <div className="seat">GBD01</div>
+            <div className="seat">GBD02</div>
+            <div className="seat">GBD03</div>
+            <div className="seat">GBD04</div>
+            <div className="seat">GBD05</div>
+          </div>
+          <div className="d-flex">
+            <div className="seat">GBD06</div>
+            <div className="seat">GBD07</div>
+            <div className="seat">GBD08</div>
+            <div className="seat">GBD09</div>
+            <div className="seat">GBD10</div>
+          </div>
+
+          <select>
+            <option>Ground Floor</option>
+            <option>Second Floor</option>
+            <option>Third Floor</option>
+          </select>
+
+          <div>
+            Status
+            Available
+            Reserved
+            Unavailable
+            Occupied
+          </div>
+        </div>
+      </div>
     </section>
   );
 };
