@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import Hero from "../components/hero/Hero";
 import Service from "../components/services/Service";
@@ -11,6 +12,7 @@ const HomeScreen = () => {
   return (
     <div>
       <Hero />
+      HELLLOOO
       <Service title="Top Services" show={3} isBookingPage={false} />
       <Blogs />
       <Messenger />
