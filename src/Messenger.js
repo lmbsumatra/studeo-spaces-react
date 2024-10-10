@@ -2,7 +2,7 @@
 import React from "react";
 import { FacebookProvider, CustomChat } from "react-facebook";
 
-const HomeScreen = () => {
+const Messenger = () => {
   return (
     <div>
       <FacebookProvider appId="1055141332568092" chatSupport>
