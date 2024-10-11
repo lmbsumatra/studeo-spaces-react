@@ -13,6 +13,7 @@ class MessageController extends Controller
             'email' => 'required|email|max:255',
             'name' => 'required|string|max:255',
             'message' => 'required|string',
+            'message_type' => 'string',
         ]);
 
         $message = Message::create($validatedData);

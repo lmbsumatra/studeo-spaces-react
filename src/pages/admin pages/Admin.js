@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/header/Sidebar";
 import { Outlet, useNavigate } from "react-router-dom";
 import io from "socket.io-client";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./style.css";
 import { baseSocketUrl } from "../../App";
@@ -48,18 +48,16 @@ const Admin = () => {
   };
 
   useEffect(() => {
-    // Log connection status
+    const socket = io(`${baseSocketUrl}:3002`, { transports: ['websocket'] });
+  
     socket.on("connect", () => {
       // console.log("Socket connected:", socket.id);
     });
-
-    // Listen for the 'Notification' event
+  
     socket.on("Notification", (data) => {
-      // console.log("Notification received:", data);
       const { message, type } = data;
-      const category = notificationTypes[type] || "info"; // Get notification category
-
-      // Show appropriate toast based on category
+      const category = notificationTypes[type] || "info";
+  
       switch (category) {
         case "success":
           toast.success(message, {
@@ -82,18 +80,19 @@ const Admin = () => {
           });
       }
     });
-
-    // Handle disconnect
+  
     socket.on("disconnect", () => {
       // console.log("Socket disconnected");
     });
-
+  
     return () => {
       socket.off("Notification");
       socket.off("connect");
       socket.off("disconnect");
+      socket.disconnect(); // Clean up socket connection
     };
-  }, [navigate, socket]);
+  }, [navigate]);
+  
 
   return (
     <div>
@@ -101,8 +100,7 @@ const Admin = () => {
         <Sidebar isExpanded={isSidebarExpanded} toggleSidebar={toggleSidebar} />
       </div>
       <main className={`main-content ${isSidebarExpanded ? "expanded" : "collapsed"}`}>
-        <Outlet />
-        {/* <ToastContainer /> */}
+        <Outlet/>
       </main>
     </div>
   );

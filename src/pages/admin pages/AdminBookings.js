@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { baseApiUrl } from "../../App";
+import { formatTimeTo12Hour } from "../../utils/timeFormat";
+import { formatDate } from "../../utils/dateFormat";
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -8,14 +10,6 @@ const AdminBookings = () => {
   const [sortedBookings, setSortedBookings] = useState([]);
   const [sortOption, setSortOption] = useState("default");
   const [isLoading, setLoading] = useState(true);
-
-  const formatTimeTo12Hour = (time) => {
-    let [hours, minutes] = time.split(":");
-    hours = parseInt(hours, 10);
-    const period = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12 || 12; // Convert to 12-hour format
-    return `${hours}:${minutes} ${period}`;
-  };
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -147,6 +141,7 @@ const AdminBookings = () => {
                 <th scope="col">Customer Name</th>
                 <th scope="col">Service</th>
                 <th scope="col">Payment</th>
+                <th scope="col">Date</th>
                 <th scope="col">Time</th>
                 <th scope="col">Payment Status</th>
               </tr>
@@ -158,6 +153,7 @@ const AdminBookings = () => {
                   <td>{booking.customer?.name}</td>
                   <td>{booking.service?.name}</td>
                   <td>{booking.service?.price}</td>
+                  <td>{formatDate(booking.date)}</td>
                   <td>{formatTimeTo12Hour(booking.time)}</td>
                   <td>
                     <select

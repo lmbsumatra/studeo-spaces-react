@@ -18,8 +18,6 @@ const Header = () => {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const socket = io(`${baseSocketUrl}:3002`, { transports: ['websocket'] });
-
 
   const isAdminPath = location.pathname.startsWith("/admin");
 
@@ -38,37 +36,38 @@ const Header = () => {
         console.error("Error fetching notifications:", error);
       }
     };
-  
-    // Fetch notifications once on mount
+
+    const socket = io(`${baseSocketUrl}:3002`, { transports: ["websocket"] });
+
+    // Fetch notifications on mount
     fetchNotifications();
-  
-    // Adjusted interval for fetching notifications
-    const intervalId = setInterval(fetchNotifications, 30000);
-  
-    // Socket connection
+
+    // Poll for notifications every 30 seconds
+    const intervalId = setInterval(fetchNotifications, 20000);
+
+    // Socket connection to listen for new notifications
     socket.on("connect", () => {
-      // console.log("Socket connected");
-      // Optionally fetch notifications again to ensure the latest state
+      console.log("Socket connected");
     });
-  
+
     socket.on("notification", (newNotification) => {
       setNotifications((prev) => [...prev, newNotification]);
       setUnreadCount((prev) => prev + 1);
       toast.info("New notification received!");
     });
-  
+
+    // Cleanup on unmount
     return () => {
       clearInterval(intervalId);
       socket.off("notification");
-      socket.off("connect");
+      socket.disconnect();
     };
-  }, [socket]);
-  
+  }, []);
 
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
     if (!showNotifications) {
-      setUnreadCount(0);
+      setUnreadCount(0); // Mark notifications as read
     }
   };
 
@@ -94,14 +93,14 @@ const Header = () => {
       case "message":
         return `${customer_name} sent you a message: ${message}`;
       default:
-        return `You has a new notification: ${message}`;
+        return `You have a new notification: ${message}`;
     }
   };
 
   return (
     <nav className="navbar">
       <div className="container-fluid">
-        <NavLink to="/" className="navbar-brand" ></NavLink>
+        <NavLink to="/" className="navbar-brand"></NavLink>
         <div>
           <ul className="navbar-nav">
             {isAdminPath ? (

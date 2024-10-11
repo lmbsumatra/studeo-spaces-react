@@ -12,25 +12,25 @@ import {
 import axios from "axios";
 import io from "socket.io-client";
 import { toast } from "react-toastify";
-import {baseApiUrl, baseSocketUrl} from "../App.js"
+import { baseApiUrl, baseSocketUrl } from "../App.js";
 
 const FAQs = () => {
   const [formData, setFormData] = useState({
     email: "",
     name: "",
     message: "",
+    message_type: "",
   });
   const [loading, setLoading] = useState(false); // Loading state
 
-  const socket = io(`${baseSocketUrl}:3002`, { transports: ['websocket'] });
+  const socket = io(`${baseSocketUrl}:3002`, { transports: ["websocket"] });
 
   const testNotificationData = {
     customer_id: null,
-    customer_name: "Customer",
+    customer_name: formData.name,
     message: `${formData.name} has sent you a message: ${formData.message}`,
     type: "customer_message", // Match this type with the keys in notificationTypes
   };
-
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -39,13 +39,17 @@ const FAQs = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); // Set loading to true when form is submitted
+
+    // Create a copy of formData with message_type defaulting to "inquiry" if empty
+    const dataToSend = {
+      ...formData,
+      message_type: formData.message_type || "inquiry",
+    };
+
     try {
       // Sending the message
-      await axios.post(`${baseApiUrl}messages`, formData);
-      await axios.post(
-        `${baseApiUrl}notifications`,
-        testNotificationData
-      );
+      await axios.post(`${baseApiUrl}messages`, dataToSend);
+      await axios.post(`${baseApiUrl}notifications`, testNotificationData);
 
       // Notify user about success
       toast.success(
@@ -54,7 +58,7 @@ const FAQs = () => {
       socket.emit("Notification", testNotificationData);
 
       // Clear form fields after successful submission
-      setFormData({ email: "", name: "", message: "" });
+      setFormData({ email: "", name: "", message: "", message_type: "" });
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Oops! Failed to send message. Please try again.");
@@ -102,7 +106,7 @@ const FAQs = () => {
                   Are you open during the holidays?
                 </Accordion.Header>
                 <Accordion.Body>
-                  Studeo Spaces is open everyday, from Monday to Sunday, from
+                  Studeo Spaces is open every day, from Monday to Sunday, from
                   8:00 AM to 3:00 AM the following day. We are open even during
                   national, city and special holidays and inclement weather. And
                   we NEVER close due to private events since we don’t host them.
@@ -146,17 +150,39 @@ const FAQs = () => {
                 className="mb-3"
                 controlId="exampleFormControlTextarea1"
               >
-                <Form.Label>Message</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={3}
-                  placeholder="Enter your message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  disabled={loading} // Disable input when loading
-                />
+                <div className="d-flex">
+                  <div className="flex-grow-1 m-2">
+                    <Form.Label>Message</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      placeholder="Enter your message"
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      required
+                      disabled={loading} // Disable input when loading
+                    />
+                  </div>
+                  <div className="w-25 m-2">
+                    <Form.Label>Type of Message</Form.Label>
+                    <Form.Select
+                      name="message_type"
+                      value={formData.message_type}
+                      onChange={handleChange}
+                      required
+                      disabled={loading} // Disable input when loading
+                    >
+                      <option value="">Select a message type</option>
+                      <option value="nquiry">Inquiry</option>
+                      <option value="feedback">Feedback</option>
+                      <option value="complaint">Complaint</option>
+                      <option value="request">Request</option>
+                      <option value="suggestion">Suggestion</option>
+                      <option value="other">Other</option>
+                    </Form.Select>
+                  </div>
+                </div>
               </Form.Group>
               <Button
                 variant="primary"

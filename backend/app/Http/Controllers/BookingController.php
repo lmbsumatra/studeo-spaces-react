@@ -83,14 +83,16 @@ class BookingController extends Controller
 
     public function index()
     {
-        $bookings = Booking::with(['customer', 'service'])->get();
+        // Fetch bookings with customer and service relations, sorted by created_at in descending order
+        $bookings = Booking::with(['customer', 'service'])->orderBy('created_at', 'desc')->get();
         return response()->json($bookings);
     }
+
 
     public function show($refNumber)
     {
         $booking = Booking::with(['customer', 'service'])->where('refNumber', $refNumber)->first();
-        
+
         if ($booking) {
             return response()->json($booking);
         } else {
@@ -134,8 +136,8 @@ class BookingController extends Controller
         }
 
         $pass = Pass::where('customer_id', $customer->id)
-                    ->where('remaining_days', '>', 0)
-                    ->first();
+            ->where('remaining_days', '>', 0)
+            ->first();
 
         if (!$pass) {
             return response()->json(['error' => 'No valid 15-day pass found for this customer'], 404);

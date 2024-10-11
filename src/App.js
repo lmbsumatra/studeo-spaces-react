@@ -27,7 +27,7 @@ import Payment from "./pages/PaymentScreen";
 import BookingSummary from "./pages/BookingSummary";
 import BookingDetails from "./pages/BookingDetails";
 import AdminLogin from "./pages/admin pages/AdminLoginScreen";
-import AdminDashboard from "./pages/admin pages/AdminDashboard";
+import AdminDashboard from "./pages/admin pages/admin-dashboard/AdminDashboard";
 import AdminBookings from "./pages/admin pages/AdminBookings";
 import AdminCustomers from "./pages/admin pages/AdminCustomers";
 import AdminPayments from "./pages/admin pages/AdminPayments";
@@ -118,5 +118,4 @@ const AppWrapper = () => (
 export default AppWrapper;
 
 export const baseApiUrl = `http://${window.location.hostname}:8000/api/`;
-// console.log(baseApiUrl);
 export const baseSocketUrl = `http://${window.location.hostname}`;

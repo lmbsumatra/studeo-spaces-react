@@ -5,17 +5,18 @@ import "./style.css";
 import { toast } from "react-toastify";
 import { Spinner } from "react-bootstrap";
 import { baseApiUrl } from "../../../App";
+import MappingOverview from "./mapping/MappingOverview";
 
 const AdminServices = () => {
   const [services, setServices] = useState([]);
   const [availableSeats, setAvailableSeats] = useState([]);
-  const [selectedService, setSelectedService] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingServiceIds, setLoadingServiceIds] = useState({});
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [date, setDate] = useState(new Date());
   const [isMappingActive, setMappingActive] = useState(false);
+  const [isOverlayActive, setOverlayActive] = useState(false);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -53,6 +54,7 @@ const AdminServices = () => {
     };
     fetchAvailableSeats();
   }, [date]);
+
   const handleDelete = async (id) => {
     setLoadingServiceIds((prev) => ({ ...prev, [id]: true }));
     try {
@@ -88,9 +90,7 @@ const AdminServices = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ availability: newAvailability }),
       });
-
       if (!response.ok) throw new Error("Failed to update availability");
-
       toast.success(`Successfully changed availability for ${id}.`);
     } catch (error) {
       setServices((prevServices) =>
@@ -111,8 +111,13 @@ const AdminServices = () => {
   };
 
   const handleViewMapping = () => {
-    setMappingActive(!isMappingActive);
-    console.log(isMappingActive);
+    setMappingActive((prev) => !prev);
+    setOverlayActive((prev) => !prev);
+  };
+
+  const handleCloseOverlay = () => {
+    setMappingActive(false);
+    setOverlayActive(false);
   };
 
   return (
@@ -140,7 +145,6 @@ const AdminServices = () => {
                 (seat) => seat.service_id === service.id
               );
               const availableCount = seatData ? seatData.available_seats : 0;
-
               return (
                 <div
                   className="col-lg-4 col-md-6 col-sm-12 mb-4"
@@ -223,39 +227,10 @@ const AdminServices = () => {
           </div>
         </>
       )}
-      <div className={`container-map ${isMappingActive ? "active" : ""}`}>
-        <div className="bg-white w-100 h-100">
-          Mapping
-          <div className="d-flex">
-            <div className="seat">GBD01</div>
-            <div className="seat">GBD02</div>
-            <div className="seat">GBD03</div>
-            <div className="seat">GBD04</div>
-            <div className="seat">GBD05</div>
-          </div>
-          <div className="d-flex">
-            <div className="seat">GBD06</div>
-            <div className="seat">GBD07</div>
-            <div className="seat">GBD08</div>
-            <div className="seat">GBD09</div>
-            <div className="seat">GBD10</div>
-          </div>
-
-          <select>
-            <option>Ground Floor</option>
-            <option>Second Floor</option>
-            <option>Third Floor</option>
-          </select>
-
-          <div>
-            Status
-            Available
-            Reserved
-            Unavailable
-            Occupied
-          </div>
-        </div>
-      </div>
+      <MappingOverview
+        isActive={isMappingActive}
+        onClose={() => setMappingActive(false)}
+      />
     </section>
   );
 };

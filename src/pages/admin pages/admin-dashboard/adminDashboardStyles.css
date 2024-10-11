@@ -1,0 +1,44 @@
+.container .stats {
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.top-customer-container {
+  border: solid 1px #f0f0f0 ;
+  background-color: white;
+}
+
+.top-customer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.top-customer img {
+  height: 100px;
+  width: 100px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 100%;
+}
+
+.customers {
+  display: flex;
+  justify-content: space-around;
+}
+
+.customers .customer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.customers img {
+  height: 50px;
+  width: 50px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 100%;
+}

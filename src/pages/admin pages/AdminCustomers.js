@@ -27,13 +27,11 @@ const AdminCustomers = () => {
       <h1 className="mb-4">Customers</h1>
       {isLoading ? (
         <>
-          <p>
             <div className="text-center">
               <div className="spinner-border" role="status">
                 <span className="sr-only">Loading...</span>
               </div>
             </div>
-          </p>
         </>
       ) : customers.length === 0 ? (
         <p>No customers to show</p>

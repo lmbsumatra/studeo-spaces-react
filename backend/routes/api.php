@@ -8,6 +8,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ChartDataController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
@@ -56,3 +57,8 @@ Route::get('/admin-dashboard-data', [AdminDashboardController::class, 'getData']
 Route::post('/admins', [AuthController::class, 'login']);
 
 Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->middleware('admin.auth');
+
+
+Route::get('/booking-chart-data', [ChartDataController::class, 'booking']);
+Route::get('/top-customers-data', [ChartDataController::class, 'topCustomers']);
+Route::get('/user-growth-data', [ChartDataController::class, 'userGrowth']);
