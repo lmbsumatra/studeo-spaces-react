@@ -3,7 +3,7 @@ import React from "react";
 import Hero from "../components/hero/Hero";
 import Service from "../components/services/Service";
 import Blogs from "../components/blogs/Blogs";
-import Feedback from "../components/Feedback";
+import Feedback from "../components/feedback/Feedback";
 import Footer from "../components/Footer";
 import Messenger from "../Messenger";
 

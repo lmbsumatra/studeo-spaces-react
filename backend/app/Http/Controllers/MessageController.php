@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Message;
+use App\Models\Feedback; // Make sure to include the Feedback model
 
 class MessageController extends Controller
 {
@@ -16,7 +17,16 @@ class MessageController extends Controller
             'message_type' => 'string',
         ]);
 
+        // Create the message
         $message = Message::create($validatedData);
+
+        // Check if the message type is 'feedback' and create a feedback entry
+        if ($validatedData['message_type'] === 'feedback') {
+            Feedback::create([
+                'message_id' => $message->id,
+                'publish' => false, // Set to false or true based on your requirements
+            ]);
+        }
 
         return response()->json($message, 201);
     }

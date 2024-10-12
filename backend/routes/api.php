@@ -9,6 +9,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ChartDataController;
+use App\Http\Controllers\FeedbackController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
@@ -47,7 +48,8 @@ Route::delete('/services/{id}', [ServiceController::class, 'delete']);
 Route::get('/available', [ServiceController::class, 'available']);
 Route::patch('/services/{id}/available-seats', [ServiceController::class, 'updateAvailableSeats']);
 
-
+Route::get('/feedbacks', [FeedbackController::class, 'index']);
+Route::patch('/feedbacks/{feedbackId}', [FeedbackController::class, 'update']);
 Route::post('/bookings/cancel/{refNumber}', [BookingController::class, 'cancel']);
 Route::put('/bookings/{id}/status', [BookingController::class, 'updateStatus']);
 

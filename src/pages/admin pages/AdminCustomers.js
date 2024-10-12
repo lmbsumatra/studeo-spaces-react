@@ -37,7 +37,7 @@ const AdminCustomers = () => {
         <p>No customers to show</p>
       ) : (
         <div className="table-responsive">
-          <table className="table table-striped">
+          <table className="table table-bordered">
             <thead>
               <tr>
                 <th scope="col">Customer ID</th>

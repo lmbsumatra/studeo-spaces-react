@@ -4,7 +4,6 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./adminDashboardStyles.css";
 import { baseApiUrl } from "../../../App";
-import AdminBookings from "../AdminBookings";
 import { formatTimeTo12Hour } from "../../../utils/timeFormat";
 import BookingChart from "../../../components/charts/BookingChart";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +11,8 @@ import userImg from "../../../assets/images/icons/user.svg";
 import UserGrowthChart from "../../../components/charts/UserGrowthChart";
 import mail from "../../../assets/images/icons/mail.svg";
 import MessageCarousel from "../../../components/MessagesCarousel";
+
+import FeedbackCarousel from "../../../components/FeedbackCarousel";
 
 const AdminDashboard = () => {
   const [isLoading, setLoading] = useState(true);
@@ -28,15 +29,28 @@ const AdminDashboard = () => {
   const [bookingChartData, setBookingChartData] = useState([]);
   const [topCustomersData, setTopCustomersData] = useState([]);
   const [messages, setMessages] = useState([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchData(date);
-    fetchBookingChartData();
-    fetchBookings();
-    fetchTopCustomersData();
-    fetchMessages();
+    const fetchAllData = async () => {
+      setLoading(true);
+      try {
+        await fetchData(date);
+        await fetchBookingChartData();
+        await fetchBookings();
+        await fetchTopCustomersData();
+        await fetchMessages();
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchAllData();
   }, [date, messages]);
+  
 
   const fetchData = async (selectedDate) => {
     setLoading(true);
@@ -106,80 +120,151 @@ const AdminDashboard = () => {
       <div className="container mb-2">
         <h2 className="fs-600 ff-serif">Select Day</h2>
       </div>
+      {/* Overall booking overview */}
+      <div className="row">
+        {/* col 1 */}
+        <div className="col-12 col-md-6 col-lg-3 d-flex flex-column mb-3">
+          <Calendar onChange={setDate} value={date} className="calendar" />
+        </div>
 
-      {isLoading ? (
-        <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="sr-only">Loading...</span>
-          </div>
-        </div>
-      ) : (
-        <div className="row">
-          {/* col 1 */}
-          <div className="col-12 col-md-6 col-lg-3 d-flex flex-column mb-3">
-            <Calendar onChange={setDate} value={date} className="calendar" />
-          </div>
-          {/* col 2 */}
-          <div className="d-block col-12 col-md-6 col-lg-3 d-flex flex-column mb-3">
-            <div className="flex-fill mb-2">
-              <div className="card text-white bg-primary h-100 w-100">
-                <div className="card-body">
-                  <h5 className="card-title">Available Seats</h5>
-                  <p className="card-text fs-3">{data.availableSeats}</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex-fill mb-2">
-              <div className="card text-white bg-success h-100 w-100">
-                <div className="card-body">
-                  <h5 className="card-title">Booked Seats</h5>
-                  <p className="card-text fs-3">{data.bookedSeats}</p>
-                </div>
+        {/* col 2 */}
+        <div className="d-block col-12 col-md-6 col-lg-3 d-flex flex-column mb-3">
+          <div className="flex-fill mb-2">
+            <div className="card text-white bg-primary h-100 w-100">
+              <div className="card-body">
+                <h5 className="card-title">Available Seats</h5>
+                <p className="card-text fs-3">
+                  {isLoading ? (
+                    <span>
+                      <div
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                      >
+                        <span className="sr-only">Loading...</span>
+                      </div>
+                    </span>
+                  ) : (
+                    data.availableSeats
+                  )}
+                </p>
               </div>
             </div>
           </div>
-          {/* col 3 */}
-          <div className="d-block col-12 col-md-6 col-lg-3 d-flex flex-column mb-3">
-            <div className="flex-fill mb-2">
-              <div className="card text-white bg-info h-100 w-100">
-                <div className="card-body">
-                  <h5 className="card-title">Customers</h5>
-                  <p className="card-text fs-3">{data.numberOfCustomers}</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex-fill mb-2">
-              <div className="card text-white bg-warning h-100 w-100">
-                <div className="card-body">
-                  <h5 className="card-title">Total Sales</h5>
-                  <p className="card-text fs-3">
-                    ₱ {data.totalSales.toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* col 4 */}
-          <div className="d-block col-12 col-md-6 col-lg-3 d-flex flex-column mb-3">
-            <div className="flex-fill mb-2">
-              <div className="card text-white bg-danger h-100 w-100">
-                <div className="card-body">
-                  <h5 className="card-title">Pending Bookings</h5>
-                  <p className="card-text fs-3">{data.pendingBookings}</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex-fill mb-2">
-              <div className="card text-white bg-secondary h-100 w-100">
-                <div className="card-body">
-                  <h5 className="card-title">Canceled Bookings</h5>
-                  <p className="card-text fs-3">{data.canceledBookings}</p>
-                </div>
+          <div className="flex-fill mb-2">
+            <div className="card text-white bg-success h-100 w-100">
+              <div className="card-body">
+                <h5 className="card-title">Booked Seats</h5>
+                <p className="card-text fs-3">
+                  {isLoading ? (
+                    <span>
+                      <div
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                      >
+                        <span className="sr-only">Loading...</span>
+                      </div>
+                    </span>
+                  ) : (
+                    data.bookedSeats
+                  )}
+                </p>
               </div>
             </div>
           </div>
         </div>
-      )}
+
+        {/* col 3 */}
+        <div className="d-block col-12 col-md-6 col-lg-3 d-flex flex-column mb-3">
+          <div className="flex-fill mb-2">
+            <div className="card text-white bg-info h-100 w-100">
+              <div className="card-body">
+                <h5 className="card-title">Customers</h5>
+                <p className="card-text fs-3">
+                  {isLoading ? (
+                    <span>
+                      <div
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                      >
+                        <span className="sr-only">Loading...</span>
+                      </div>
+                    </span>
+                  ) : (
+                    data.numberOfCustomers
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex-fill mb-2">
+            <div className="card text-white bg-warning h-100 w-100">
+              <div className="card-body">
+                <h5 className="card-title">Total Sales</h5>
+                <p className="card-text fs-3">
+                  {isLoading ? (
+                    <span>
+                      <div
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                      >
+                        <span className="sr-only">Loading...</span>
+                      </div>
+                    </span>
+                  ) : (
+                    `₱ ${data.totalSales.toLocaleString()}`
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* col 4 */}
+        <div className="d-block col-12 col-md-6 col-lg-3 d-flex flex-column mb-3">
+          <div className="flex-fill mb-2">
+            <div className="card text-white bg-danger h-100 w-100">
+              <div className="card-body">
+                <h5 className="card-title">Pending Bookings</h5>
+                <p className="card-text fs-3">
+                  {isLoading ? (
+                    <span>
+                      <div
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                      >
+                        <span className="sr-only">Loading...</span>
+                      </div>
+                    </span>
+                  ) : (
+                    data.pendingBookings
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex-fill mb-2">
+            <div className="card text-white bg-secondary h-100 w-100">
+              <div className="card-body">
+                <h5 className="card-title">Canceled Bookings</h5>
+                <p className="card-text fs-3">
+                  {isLoading ? (
+                    <span>
+                      <div
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                      >
+                        <span className="sr-only">Loading...</span>
+                      </div>
+                    </span>
+                  ) : (
+                    data.canceledBookings
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <hr />
       <div className="fs-600">Studeo Spaces Statistics</div>
@@ -271,32 +356,32 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
-
+      
       {/* Messages Statistics */}
       <div className="container stats">
+      <h2 className="fs-600 ff-serif ">Message Overview</h2>
         <div className="row p-2">
           {/* Urgent */}
-          <div className="bg-danger rounded col-12 col-lg-4 p-2">
+          <div className="text-white bg-danger rounded col-12 col-lg-4 p-2">
             <h2 className="fs-600 ff-serif ">Needs Attention</h2>
             <div>
-              <MessageCarousel messages={messages} />
-              <button
-                className="btn btn-primary h-25"
-                onClick={() => handleViewAll("/admin/messages")}
-              >
-                View All Messages →
-              </button>
+              <MessageCarousel messages={messages} style={{ height: "50px" }} />
             </div>
           </div>
-          {/* Feedbacks */}
-          <div className="top-customer-container rounded col-12 col-lg-4 p-2">
-            <h2 className="fs-600 ff-serif ">Feedback</h2>
+          {/* Feedback */}
+          <div className="bg-dark text-white rounded col-12 col-lg-4 p-2">
+            <h2 className="fs-600 ff-serif ">Review Feedbacks</h2>
             <div>
-            <img src={userImg} style={{ height: "50px" }}/>
-              <MessageCarousel messages={messages} />
-
+              {!(<FeedbackCarousel style={{ height: "50px" }} />) ? (
+                <>
+                  <p>No Feeback Available</p>
+                </>
+              ) : (
+                <FeedbackCarousel style={{ height: "50px" }} />
+              )}
             </div>
           </div>
+
           {/* New Messages */}
           <div className="top-customer-container rounded col-12 col-lg-4 p-2">
             <h2 className="fs-600 ff-serif ">Recent Message</h2>
@@ -308,9 +393,18 @@ const AdminDashboard = () => {
                     className="d-flex justify-content-center"
                     style={{ height: "50px" }}
                   />
-                  <h3>{messages[0].message_type || "No message type"}</h3>
-                  <p>From: {messages[0].name || "Unknown sender"}</p>
-                  <p>{messages[0].message || "No message content"}</p>
+                  <h3>
+                    {messages[messages.length - 1].message_type ||
+                      "No message type"}
+                  </h3>
+                  <p>
+                    From:{" "}
+                    {messages[messages.length - 1].name || "Unknown sender"}
+                  </p>
+                  <p>
+                    {messages[messages.length - 1].message ||
+                      "No message content"}
+                  </p>
                   <div className="d-flex w-100 justify-content-between">
                     <button className="btn btn-warning text-white">
                       Mark as read
@@ -327,6 +421,12 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
+        <button
+          className="btn btn-primary h-25 d-block"
+          onClick={() => handleViewAll("/admin/messages")}
+        >
+          View All Messages →
+        </button>
       </div>
     </div>
   );

@@ -20,6 +20,7 @@ const links = [
   { path: "/admin/messages", label: "Messages", icon: messagesIcon },
   { path: "/admin/content-management", label: "Content Management", icon: contentManagementIcon },
   { path: "/admin/services", label: "Services", icon: servicesIcon },
+  { path: "/admin/feedbacks", label: "Feedback Management", icon: blogsIcon },
   { path: "/admin/blogs", label: "Blogs", icon: blogsIcon },
 ];
 

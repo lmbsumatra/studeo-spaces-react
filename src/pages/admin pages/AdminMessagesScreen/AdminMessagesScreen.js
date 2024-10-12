@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { baseApiUrl } from "../../../App";
+import { formatDate } from "../../../utils/dateFormat";
 
 const AdminMessagesScreen = () => {
   const [messages, setMessages] = useState([]);
@@ -44,6 +45,7 @@ const AdminMessagesScreen = () => {
                 <th>Name</th>
                 <th>Message</th>
                 <th>Date</th>
+                <th>Type</th>
               </tr>
             </thead>
             <tbody>
@@ -53,7 +55,8 @@ const AdminMessagesScreen = () => {
                   <td>{msg.email}</td>
                   <td>{msg.name}</td>
                   <td>{msg.message}</td>
-                  <td>{new Date(msg.created_at).toLocaleString()}</td>
+                  <td>{formatDate(msg.created_at)}</td>
+                  <td>{msg.message_type}</td>
                 </tr>
               ))}
             </tbody>

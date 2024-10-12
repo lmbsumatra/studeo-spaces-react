@@ -1,10 +1,8 @@
-// src/components/MessageCarousel.js
-
 import React from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import mail from "../assets/images/icons/mail.svg";
+import attention from "../assets/images/icons/attention.svg";
 
 const MessageCarousel = ({ messages }) => {
   const settings = {
@@ -15,18 +13,16 @@ const MessageCarousel = ({ messages }) => {
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 2000,
-    arrow: false
+    arrows: false
   };
 
   return (
-    <Slider {...settings}>
+    <Slider {...settings} style={{ padding: "0px", height: "auto" }}>
+
       {messages.map((message, index) => (
-        <div key={index} className="pb-3">
-          <img
-            src={mail}
-            className="d-flex justify-content-center"
-            style={{ height: "50px" }}
-          />
+        <div key={index} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+
+          <img src={attention} style={{ height: "50px" }} alt="mail icon" />
           <h3>{message.message_type}</h3>
           <p>From: {message.name}</p>
           <p>{message.message}</p>

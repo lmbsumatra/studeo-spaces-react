@@ -40,6 +40,7 @@ import Card from "./Card";
 import Admin from "../src/pages/admin pages/Admin";
 
 import PageNotAvailable from "./pages/PageNotAvailable";
+import AdminFeedbackScreen from "./pages/admin pages/admin-feedbacks/AdminFeedbackScreen";
 
 const App = () => {
   const location = useLocation();
@@ -80,6 +81,7 @@ const App = () => {
           <Route path="payments" element={<AdminPayments />} />
           <Route path="customers" element={<AdminCustomers />} />
           <Route path="messages" element={<AdminMessagesScreen />} />
+          <Route path="feedbacks" element={<AdminFeedbackScreen />} />
           <Route
             path="services"
             element={<AdminServices title="Admin Services Management" />}

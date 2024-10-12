@@ -165,7 +165,7 @@ const FAQs = () => {
                     />
                   </div>
                   <div className="w-25 m-2">
-                    <Form.Label>Type of Message</Form.Label>
+                    <Form.Label>Type</Form.Label>
                     <Form.Select
                       name="message_type"
                       value={formData.message_type}

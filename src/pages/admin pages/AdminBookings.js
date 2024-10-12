@@ -134,7 +134,7 @@ const AdminBookings = () => {
         <p>No bookings to show</p>
       ) : (
         <div className="table-responsive">
-          <table className="table table-striped">
+          <table className="table table-bordered">
             <thead>
               <tr>
                 <th scope="col">Booking ID</th>

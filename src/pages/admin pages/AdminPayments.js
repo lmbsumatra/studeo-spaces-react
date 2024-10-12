@@ -24,7 +24,7 @@ const AdminPayments = () => {
     <div className="container mt-5">
       <h1 className="mb-4">Payments</h1>
       <div className="table-responsive">
-        <table className="table table-striped">
+        <table className="table table-bordered">
           <thead>
             <tr>
               <th scope="col">Payment ID</th>
