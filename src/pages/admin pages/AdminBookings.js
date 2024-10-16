@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { baseApiUrl } from "../../App";
+import { formatTimeTo12Hour } from "../../utils/timeFormat";
+import { formatDate } from "../../utils/dateFormat"; // Assuming you have a date formatting function
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -10,6 +12,7 @@ const AdminBookings = () => {
   const [serviceFilter, setServiceFilter] = useState(""); // Default to all services
   const [statusFilter, setStatusFilter] = useState(""); // Default to all statuses
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [dateSortOption, setDateSortOption] = useState("default"); // State for date sorting
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,6 +55,13 @@ const AdminBookings = () => {
       });
     }
 
+    // Date sorting logic
+    if (dateSortOption === "dateAscend") {
+      sortedData.sort((a, b) => new Date(a.date) - new Date(b.date));
+    } else if (dateSortOption === "dateDescend") {
+      sortedData.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
     // Apply service filter (filter only if a specific service is selected)
     if (serviceFilter && serviceFilter !== "All Services") {
       sortedData = sortedData.filter(
@@ -76,7 +86,7 @@ const AdminBookings = () => {
     }
 
     setSortedBookings(sortedData);
-  }, [bookings, sortConfig, serviceFilter, statusFilter, statuses, searchQuery]); // Add all dependencies used in sorting/filtering logic
+  }, [bookings, sortConfig, serviceFilter, statusFilter, statuses, searchQuery, dateSortOption]); // Add dateSortOption as a dependency
 
   const handleSortChange = (key, direction) => {
     setSortConfig({ key, direction });
@@ -88,6 +98,10 @@ const AdminBookings = () => {
 
   const handleStatusFilterChange = (event) => {
     setStatusFilter(event.target.value); // Set selected status filter
+  };
+
+  const handleDateSortChange = (event) => {
+    setDateSortOption(event.target.value); // Set selected date sort option
   };
 
   const handleStatusChange = async (bookingId, newStatus) => {
@@ -166,6 +180,17 @@ const AdminBookings = () => {
               className="form-control"
             />
           </div>
+          <div className="mb-3">
+            <select
+              value={dateSortOption}
+              onChange={handleDateSortChange}
+              className="form-control form-control-sm"
+            >
+              <option value="default">Sort by Date</option>
+              <option value="dateAscend">Date (Oldest to Newest)</option>
+              <option value="dateDescend">Date (Newest to Oldest)</option>
+            </select>
+          </div>
           <div className="table-responsive">
             <table className="table table-bordered">
               <thead>
@@ -240,31 +265,33 @@ const AdminBookings = () => {
                     </select>
                   </th>
                   <th scope="col">
-                    Payment Status
+                    Status
                     <select
                       value={statusFilter} // Set the selected value
                       onChange={handleStatusFilterChange}
                       className="form-control form-control-sm"
                     >
                       <option value="All Statuses">All Statuses</option>
-                      <option value="Completed">Completed</option>
                       <option value="Pending">Pending</option>
+                      <option value="Completed">Completed</option>
                       <option value="Cancelled">Cancelled</option>
                     </select>
                   </th>
+                  <th scope="col">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {sortedBookings.map((booking) => (
                   <tr key={booking.id}>
-                    <th scope="row">{booking.id}</th>
+                    <td>{booking.id}</td>
                     <td>{booking.customer?.name}</td>
                     <td>{booking.service?.name}</td>
                     <td>{booking.service?.price}</td>
-                    <td>{booking.time}</td>
+                    <td>{formatTimeTo12Hour(booking.time)}</td>
+                    <td>{statuses[booking.id]}</td>
                     <td>
                       <select
-                        value={statuses[booking.id] || "Pending"}
+                        value={statuses[booking.id] || ""}
                         onChange={(e) =>
                           handleStatusChange(booking.id, e.target.value)
                         }
