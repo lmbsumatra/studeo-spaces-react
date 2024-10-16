@@ -188,20 +188,19 @@ const AdminMessagesScreen = () => {
               {sortedMessages.map((msg) => (
                 <tr key={msg.id}>
                   <td>{msg.id}</td>
-                  <td>
-                    <a
-                      href={`mailto:${msg.email}?subject=Response&body=Hello, ${msg.name},%0A%0A`}
-                    >
-                      {msg.email}
-                    </a>
-                  </td>
+                  <td>{msg.email}</td> 
                   <td>{msg.name}</td>
                   <td>{msg.message}</td>
                   <td>{formatDate(msg.created_at)}</td>
                   <td>{msg.message_type}</td>
                   <td>
-                    {/* Optional: Add action buttons if needed */}
-                    <button className="btn btn-link">Reply</button>
+                    {/* Reply button with mailto */}
+                    <a
+                      className="btn btn-link"
+                      href={`mailto:${msg.email}?subject=Response&body=Hello, ${msg.name},%0A%0A`}
+                    >
+                      Reply
+                    </a>
                   </td>
                 </tr>
               ))}
