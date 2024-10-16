@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { baseApiUrl } from "../../App";
-import { formatTimeTo12Hour } from "../../utils/timeFormat";
-import { formatDate } from "../../utils/dateFormat";
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [statuses, setStatuses] = useState({});
   const [sortedBookings, setSortedBookings] = useState([]);
-  const [sortOption, setSortOption] = useState("default");
+  const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
+  const [serviceFilter, setServiceFilter] = useState(""); // Default to all services
+  const [statusFilter, setStatusFilter] = useState(""); // Default to all statuses
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +23,6 @@ const AdminBookings = () => {
           return acc;
         }, {});
         setStatuses(initialStatuses);
-        sortBookings(response.data, sortOption);
       } catch (error) {
         console.error("Error fetching bookings:", error);
       } finally {
@@ -31,27 +31,63 @@ const AdminBookings = () => {
     };
 
     fetchBookings();
-  }, [sortOption]);
+  }, []);
 
-  const sortBookings = (data, option) => {
-    let sortedData = [...data];
+  useEffect(() => {
+    // Sorting and filtering logic is placed here inside the useEffect
+    let sortedData = [...bookings];
 
-    if (option === "dateAscend") {
-      sortedData = sortedData.sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
+    // Sorting logic
+    if (sortConfig.key && sortConfig.direction) {
+      sortedData.sort((a, b) => {
+        const aValue = sortConfig.key === "customer.name" ? a.customer?.name : a[sortConfig.key];
+        const bValue = sortConfig.key === "customer.name" ? b.customer?.name : b[sortConfig.key];
+        if (aValue < bValue) {
+          return sortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    // Apply service filter (filter only if a specific service is selected)
+    if (serviceFilter && serviceFilter !== "All Services") {
+      sortedData = sortedData.filter(
+        (booking) => booking.service?.name === serviceFilter
       );
-    } else if (option === "dateDescend") {
-      sortedData = sortedData.sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
+    }
+
+    // Apply status filter (filter only if a specific status is selected)
+    if (statusFilter && statusFilter !== "All Statuses") {
+      sortedData = sortedData.filter(
+        (booking) => statuses[booking.id] === statusFilter
+      );
+    }
+
+    // Apply search filter for Booking ID and Customer Name
+    if (searchQuery) {
+      sortedData = sortedData.filter(
+        (booking) =>
+          booking.id.toString().includes(searchQuery) || 
+          (booking.customer?.name && booking.customer.name.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
     setSortedBookings(sortedData);
+  }, [bookings, sortConfig, serviceFilter, statusFilter, statuses, searchQuery]); // Add all dependencies used in sorting/filtering logic
+
+  const handleSortChange = (key, direction) => {
+    setSortConfig({ key, direction });
   };
 
-  const handleSortChange = (event) => {
-    const { value } = event.target;
-    setSortOption(value);
+  const handleServiceFilterChange = (event) => {
+    setServiceFilter(event.target.value); // Set selected service filter
+  };
+
+  const handleStatusFilterChange = (event) => {
+    setStatusFilter(event.target.value); // Set selected status filter
   };
 
   const handleStatusChange = async (bookingId, newStatus) => {
@@ -111,19 +147,6 @@ const AdminBookings = () => {
   return (
     <div className="container mt-5">
       <h1 className="mb-4">Bookings</h1>
-      <div className="row mb-3">
-        <div className="col">
-          <select
-            value={sortOption}
-            onChange={handleSortChange}
-            className="form-control form-control-sm"
-          >
-            <option value="default">Default</option>
-            <option value="dateAscend">Date (Ascending)</option>
-            <option value="dateDescend">Date (Descending)</option>
-          </select>
-        </div>
-      </div>
       {isLoading ? (
         <div className="text-center">
           <div className="spinner-border" role="status">
@@ -133,44 +156,130 @@ const AdminBookings = () => {
       ) : bookings.length === 0 ? (
         <p>No bookings to show</p>
       ) : (
-        <div className="table-responsive">
-          <table className="table table-bordered">
-            <thead>
-              <tr>
-                <th scope="col">Booking ID</th>
-                <th scope="col">Customer Name</th>
-                <th scope="col">Service</th>
-                <th scope="col">Payment</th>
-                <th scope="col">Date</th>
-                <th scope="col">Time</th>
-                <th scope="col">Payment Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedBookings.map((booking) => (
-                <tr key={booking.id}>
-                  <th scope="row">{booking.id}</th>
-                  <td>{booking.customer?.name}</td>
-                  <td>{booking.service?.name}</td>
-                  <td>{booking.service?.price}</td>
-                  <td>{formatDate(booking.date)}</td>
-                  <td>{formatTimeTo12Hour(booking.time)}</td>
-                  <td>
+        <div>
+          <div className="mb-3">
+            <input
+              type="text"
+              placeholder="Search by Booking ID or Customer Name"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="form-control"
+            />
+          </div>
+          <div className="table-responsive">
+            <table className="table table-bordered">
+              <thead>
+                <tr>
+                  <th scope="col">
+                    Booking ID
                     <select
-                      value={statuses[booking.id] || "Pending"}
                       onChange={(e) =>
-                        handleStatusChange(booking.id, e.target.value)
+                        handleSortChange("id", e.target.value)
                       }
+                      className="form-control form-control-sm"
                     >
+                      <option value="">Sort</option>
+                      <option value="asc">↑ Ascending</option>
+                      <option value="desc">↓ Descending</option>
+                    </select>
+                  </th>
+                  <th scope="col">
+                    Customer Name
+                    <select
+                      onChange={(e) =>
+                        handleSortChange("customer.name", e.target.value)
+                      }
+                      className="form-control form-control-sm"
+                    >
+                      <option value="">Sort</option>
+                      <option value="asc">↑ Ascending</option>
+                      <option value="desc">↓ Descending</option>
+                    </select>
+                  </th>
+                  <th scope="col">
+                    Service
+                    <select
+                      value={serviceFilter} // Set the selected value
+                      onChange={handleServiceFilterChange}
+                      className="form-control form-control-sm"
+                    >
+                      <option value="All Services">All Services</option>
+                      {Array.from(new Set(bookings.map((b) => b.service?.name))).map(
+                        (service) => (
+                          <option key={service} value={service}>
+                            {service}
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </th>
+                  <th scope="col">
+                    Payment
+                    <select
+                      onChange={(e) =>
+                        handleSortChange("service.price", e.target.value)
+                      }
+                      className="form-control form-control-sm"
+                    >
+                      <option value="">Sort</option>
+                      <option value="asc">↑ Ascending</option>
+                      <option value="desc">↓ Descending</option>
+                    </select>
+                  </th>
+                  <th scope="col">
+                    Time
+                    <select
+                      onChange={(e) =>
+                        handleSortChange("time", e.target.value)
+                      }
+                      className="form-control form-control-sm"
+                    >
+                      <option value="">Sort</option>
+                      <option value="asc">↑ Ascending</option>
+                      <option value="desc">↓ Descending</option>
+                    </select>
+                  </th>
+                  <th scope="col">
+                    Payment Status
+                    <select
+                      value={statusFilter} // Set the selected value
+                      onChange={handleStatusFilterChange}
+                      className="form-control form-control-sm"
+                    >
+                      <option value="All Statuses">All Statuses</option>
                       <option value="Completed">Completed</option>
                       <option value="Pending">Pending</option>
                       <option value="Cancelled">Cancelled</option>
                     </select>
-                  </td>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {sortedBookings.map((booking) => (
+                  <tr key={booking.id}>
+                    <th scope="row">{booking.id}</th>
+                    <td>{booking.customer?.name}</td>
+                    <td>{booking.service?.name}</td>
+                    <td>{booking.service?.price}</td>
+                    <td>{booking.time}</td>
+                    <td>
+                      <select
+                        value={statuses[booking.id] || "Pending"}
+                        onChange={(e) =>
+                          handleStatusChange(booking.id, e.target.value)
+                        }
+                        className="form-control"
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
