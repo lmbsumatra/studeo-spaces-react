@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { baseApiUrl } from "../../App";
+import PaginationComponent from "../../components/PaginationComponent";
 
 const AdminCustomers = () => {
   const [customers, setCustomers] = useState([]);
@@ -8,6 +9,10 @@ const AdminCustomers = () => {
   const [isLoading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(1); // 10 items per page
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -65,6 +70,13 @@ const AdminCustomers = () => {
     setSearchQuery(event.target.value);
   };
 
+  // Calculate the indices of the first and last messages on the current page
+const indexOfLastCustomer = currentPage * itemsPerPage;
+const indexOfFirstCustomer = indexOfLastCustomer - itemsPerPage;
+
+// Pagination logic: slice the sortedCustomers array
+const currentCustomers = sortedCustomers.slice(indexOfFirstCustomer, indexOfLastCustomer);
+const totalPages = Math.ceil(sortedCustomers.length / itemsPerPage);
 
   return (
     <div className="container mt-5">
@@ -139,7 +151,7 @@ const AdminCustomers = () => {
               </tr>
             </thead>
             <tbody>
-              {sortedCustomers.map((customer) => (
+              {currentCustomers.map((customer) => (
                 <tr key={customer.id}>
                   <th scope="row">{customer.id}</th>
                   <td>{customer.name}</td>
@@ -157,6 +169,14 @@ const AdminCustomers = () => {
               ))}
             </tbody>
           </table>
+
+          {/* Pagination */}
+          <PaginationComponent
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { baseApiUrl } from "../../../App";
 import { formatDate } from "../../../utils/dateFormat";
+import PaginationComponent from "../../../components/PaginationComponent";
 
 const AdminMessagesScreen = () => {
   const [messages, setMessages] = useState([]);
@@ -10,6 +11,11 @@ const AdminMessagesScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
   const [selectedDate, setSelectedDate] = useState("");
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(1); // 10 items per page
+
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -85,6 +91,15 @@ const AdminMessagesScreen = () => {
     setSelectedDate("");
     setSortConfig({ key: "", direction: "" });
   };
+
+// Calculate the indices of the first and last messages on the current page
+const indexOfLastMessage = currentPage * itemsPerPage;
+const indexOfFirstMessage = indexOfLastMessage - itemsPerPage;
+
+// Pagination logic: slice the sortedMessages array
+const currentMessages = sortedMessages.slice(indexOfFirstMessage, indexOfLastMessage);
+const totalPages = Math.ceil(sortedMessages.length / itemsPerPage);
+
 
   return (
     <div className="container mt-5">
@@ -185,10 +200,10 @@ const AdminMessagesScreen = () => {
               </tr>
             </thead>
             <tbody>
-              {sortedMessages.map((msg) => (
+              {currentMessages.map((msg) => (
                 <tr key={msg.id}>
                   <td>{msg.id}</td>
-                  <td>{msg.email}</td> 
+                  <td>{msg.email}</td>
                   <td>{msg.name}</td>
                   <td>{msg.message}</td>
                   <td>{formatDate(msg.created_at)}</td>
@@ -206,6 +221,13 @@ const AdminMessagesScreen = () => {
               ))}
             </tbody>
           </table>
+
+          {/* Pagination */}
+          <PaginationComponent
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
     </div>

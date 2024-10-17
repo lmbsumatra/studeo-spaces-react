@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { baseApiUrl } from "../../App";
 import { formatTimeTo12Hour } from "../../utils/timeFormat";
-import { formatDate } from "../../utils/dateFormat"; // Assuming you have a date formatting function
+import PaginationComponent from "../../components/PaginationComponent";
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -14,6 +14,10 @@ const AdminBookings = () => {
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [dateSortOption, setDateSortOption] = useState("default"); // State for date sorting
   const [isLoading, setLoading] = useState(true);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(1); // 10 items per page
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -85,78 +89,87 @@ const AdminBookings = () => {
       );
     }
 
-    setSortedBookings(sortedData);
-  }, [bookings, sortConfig, serviceFilter, statusFilter, statuses, searchQuery, dateSortOption]); // Add dateSortOption as a dependency
+      setSortedBookings(sortedData);
+    }, [bookings, sortConfig, serviceFilter, statusFilter, statuses, searchQuery, dateSortOption]); // Add dateSortOption as a dependency
 
-  const handleSortChange = (key, direction) => {
-    setSortConfig({ key, direction });
-  };
+    const handleSortChange = (key, direction) => {
+      setSortConfig({ key, direction });
+    };
 
-  const handleServiceFilterChange = (event) => {
-    setServiceFilter(event.target.value); // Set selected service filter
-  };
+    const handleServiceFilterChange = (event) => {
+      setServiceFilter(event.target.value); // Set selected service filter
+    };
 
-  const handleStatusFilterChange = (event) => {
-    setStatusFilter(event.target.value); // Set selected status filter
-  };
+    const handleStatusFilterChange = (event) => {
+      setStatusFilter(event.target.value); // Set selected status filter
+    };
 
-  const handleDateSortChange = (event) => {
-    setDateSortOption(event.target.value); // Set selected date sort option
-  };
+    const handleDateSortChange = (event) => {
+      setDateSortOption(event.target.value); // Set selected date sort option
+    };
 
-  const handleStatusChange = async (bookingId, newStatus) => {
-    try {
-      setLoading(true);
-      setStatuses((prevStatuses) => ({
-        ...prevStatuses,
-        [bookingId]: newStatus,
-      }));
+    const handleStatusChange = async (bookingId, newStatus) => {
+      try {
+        setLoading(true);
+        setStatuses((prevStatuses) => ({
+          ...prevStatuses,
+          [bookingId]: newStatus,
+        }));
 
-      const response = await axios.put(
-        `http://127.0.0.1:8000/api/bookings/${bookingId}/status`,
-        {
-          status: newStatus,
-        }
-      );
-
-      if (response.status === 200) {
-        console.log("Booking status updated successfully");
-
-        if (newStatus === "Completed") {
-          const bookingDetails = bookings.find(
-            (booking) => booking.id === bookingId
-          );
-
-          const paymentData = {
-            customerName: bookingDetails.customer?.name,
-            amount: bookingDetails.service?.price,
-            date: bookingDetails.date,
-          };
-
-          const paymentResponse = await axios.post(
-            "http://127.0.0.1:8000/api/payments",
-            paymentData
-          );
-
-          if (paymentResponse.status === 201) {
-            console.log("Payment added successfully");
-          } else {
-            throw new Error("Failed to add payment");
+        const response = await axios.put(
+          `http://127.0.0.1:8000/api/bookings/${bookingId}/status`,
+          {
+            status: newStatus,
           }
+        );
+
+        if (response.status === 200) {
+          console.log("Booking status updated successfully");
+
+          if (newStatus === "Completed") {
+            const bookingDetails = bookings.find(
+              (booking) => booking.id === bookingId
+            );
+
+            const paymentData = {
+              customerName: bookingDetails.customer?.name,
+              amount: bookingDetails.service?.price,
+              date: bookingDetails.date,
+            };
+
+            const paymentResponse = await axios.post(
+              "http://127.0.0.1:8000/api/payments",
+              paymentData
+            );
+
+            if (paymentResponse.status === 201) {
+              console.log("Payment added successfully");
+            } else {
+              throw new Error("Failed to add payment");
+            }
+          }
+        } else {
+          throw new Error("Failed to update status");
         }
-      } else {
-        throw new Error("Failed to update status");
+      } catch (error) {
+        console.error("Error updating booking status:", error);
+        setStatuses((prevStatuses) => ({
+          ...prevStatuses,
+          [bookingId]: prevStatuses[bookingId],
+        }));
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error updating booking status:", error);
-      setStatuses((prevStatuses) => ({
-        ...prevStatuses,
-        [bookingId]: prevStatuses[bookingId],
-      }));
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+
+  // Calculate the indices of the first and last bookings on the current page
+    const indexOfLastBooking = currentPage * itemsPerPage;
+    const indexOfFirstBooking = indexOfLastBooking - itemsPerPage;
+  // Pagination logic
+    const currentBookings = sortedBookings.slice(indexOfFirstBooking, indexOfLastBooking);
+    const totalPages = Math.ceil(sortedBookings.length / itemsPerPage);
+
 
   return (
     <div className="container mt-5">
@@ -240,16 +253,6 @@ const AdminBookings = () => {
                   </th>
                   <th scope="col">
                     Payment
-                    <select
-                      onChange={(e) =>
-                        handleSortChange("service.price", e.target.value)
-                      }
-                      className="form-control form-control-sm"
-                    >
-                      <option value="">Sort</option>
-                      <option value="asc">↑ Ascending</option>
-                      <option value="desc">↓ Descending</option>
-                    </select>
                   </th>
                   <th scope="col">
                     Time
@@ -281,7 +284,7 @@ const AdminBookings = () => {
                 </tr>
               </thead>
               <tbody>
-                {sortedBookings.map((booking) => (
+                {currentBookings.map((booking) => (
                   <tr key={booking.id}>
                     <td>{booking.id}</td>
                     <td>{booking.customer?.name}</td>
@@ -292,9 +295,7 @@ const AdminBookings = () => {
                     <td>
                       <select
                         value={statuses[booking.id] || ""}
-                        onChange={(e) =>
-                          handleStatusChange(booking.id, e.target.value)
-                        }
+                        onChange={(e) => handleStatusChange(booking.id, e.target.value)}
                         className="form-control"
                       >
                         <option value="Pending">Pending</option>
@@ -305,8 +306,15 @@ const AdminBookings = () => {
                   </tr>
                 ))}
               </tbody>
+
             </table>
           </div>
+          {/* Pagination */}
+          <PaginationComponent
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
         </div>
       )}
     </div>
