@@ -58,4 +58,8 @@ node_modules/.cache/default-development/index.pack.old
 # Log files
 *.log
 /vendor
+<<<<<<< Updated upstream
+/node_modules/.cache
+=======
+>>>>>>> Stashed changes
 /node_modules/.cache

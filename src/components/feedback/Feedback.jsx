@@ -39,8 +39,9 @@ const Feedback = () => {
     dots: false,
     infinite: true,
     speed: 500,
-    slidesToShow: 3, // Show 3 slides at a time
-    slidesToScroll: 1, // Scroll 1 slide at a time
+    slidesToShow: feedbacks.length === 1 ? 1 : feedbacks.length === 2 ? 2 : 3,
+    slidesToScroll: 1, 
+    infinite: feedbacks.length === 1 ? false : true,
   };
 
   return (
@@ -57,7 +58,7 @@ const Feedback = () => {
           {feedbacks.map((feedback) => (
             <div
               className="card d-flex flex-column justify-content-between align-items-center text-center"
-              style={{ width: "11rem", margin: "0 100px" }} // Add margin here
+              style={{ width: "1rem", margin: "0 100px" }} // Add margin here
               key={feedback.id}
             >
               <div

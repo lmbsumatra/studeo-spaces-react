@@ -47,10 +47,9 @@ const AdminDashboard = () => {
         setLoading(false);
       }
     };
-  
+
     fetchAllData();
   }, [date, messages]);
-  
 
   const fetchData = async (selectedDate) => {
     setLoading(true);
@@ -356,35 +355,35 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
-      
-      {/* Messages Statistics */}
+
       <div className="container stats">
-      <h2 className="fs-600 ff-serif ">Message Overview</h2>
-        <div className="row p-2">
+        <h2 className="fs-600 ff-serif">Message Overview</h2>
+        <div className="row p-4">
           {/* Urgent */}
-          <div className="text-white bg-danger rounded col-12 col-lg-4 p-2">
-            <h2 className="fs-600 ff-serif ">Needs Attention</h2>
+          <div className="stat-card text-white bg-danger rounded p-2">
+            <h2 className="fs-600 ff-serif">Needs Attention</h2>
             <div>
               <MessageCarousel messages={messages} style={{ height: "50px" }} />
             </div>
           </div>
           {/* Feedback */}
-          <div className="bg-dark text-white rounded col-12 col-lg-4 p-2">
-            <h2 className="fs-600 ff-serif ">Review Feedbacks</h2>
+          <div className="stat-card bg-dark text-white rounded p-2">
+            <h2 className="fs-600 ff-serif">Review Feedbacks</h2>
             <div>
-              {!(<FeedbackCarousel style={{ height: "50px" }} />) ? (
+              {!(
+                <FeedbackCarousel style={{ height: "50px", margin: "10px" }} />
+              ) ? (
                 <>
-                  <p>No Feeback Available</p>
+                  <p>No Feedback Available</p>
                 </>
               ) : (
                 <FeedbackCarousel style={{ height: "50px" }} />
               )}
             </div>
           </div>
-
           {/* New Messages */}
-          <div className="top-customer-container rounded col-12 col-lg-4 p-2">
-            <h2 className="fs-600 ff-serif ">Recent Message</h2>
+          <div className="stat-card top-customer-container rounded p-2">
+            <h2 className="fs-600 ff-serif">Recent Message</h2>
             <div>
               {messages.length > 0 ? (
                 <div className="pb-3">

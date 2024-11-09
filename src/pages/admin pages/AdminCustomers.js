@@ -12,7 +12,7 @@ const AdminCustomers = () => {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(1); // 10 items per page
+  const [itemsPerPage] = useState(10); // 10 items per page
 
   useEffect(() => {
     const fetchCustomers = async () => {

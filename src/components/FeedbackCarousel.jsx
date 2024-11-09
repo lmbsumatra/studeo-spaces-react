@@ -2,27 +2,16 @@ import React from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import feedbackImg from "../assets/images/icons/feedback.svg"
+import feedbackImg from "../assets/images/icons/feedback.svg";
 import { Spinner } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { baseApiUrl } from "../App";
 
-const FeedbackCarousel = ({  }) => {
-  const settings = {
-    dots: false,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 2000,
-    arrows: false,
-  };
+const FeedbackCarousel = ({}) => {
   const [loadingFeedbackId, setLoadingFeedbackId] = useState(null);
   const [feedbacks, setFeedbacks] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false)
-
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchFeedbacks();
@@ -41,6 +30,17 @@ const FeedbackCarousel = ({  }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const settings = {
+    dots: false,
+    infinite: feedbacks.length === 1 ? false : true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 2000,
+    arrows: false,
   };
 
   const togglePublish = async (feedbackId, currentStatus) => {

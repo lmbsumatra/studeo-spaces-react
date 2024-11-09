@@ -174,7 +174,7 @@ const FAQs = () => {
                       disabled={loading} // Disable input when loading
                     >
                       <option value="">Select a message type</option>
-                      <option value="nquiry">Inquiry</option>
+                      <option value="inquiry">Inquiry</option>
                       <option value="feedback">Feedback</option>
                       <option value="complaint">Complaint</option>
                       <option value="request">Request</option>

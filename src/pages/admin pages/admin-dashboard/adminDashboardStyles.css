@@ -43,3 +43,25 @@
   background-color: rgb(255, 255, 255);
   border-radius: 100%;
 }
+
+/* Default Styles for Small Screens */
+.stat-card {
+  width: 100%;   
+  margin-bottom: 20px;  
+}
+
+@media (min-width: 992px) {
+  .row {
+    display: flex;
+    justify-content: space-between; 
+  }
+
+  .stat-card {
+    width: calc(33.33% - 20px);  
+    margin-right: 10px;  
+  }
+
+  .stat-card:nth-child(3n) {
+    margin-right: 0;
+  }
+}
