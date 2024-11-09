@@ -31,12 +31,12 @@ class ServiceController extends Controller
         $services = Service::all();
 
         // Fetch availability data for each service
-        foreach ($services as $service) {
-            $availability = ServiceAvailability::where('service_id', $service->id)
-                ->where('date', Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d')) // Or any specific date
-                ->first();
+        // foreach ($services as $service) {
+        //     $availability = ServiceAvailability::where('service_id', $service->id)
+        //         ->where('date', Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d')) // Or any specific date
+        //         ->first();
 
-        }
+        // }
 
         return response()->json($services);
     }

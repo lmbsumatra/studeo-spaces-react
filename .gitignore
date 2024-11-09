@@ -58,3 +58,4 @@ node_modules/.cache/default-development/index.pack.old
 # Log files
 *.log
 /vendor
+/node_modules/.cache
