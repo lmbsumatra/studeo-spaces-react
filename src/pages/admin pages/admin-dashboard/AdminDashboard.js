@@ -11,7 +11,6 @@ import userImg from "../../../assets/images/icons/user.svg";
 import UserGrowthChart from "../../../components/charts/UserGrowthChart";
 import mail from "../../../assets/images/icons/mail.svg";
 import MessageCarousel from "../../../components/MessagesCarousel";
-
 import FeedbackCarousel from "../../../components/FeedbackCarousel";
 
 const AdminDashboard = () => {
@@ -49,10 +48,9 @@ const AdminDashboard = () => {
     };
 
     fetchAllData();
-  }, [date, messages]);
+  }, [date]);
 
   const fetchData = async (selectedDate) => {
-    setLoading(true);
     const formattedDate = selectedDate.toLocaleDateString("en-CA");
     try {
       const response = await axios.get(
@@ -61,8 +59,6 @@ const AdminDashboard = () => {
       setData(response.data);
     } catch (error) {
       console.error("There was an error fetching the data!", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -85,11 +81,7 @@ const AdminDashboard = () => {
   };
 
   const handleViewAll = (url) => {
-    try {
-      navigate(`${url}`);
-    } catch (error) {
-      console.error("There was an error going to the bookings page", error);
-    }
+    navigate(url);
   };
 
   const fetchTopCustomersData = async () => {
@@ -113,12 +105,19 @@ const AdminDashboard = () => {
     }
   };
 
+  const renderSpinner = () => (
+    <div className="spinner-border spinner-border-sm" role="status">
+      <span className="sr-only">Loading...</span>
+    </div>
+  );
+
   return (
     <div className="container mt-5" id="dashboard">
       <h1 className="mb-4">Admin Dashboard</h1>
       <div className="container mb-2">
         <h2 className="fs-600 ff-serif">Select Day</h2>
       </div>
+
       {/* Overall booking overview */}
       <div className="row">
         {/* col 1 */}
@@ -133,18 +132,7 @@ const AdminDashboard = () => {
               <div className="card-body">
                 <h5 className="card-title">Available Seats</h5>
                 <p className="card-text fs-3">
-                  {isLoading ? (
-                    <span>
-                      <div
-                        className="spinner-border spinner-border-sm"
-                        role="status"
-                      >
-                        <span className="sr-only">Loading...</span>
-                      </div>
-                    </span>
-                  ) : (
-                    data.availableSeats
-                  )}
+                  {isLoading ? renderSpinner() : data.availableSeats}
                 </p>
               </div>
             </div>
@@ -154,18 +142,7 @@ const AdminDashboard = () => {
               <div className="card-body">
                 <h5 className="card-title">Booked Seats</h5>
                 <p className="card-text fs-3">
-                  {isLoading ? (
-                    <span>
-                      <div
-                        className="spinner-border spinner-border-sm"
-                        role="status"
-                      >
-                        <span className="sr-only">Loading...</span>
-                      </div>
-                    </span>
-                  ) : (
-                    data.bookedSeats
-                  )}
+                  {isLoading ? renderSpinner() : data.bookedSeats}
                 </p>
               </div>
             </div>
@@ -179,18 +156,7 @@ const AdminDashboard = () => {
               <div className="card-body">
                 <h5 className="card-title">Customers</h5>
                 <p className="card-text fs-3">
-                  {isLoading ? (
-                    <span>
-                      <div
-                        className="spinner-border spinner-border-sm"
-                        role="status"
-                      >
-                        <span className="sr-only">Loading...</span>
-                      </div>
-                    </span>
-                  ) : (
-                    data.numberOfCustomers
-                  )}
+                  {isLoading ? renderSpinner() : data.numberOfCustomers}
                 </p>
               </div>
             </div>
@@ -200,18 +166,9 @@ const AdminDashboard = () => {
               <div className="card-body">
                 <h5 className="card-title">Total Sales</h5>
                 <p className="card-text fs-3">
-                  {isLoading ? (
-                    <span>
-                      <div
-                        className="spinner-border spinner-border-sm"
-                        role="status"
-                      >
-                        <span className="sr-only">Loading...</span>
-                      </div>
-                    </span>
-                  ) : (
-                    `₱ ${data.totalSales.toLocaleString()}`
-                  )}
+                  {isLoading
+                    ? renderSpinner()
+                    : `₱ ${data.totalSales.toLocaleString()}`}
                 </p>
               </div>
             </div>
@@ -225,18 +182,7 @@ const AdminDashboard = () => {
               <div className="card-body">
                 <h5 className="card-title">Pending Bookings</h5>
                 <p className="card-text fs-3">
-                  {isLoading ? (
-                    <span>
-                      <div
-                        className="spinner-border spinner-border-sm"
-                        role="status"
-                      >
-                        <span className="sr-only">Loading...</span>
-                      </div>
-                    </span>
-                  ) : (
-                    data.pendingBookings
-                  )}
+                  {isLoading ? renderSpinner() : data.pendingBookings}
                 </p>
               </div>
             </div>
@@ -246,18 +192,7 @@ const AdminDashboard = () => {
               <div className="card-body">
                 <h5 className="card-title">Canceled Bookings</h5>
                 <p className="card-text fs-3">
-                  {isLoading ? (
-                    <span>
-                      <div
-                        className="spinner-border spinner-border-sm"
-                        role="status"
-                      >
-                        <span className="sr-only">Loading...</span>
-                      </div>
-                    </span>
-                  ) : (
-                    data.canceledBookings
-                  )}
+                  {isLoading ? renderSpinner() : data.canceledBookings}
                 </p>
               </div>
             </div>
@@ -267,6 +202,7 @@ const AdminDashboard = () => {
 
       <hr />
       <div className="fs-600">Studeo Spaces Statistics</div>
+
       {/* Bookings Statistics */}
       <div className="container stats">
         <div className="row">
@@ -282,14 +218,16 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {bookings.map((booking) => (
-                  <tr key={booking.id}>
-                    <td>{booking.customer?.name}</td>
-                    <td>{booking.service?.name}</td>
-                    <td>{booking.service?.price}</td>
-                    <td>{formatTimeTo12Hour(booking.time)}</td>
-                  </tr>
-                ))}
+                {isLoading
+                  ? renderSpinner()
+                  : bookings.map((booking) => (
+                      <tr key={booking.id}>
+                        <td>{booking.customer?.name}</td>
+                        <td>{booking.service?.name}</td>
+                        <td>{booking.service?.price}</td>
+                        <td>{formatTimeTo12Hour(booking.time)}</td>
+                      </tr>
+                    ))}
               </tbody>
             </table>
             <button
@@ -300,7 +238,8 @@ const AdminDashboard = () => {
             </button>
           </div>
           <div className="col-lg-6">
-            <BookingChart data={bookingChartData} />
+          <h2 className="fs-600 ff-serif">Number of bookings</h2>
+            {isLoading ? renderSpinner() : <BookingChart data={bookingChartData} />}
           </div>
         </div>
       </div>
@@ -313,7 +252,7 @@ const AdminDashboard = () => {
 
             {/* Display top customer */}
             <div className="top-customer customer">
-              {topCustomersData[0] && (
+              {topCustomersData[0] ? (
                 <div>
                   <img
                     src={userImg}
@@ -325,6 +264,8 @@ const AdminDashboard = () => {
                   </p>
                   <p>{topCustomersData[0].total_bookings}</p>
                 </div>
+              ) : (
+                renderSpinner()
               )}
             </div>
 
@@ -351,11 +292,12 @@ const AdminDashboard = () => {
               </button>
             </div>
 
-            <UserGrowthChart />
+            {isLoading ? renderSpinner() : <UserGrowthChart />}
           </div>
         </div>
       </div>
 
+      {/* Message Overview */}
       <div className="container stats">
         <h2 className="fs-600 ff-serif">Message Overview</h2>
         <div className="row p-4">
@@ -363,19 +305,19 @@ const AdminDashboard = () => {
           <div className="stat-card text-white bg-danger rounded p-2">
             <h2 className="fs-600 ff-serif">Needs Attention</h2>
             <div>
-              <MessageCarousel messages={messages} style={{ height: "50px" }} />
+              {isLoading ? renderSpinner() : messages.length === 0 ? (
+                <p>No Messages</p>
+              ) : (
+                <MessageCarousel messages={messages} style={{ height: "50px" }} />
+              )}
             </div>
           </div>
           {/* Feedback */}
           <div className="stat-card bg-dark text-white rounded p-2">
             <h2 className="fs-600 ff-serif">Review Feedbacks</h2>
             <div>
-              {!(
-                <FeedbackCarousel style={{ height: "50px", margin: "10px" }} />
-              ) ? (
-                <>
-                  <p>No Feedback Available</p>
-                </>
+              {isLoading ? renderSpinner() : messages.length === 0 ? (
+                <p>No Feedback Available</p>
               ) : (
                 <FeedbackCarousel style={{ height: "50px" }} />
               )}
@@ -385,7 +327,7 @@ const AdminDashboard = () => {
           <div className="stat-card top-customer-container rounded p-2">
             <h2 className="fs-600 ff-serif">Recent Message</h2>
             <div>
-              {messages.length > 0 ? (
+              {isLoading ? renderSpinner() : messages.length > 0 ? (
                 <div className="pb-3">
                   <img
                     src={mail}

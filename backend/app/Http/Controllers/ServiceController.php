@@ -6,6 +6,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Models\ServiceAvailability;
+use Illuminate\Support\Facades\Log;
 
 class ServiceController extends Controller
 {
@@ -111,6 +112,23 @@ class ServiceController extends Controller
             'count' => 'required|integer',
         ]);
 
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+
+            $uploadedFileUrl = cloudinary()->upload($file, [
+                'asset_folder' => 'services_images',
+                'curl_options' => [
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_SSL_VERIFYHOST => false
+                ]
+            ])->getSecurePath();
+            $validatedData['images'] = $uploadedFileUrl;  // Add the uploaded file URL to validated data
+            Log::info('Uploaded file:', ['file' => $request->file('images')]);
+        }
+
+
+        
+
         $service = Service::create($validatedData);
 
         return response()->json($service, 201);
@@ -129,16 +147,33 @@ class ServiceController extends Controller
             'name' => 'sometimes|string|max:255',
             'duration' => 'sometimes|string|max:255',
             'price' => 'sometimes|numeric',
-            'images' => 'nullable|string',
+            'images' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'description' => 'nullable|string',
             'count' => 'sometimes|integer|min:0',
             'availability' => 'required|boolean',
         ]);
 
+        // If a file is uploaded, handle the upload to Cloudinary
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+
+            $uploadedFileUrl = cloudinary()->upload($file, [
+                'asset_folder' => 'services_images',
+                'curl_options' => [
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_SSL_VERIFYHOST => false
+                ]
+            ])->getSecurePath();
+            $validatedData['images'] = $uploadedFileUrl;  // Add the uploaded file URL to validated data
+            Log::info('Uploaded file:', ['file' => $request->file('images')]);
+        }
+
+        // Update the service with the validated data
         $service->update($validatedData);
 
-        return response()->json($service, 200);
+        return response()->json(['data' => $service], 200);  // Return the updated service data
     }
+
 
     public function delete(Request $request, $id)
     {

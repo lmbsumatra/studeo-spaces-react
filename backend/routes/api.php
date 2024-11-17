@@ -41,7 +41,7 @@ Route::get('/messages', [MessageController::class, 'index']);
 Route::get('/services', [ServiceController::class, 'index']);
 Route::post('/services', [ServiceController::class, 'create']);
 Route::get('/services/{id}', [ServiceController::class, 'read']);
-Route::patch('/services/{id}', [ServiceController::class, 'update']);
+Route::post('/services/{id}', [ServiceController::class, 'update']);
 Route::patch('/services-availability/{id}', [ServiceController::class, 'updateAvailability']);
 Route::get('/services-availability', [ServiceController::class, 'getAvailableSeats']);
 Route::delete('/services/{id}', [ServiceController::class, 'delete']);

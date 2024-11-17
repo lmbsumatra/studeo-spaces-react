@@ -12,11 +12,13 @@ const AdminEditService = () => {
     name: "",
     duration: "",
     price: "",
-    images: "",
+    images: null,
     description: "",
     count: "",
-    availability: false, // Initial state for availability as boolean
+    availability: false,
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [error, setError] = useState({});
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -25,9 +27,7 @@ const AdminEditService = () => {
     const fetchService = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `http://127.0.0.1:8000/api/services/${id}`
-        );
+        const response = await fetch(`${baseApiUrl}services/${id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch service");
         }
@@ -35,12 +35,16 @@ const AdminEditService = () => {
         setFormData({
           name: data.name,
           duration: data.duration,
-          price: data.price,
+          price: data.price?.toString() || "",
           images: data.images,
-          description: data.description,
-          count: data.count,
-          availability: data.availability === 1, // Convert to boolean
+          description: data.description || "",
+          count: data.count?.toString() || "",
+          availability: Boolean(data.availability),
         });
+        // Set image preview if exists
+        if (data.images) {
+          setImagePreview(data.images);
+        }
       } catch (error) {
         setError({ general: error.message });
       } finally {
@@ -53,63 +57,106 @@ const AdminEditService = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: type === "checkbox" ? checked : value, // Handle checkbox
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: type === "checkbox" ? checked : value,
     }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    Object.keys(formData).forEach((key) => {
-      if (!formData[key] && key !== "availability") {
-        newErrors[key] = `${
-          key.charAt(0).toUpperCase() + key.slice(1)
-        } is required`;
-      }
-    });
+
+    if (!formData.name?.trim()) {
+      newErrors.name = "Name is required";
+    }
+
+    if (!formData.duration?.trim()) {
+      newErrors.duration = "Duration is required";
+    }
+
+    if (!formData.price || isNaN(Number(formData.price))) {
+      newErrors.price = "Valid price is required";
+    }
+
+    if (!formData.description?.trim()) {
+      newErrors.description = "Description is required";
+    }
+
+    if (!formData.count || isNaN(Number(formData.count))) {
+      newErrors.count = "Valid count is required";
+    }
+
     setError(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    if (Object.keys(newErrors).length > 0) {
+      toast.error("Please fill in all required fields correctly.");
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validateForm()) {
       return;
     }
-    
+
     try {
       setLoading(true);
-      const response = await fetch(`${baseApiUrl}services/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          duration: formData.duration,
-          price: formData.price,
-          images: formData.images,
-          description: formData.description,
-          count: formData.count,
-          availability: formData.availability ? 1 : 0,
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to update service");
+
+      // Create FormData instance
+      const updateData = new FormData();
+      updateData.append("name", formData.name.trim());
+      updateData.append("duration", formData.duration.trim());
+      updateData.append("price", Number(formData.price));
+      updateData.append("description", formData.description.trim());
+      updateData.append("count", Number(formData.count));
+      updateData.append("availability", formData.availability ? 1 : 0);
+
+      // Append image if a new one was selected
+      if (imageFile) {
+        console.log(imageFile)
+        updateData.append("image", imageFile);
       }
-      
+      // Iterate over FormData to log all key-value pairs
+      for (let pair of updateData.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
+      }
+      const response = await fetch(`${baseApiUrl}services/${id}`, {
+        method: "POST", // Using POST instead of PATCH for FormData
+        headers: {
+          Accept: "application/json",
+          // Don't set Content-Type header when sending FormData
+        },
+        body: updateData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update service");
+      }
+
       toast.success(`Success! ${formData.name} is updated.`);
       navigate("/admin/services");
     } catch (error) {
-      toast.error(`Error! ${error}`);
+      toast.error(`Error! ${error.message}`);
       setError({ general: error.message });
     } finally {
       setLoading(false);
     }
   };
-  
 
   return (
     <div className="container items mt-5">
@@ -130,6 +177,7 @@ const AdminEditService = () => {
           />
           {error.name && <div className="invalid-feedback">{error.name}</div>}
         </div>
+
         <div className="mb-3">
           <label htmlFor="duration" className="form-label">
             Duration
@@ -147,6 +195,7 @@ const AdminEditService = () => {
             <div className="invalid-feedback">{error.duration}</div>
           )}
         </div>
+
         <div className="mb-3">
           <label htmlFor="price" className="form-label">
             Price
@@ -162,23 +211,35 @@ const AdminEditService = () => {
           />
           {error.price && <div className="invalid-feedback">{error.price}</div>}
         </div>
+
         <div className="mb-3">
           <label htmlFor="images" className="form-label">
-            Images
+            Service Image
           </label>
           <input
-            type="text"
+            type="file"
             className={`form-control ${error.images && "is-invalid"}`}
             id="images"
             name="images"
-            value={formData.images}
-            onChange={handleChange}
+            accept="image/*"
+            onChange={handleImageChange}
             disabled={loading}
           />
           {error.images && (
             <div className="invalid-feedback">{error.images}</div>
           )}
+          {imagePreview && (
+            <div className="mt-2">
+              <img
+                src={imagePreview}
+                alt="Service preview"
+                style={{ maxWidth: "200px", maxHeight: "200px" }}
+                className="mt-2 img-thumbnail"
+              />
+            </div>
+          )}
         </div>
+
         <div className="mb-3">
           <label htmlFor="description" className="form-label">
             Description
@@ -190,11 +251,13 @@ const AdminEditService = () => {
             value={formData.description}
             onChange={handleChange}
             disabled={loading}
+            rows="4"
           />
           {error.description && (
             <div className="invalid-feedback">{error.description}</div>
           )}
         </div>
+
         <div className="mb-3">
           <label htmlFor="count" className="form-label">
             Count
@@ -210,6 +273,7 @@ const AdminEditService = () => {
           />
           {error.count && <div className="invalid-feedback">{error.count}</div>}
         </div>
+
         <div className="mb-3 form-check">
           <input
             type="checkbox"
@@ -220,30 +284,32 @@ const AdminEditService = () => {
             onChange={handleChange}
             disabled={loading}
           />
-          <label htmlFor="availability" className="form-check-label">
+          <label className="form-check-label" htmlFor="availability">
             Available
           </label>
         </div>
+
         {error.general && (
           <div className="alert alert-danger">{error.general}</div>
         )}
-        <button type="submit" className="btn btn-primary">
-        {loading ? (
-                      <>
-                        <Spinner
-                          as="span"
-                          animation="border"
-                          size="sm"
-                          role="status"
-                          aria-hidden="true"
-                        />{" "}
-                        Loading...
-                      </>
-                    ) : (
-                      "Update Service"
-                    )}
+
+        <button type="submit" className="btn btn-primary" disabled={loading}>
+          {loading ? (
+            <>
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+                className="me-2"
+              />
+              Updating...
+            </>
+          ) : (
+            "Update Service"
+          )}
         </button>
-       
       </form>
     </div>
   );

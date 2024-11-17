@@ -3,6 +3,7 @@ import axios from "axios";
 import { baseApiUrl } from "../../App";
 import { formatTimeTo12Hour } from "../../utils/timeFormat";
 import PaginationComponent from "../../components/PaginationComponent";
+import { formatDate } from "../../utils/dateFormat";
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -254,6 +255,7 @@ const AdminBookings = () => {
                   <th scope="col">
                     Payment
                   </th>
+                  <th scope="col">Date</th>
                   <th scope="col">
                     Time
                     <select
@@ -290,6 +292,7 @@ const AdminBookings = () => {
                     <td>{booking.customer?.name}</td>
                     <td>{booking.service?.name}</td>
                     <td>{booking.service?.price}</td>
+                    <td>{formatDate(booking.date)}</td>
                     <td>{formatTimeTo12Hour(booking.time)}</td>
                     <td>{statuses[booking.id]}</td>
                     <td>

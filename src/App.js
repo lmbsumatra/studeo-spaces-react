@@ -112,12 +112,13 @@ const App = () => {
 
 const AppWrapper = () => (
   <Router>
-      <ToastContainer />
-      <App />
+    <ToastContainer />
+    <App />
   </Router>
 );
 
 export default AppWrapper;
 
-export const baseApiUrl = `http://${window.location.hostname}:8000/api/`;
+export const baseApiUrl = "http://localhost:8000/api/";
+
 export const baseSocketUrl = `http://${window.location.hostname}`;
