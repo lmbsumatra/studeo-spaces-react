@@ -125,8 +125,6 @@ class ServiceController extends Controller
             $validatedData['images'] = $uploadedFileUrl;  // Add the uploaded file URL to validated data
             Log::info('Uploaded file:', ['file' => $request->file('images')]);
         }
-
-
         
 
         $service = Service::create($validatedData);
