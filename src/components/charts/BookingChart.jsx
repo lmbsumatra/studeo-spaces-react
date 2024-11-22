@@ -21,15 +21,12 @@ const BookingChart = ({ data = {} }) => {
     return selectedData.map(entry => {
       let label;
       switch (timeframe) {
-        case 'weekly':
-          label = entry.week || 'Unknown Week'; // Handle missing week label
-          break;
         case 'monthly':
-          label = entry.month || 'Unknown Month'; // Handle missing month label
+          label = entry.period || 'Unknown Month'; // Handle missing month label
           break;
         case 'daily':
         default:
-          label = entry.date || 'Unknown Date'; // Handle missing date label
+          label = entry.period || 'Unknown Date'; // Handle missing date label
           break;
       }
 
@@ -69,7 +66,6 @@ const BookingChart = ({ data = {} }) => {
       <div>
         <select className="form-select w-25 mt-2 mb-2" value={timeframe} onChange={(e) => setTimeframe(e.target.value)}>
           <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
           <option value="monthly">Monthly</option>
         </select>
       </div>

@@ -23,11 +23,13 @@ const AdminDashboard = () => {
     totalSales: 0,
     pendingBookings: 0,
     canceledBookings: 0,
+    topCustomers: [],
+    messages: [],
+    bookingChartData: [],
+    upcomingBookings: [],
+    combinedBookingStats: [],
+
   });
-  const [bookings, setBookings] = useState([]);
-  const [bookingChartData, setBookingChartData] = useState([]);
-  const [topCustomersData, setTopCustomersData] = useState([]);
-  const [messages, setMessages] = useState([]);
 
   const navigate = useNavigate();
 
@@ -35,11 +37,11 @@ const AdminDashboard = () => {
     const fetchAllData = async () => {
       setLoading(true);
       try {
-        await fetchData(date);
-        await fetchBookingChartData();
-        await fetchBookings();
-        await fetchTopCustomersData();
-        await fetchMessages();
+        const formattedDate = date.toLocaleDateString("en-CA"); // Format date as YYYY-MM-DD
+        const response = await axios.get(
+          `${baseApiUrl}admin-dashboard-data?date=${formattedDate}`
+        );
+        setData(response.data);
       } catch (error) {
         console.error("Error fetching data: ", error);
       } finally {
@@ -50,59 +52,8 @@ const AdminDashboard = () => {
     fetchAllData();
   }, [date]);
 
-  const fetchData = async (selectedDate) => {
-    const formattedDate = selectedDate.toLocaleDateString("en-CA");
-    try {
-      const response = await axios.get(
-        `${baseApiUrl}admin-dashboard-data?date=${formattedDate}`
-      );
-      setData(response.data);
-    } catch (error) {
-      console.error("There was an error fetching the data!", error);
-    }
-  };
-
-  const fetchBookingChartData = async () => {
-    try {
-      const response = await axios.get(`${baseApiUrl}booking-chart-data`);
-      setBookingChartData(response.data);
-    } catch (error) {
-      console.error("There was an error fetching the bookings!", error);
-    }
-  };
-
-  const fetchBookings = async () => {
-    try {
-      const response = await axios.get(`${baseApiUrl}bookings`);
-      setBookings(response.data.slice(0, 4));
-    } catch (error) {
-      console.error("There was an error fetching the bookings!", error);
-    }
-  };
-
   const handleViewAll = (url) => {
     navigate(url);
-  };
-
-  const fetchTopCustomersData = async () => {
-    try {
-      const response = await axios.get(`${baseApiUrl}top-customers-data`);
-      const sortedData = response.data.sort(
-        (a, b) => b.total_bookings - a.total_bookings
-      ); // Sort in descending order
-      setTopCustomersData(sortedData);
-    } catch (error) {
-      console.log("There was an error getting top customers!", error);
-    }
-  };
-
-  const fetchMessages = async () => {
-    try {
-      const response = await axios.get(`${baseApiUrl}messages`);
-      setMessages(response.data);
-    } catch (error) {
-      console.log("There was an error getting messages!", error);
-    }
   };
 
   const renderSpinner = () => (
@@ -120,12 +71,11 @@ const AdminDashboard = () => {
 
       {/* Overall booking overview */}
       <div className="row">
-        {/* col 1 */}
         <div className="col-12 col-md-6 col-lg-3 d-flex flex-column mb-3">
           <Calendar onChange={setDate} value={date} className="calendar" />
         </div>
 
-        {/* col 2 */}
+        {/* Available Seats / Booked Seats */}
         <div className="d-block col-12 col-md-6 col-lg-3 d-flex flex-column mb-3">
           <div className="flex-fill mb-2">
             <div className="card text-white bg-primary h-100 w-100">
@@ -149,7 +99,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* col 3 */}
+        {/* Customers / Total Sales */}
         <div className="d-block col-12 col-md-6 col-lg-3 d-flex flex-column mb-3">
           <div className="flex-fill mb-2">
             <div className="card text-white bg-info h-100 w-100">
@@ -175,7 +125,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* col 4 */}
+        {/* Pending / Canceled Bookings */}
         <div className="d-block col-12 col-md-6 col-lg-3 d-flex flex-column mb-3">
           <div className="flex-fill mb-2">
             <div className="card text-white bg-danger h-100 w-100">
@@ -220,12 +170,12 @@ const AdminDashboard = () => {
               <tbody>
                 {isLoading
                   ? renderSpinner()
-                  : bookings.map((booking) => (
+                  : data.upcomingBookings?.slice(0, 4).map((booking) => (
                       <tr key={booking.id}>
-                        <td>{booking.customer?.name}</td>
-                        <td>{booking.service?.name}</td>
+                        <td>{booking?.customer_name}</td>
+                        <td>{booking?.service_name}</td>
                         <td>{booking.service?.price}</td>
-                        <td>{formatTimeTo12Hour(booking.time)}</td>
+                        <td>{formatTimeTo12Hour(booking.time)}</td> {/* Assuming 'time' is formatted in 'date' */}
                       </tr>
                     ))}
               </tbody>
@@ -238,8 +188,12 @@ const AdminDashboard = () => {
             </button>
           </div>
           <div className="col-lg-6">
-          <h2 className="fs-600 ff-serif">Number of bookings</h2>
-            {isLoading ? renderSpinner() : <BookingChart data={bookingChartData} />}
+            <h2 className="fs-600 ff-serif">Number of bookings</h2>
+            {isLoading ? (
+              renderSpinner()
+            ) : (
+              <BookingChart data={data.combinedBookingStats} />
+            )}
           </div>
         </div>
       </div>
@@ -252,17 +206,17 @@ const AdminDashboard = () => {
 
             {/* Display top customer */}
             <div className="top-customer customer">
-              {topCustomersData[0] ? (
+              {data.topCustomers[0] ? (
                 <div>
                   <img
                     src={userImg}
                     className="top"
-                    alt={topCustomersData[0].customer_name}
+                    alt={data.topCustomers[0].name}
                   />
                   <p className="ff-serif">
-                    {topCustomersData[0].customer_name}
+                    {data.topCustomers[0].name}
                   </p>
-                  <p>{topCustomersData[0].total_bookings}</p>
+                  <p>{data.topCustomers[0].bookings_count}</p>
                 </div>
               ) : (
                 renderSpinner()
@@ -271,11 +225,11 @@ const AdminDashboard = () => {
 
             {/* Display last two customers side by side */}
             <div className="customers">
-              {topCustomersData.slice(1).map((customer) => (
-                <div key={customer.customer_id} className="customer">
-                  <img src={userImg} alt={customer.customer_name} />
-                  <p className="ff-serif">{customer.customer_name}</p>
-                  <p>{customer.total_bookings}</p>
+              {data.topCustomers.slice(1).map((customer) => (
+                <div key={customer.id} className="customer">
+                  <img src={userImg} alt={customer.name} />
+                  <p className="ff-serif">{customer.name}</p>
+                  <p>{customer.bookings_count}</p>
                 </div>
               ))}
             </div>
@@ -305,10 +259,15 @@ const AdminDashboard = () => {
           <div className="stat-card text-white bg-danger rounded p-2">
             <h2 className="fs-600 ff-serif">Needs Attention</h2>
             <div>
-              {isLoading ? renderSpinner() : messages.length === 0 ? (
+              {isLoading ? (
+                renderSpinner()
+              ) : data.messages.length === 0 ? (
                 <p>No Messages</p>
               ) : (
-                <MessageCarousel messages={messages} style={{ height: "50px" }} />
+                <MessageCarousel
+                  messages={data.messages}
+                  style={{ height: "50px" }}
+                />
               )}
             </div>
           </div>
@@ -316,7 +275,9 @@ const AdminDashboard = () => {
           <div className="stat-card bg-dark text-white rounded p-2">
             <h2 className="fs-600 ff-serif">Review Feedbacks</h2>
             <div>
-              {isLoading ? renderSpinner() : messages.length === 0 ? (
+              {isLoading ? (
+                renderSpinner()
+              ) : data.messages.length === 0 ? (
                 <p>No Feedback Available</p>
               ) : (
                 <FeedbackCarousel style={{ height: "50px" }} />
@@ -327,7 +288,9 @@ const AdminDashboard = () => {
           <div className="stat-card top-customer-container rounded p-2">
             <h2 className="fs-600 ff-serif">Recent Message</h2>
             <div>
-              {isLoading ? renderSpinner() : messages.length > 0 ? (
+              {isLoading ? (
+                renderSpinner()
+              ) : data.messages.length > 0 ? (
                 <div className="pb-3">
                   <img
                     src={mail}
@@ -335,15 +298,16 @@ const AdminDashboard = () => {
                     style={{ height: "50px" }}
                   />
                   <h3>
-                    {messages[messages.length - 1].message_type ||
+                    {data.messages[data.messages.length - 1].message_type ||
                       "No message type"}
                   </h3>
                   <p>
                     From:{" "}
-                    {messages[messages.length - 1].name || "Unknown sender"}
+                    {data.messages[data.messages.length - 1].name ||
+                      "Unknown sender"}
                   </p>
                   <p>
-                    {messages[messages.length - 1].message ||
+                    {data.messages[data.messages.length - 1].message ||
                       "No message content"}
                   </p>
                   <div className="d-flex w-100 justify-content-between">
