@@ -41,6 +41,8 @@ import Admin from "../src/pages/admin pages/Admin";
 
 import PageNotAvailable from "./pages/PageNotAvailable";
 import AdminFeedbackScreen from "./pages/admin pages/admin-feedbacks/AdminFeedbackScreen";
+import PoliciesScreen from "./pages/PoliciesScreen";
+import TermsAndConditionScreen from "./pages/TermsAndConditionScreen";
 
 const App = () => {
   const location = useLocation();
@@ -62,6 +64,8 @@ const App = () => {
         <Route path="/payment" element={<Payment />} />
         <Route path="/booking-successful" element={<BookingSummary />} />
         <Route path="/booking-details" element={<BookingDetails />} />
+        <Route path="/terms-and-conditions" element={<PoliciesScreen />} />
+        <Route path="/policies" element={<TermsAndConditionScreen />} />
 
         <Route path="/login" element={<AdminLogin />} />
         <Route
@@ -119,6 +123,6 @@ const AppWrapper = () => (
 
 export default AppWrapper;
 
-export const baseApiUrl = "http://localhost:8000/api/";
+export const baseApiUrl = `http://${window.location.hostname}:8000/api/`;
 
 export const baseSocketUrl = `http://${window.location.hostname}`;

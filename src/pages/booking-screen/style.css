@@ -17,3 +17,64 @@
   color: white;
   padding: 10px;
 }
+
+.input.userId {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+.info.icon {
+  height: 18px;
+  width: auto;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  opacity: 50%;
+  transition: 0.2s opacity ease-in-out;
+}
+
+.info.icon:hover {
+  opacity: 100%;
+}
+
+.info.userId.policy {
+  display: none;
+}
+.info.userId.policy.active {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 196px;
+  transform: translate(-50%, -50%);
+  background-color: rgba(73, 73, 73, 0.719);
+  padding: 10px;
+  z-index: 1000;
+  border-radius: 8px;
+  color: white;
+}
+
+.info.userId.policy.active::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(180deg);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid rgba(73, 73, 73, 0.719);
+}
+
+.information {
+  position: relative;
+}
+
+.fs-small {
+  font-size: 12px;
+}
+
+.light-blue {
+  color: rgb(111, 214, 255);
+}

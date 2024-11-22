@@ -1,42 +1,43 @@
-import React from 'react';
+import React from "react";
 
 const Footer = () => {
   return (
     <footer className="container mt-5">
+      <hr/>
       <div className="row items">
         <div className="col flex-items">
           <ul>
-            <li style={{ width: '50px', height: '50px' }}>
-              <a href="#"><img src="../../assets/images/studeo-spaces-logo.png"alt="Studeo Spaces Logo" /></a>
+            <li style={{ width: "50px", height: "50px" }}>
+              <a href="#">
+                <img
+                  src="../../assets/images/studeo-spaces-logo.png"
+                  alt="Studeo Spaces Logo"
+                />
+              </a>
             </li>
-            <li><a href="#">Studeo Spaces</a></li>
+            <li>
+              <a href="#">Studeo Spaces</a>
+            </li>
           </ul>
         </div>
         <div className="col">
           <ul>
-            <p>About</p>
-            <li><a href="#">Our story</a></li>
-            <li><a href="#">Mission</a></li>
-            <li><a href="#">Benefits</a></li>
-            <li><a href="#">Team</a></li>
+            <p className="fw-bold">Connect</p>
+            <li>2nd Floor, Studeo Suites 1707 Dapitan corner Dela Fuente Streets, Sampaloc, 1008</li>
+            <li>(02) 7002 5702</li>
+            <li><a href="https://www.facebook.com/StudeoSpaces">Facebook Page</a></li>
+            <li>info@studeospaces.com</li>
           </ul>
         </div>
         <div className="col">
           <ul>
-            <p>Connect</p>
-            <li>Address</li>
-            <li>Phone Number</li>
-            <li>Telephone Number</li>
-            <li>Visit our Facebook Page</li>
-          </ul>
-        </div>
-        <div className="col">
-          <ul>
-            <p>Legal</p>
-            <li><a href="#">Terms and Policy</a></li>
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms of Use</a></li>
-            <li><a href="#">Don't sell my information</a></li>
+            <p className="fw-bold">Legal</p>
+            <li>
+              <a href="/policies">Privacy Policy</a>
+            </li>
+            <li>
+              <a href="/terms-and-conditions">Terms and Condition</a>
+            </li>
           </ul>
         </div>
       </div>
