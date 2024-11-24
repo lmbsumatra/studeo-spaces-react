@@ -66,7 +66,7 @@ class BookingController extends Controller
         $booking->save();
 
         // Create a 15-day pass if applicable (e.g., if service ID is 4)
-        if ($service->id == 40) { // Assuming 4 is the ID for the 15-day pass service
+        if ($service->id == 4) { // Assuming 4 is the ID for the 15-day pass service
             Pass::create([
                 'customer_id' => $customer->id,
                 'total_days' => 15,

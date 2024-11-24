@@ -43,6 +43,7 @@ import PageNotAvailable from "./pages/PageNotAvailable";
 import AdminFeedbackScreen from "./pages/admin pages/admin-feedbacks/AdminFeedbackScreen";
 import PoliciesScreen from "./pages/PoliciesScreen";
 import TermsAndConditionScreen from "./pages/TermsAndConditionScreen";
+import AdminSettings from "./pages/admin pages/AdminSettings";
 
 const App = () => {
   const location = useLocation();
@@ -86,6 +87,7 @@ const App = () => {
           <Route path="customers" element={<AdminCustomers />} />
           <Route path="messages" element={<AdminMessagesScreen />} />
           <Route path="feedbacks" element={<AdminFeedbackScreen />} />
+          <Route path="settings" element={<AdminSettings />} />
           <Route
             path="services"
             element={<AdminServices title="Admin Services Management" />}

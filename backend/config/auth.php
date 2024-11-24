@@ -17,7 +17,10 @@ return [
             'driver' => 'token',
             'provider' => 'admins',
             'hash' => false,
+            'driver' => 'jwt',
+        'provider' => 'admins',
         ],
+
     ],
 
     'providers' => [

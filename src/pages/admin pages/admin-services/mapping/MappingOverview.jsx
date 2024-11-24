@@ -1,13 +1,46 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./mapping_styles.css";
 import { Modal } from "react-bootstrap";
+import { formatDate } from "../../../../utils/dateFormat";
+import { baseApiUrl } from "../../../../App";
 
 const MappingOverview = ({ isActive, onClose }) => {
   const [floor, setFloor] = useState("Ground Floor");
+  const [currentDate, setCurrentDate] = useState("");
+  const [currentTime, setCurrentTime] = useState("");
+  const [servicesData, setServicesData] = useState([]);
 
   const handleFloorChange = (event) => {
     setFloor(event.target.value);
   };
+
+  const fetchSeatData = async () => {
+    try {
+      const response = await fetch(`${baseApiUrl}booking-data`);
+      const data = await response.json();
+      console.log("Data from API:", data);
+      setServicesData(data); // Set per-service data
+    } catch (error) {
+      console.error("Error fetching seat data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (currentDate) {
+      fetchSeatData();
+    }
+  }, [currentDate]);
+  // Update the date and time every second
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const now = new Date();
+      setCurrentDate(now.toLocaleDateString()); // Get current date in format: MM/DD/YYYY
+      setCurrentTime(now.toLocaleTimeString()); // Get current time in format: HH:mm:ss AM/PM
+    }, 1000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
   // Define seating arrangements for each floor
   const seatingArrangement = {
@@ -76,21 +109,35 @@ const MappingOverview = ({ isActive, onClose }) => {
       { id: "ADAN34" },
       { id: "ADAN35" },
     ],
-    "Third Floor": [
-      { id: "TFD01" },
-      { id: "TFD02" },
-      { id: "TFD03" },
-      { id: "TFD04" },
-      { id: "TFD05" },
-      { id: "TFD06" },
-      { id: "TFD07" },
-      { id: "TFD08" },
-      { id: "TFD09" },
-      { id: "TFD10" },
-    ],
   };
 
   if (!isActive) return null;
+
+  const glassboxService = servicesData.find(
+    (service) => service.service_id === 2
+  );
+  let serviceContent = null;
+  if (glassboxService) {
+    serviceContent = (
+      <div className="p-2">
+        <p>{`${glassboxService.service_name}`}</p>
+        <p>{`${glassboxService.duration}`}</p>
+        <p>Available Seats</p>
+        <div className="d-flex">
+          <div className="d-block p-2">
+            <div className="card p-2">
+              Available Seats{" "}
+              <span className="fw-bold">{glassboxService.availableSeats}</span>
+            </div>
+            <div className="card p-2">
+              Booked Seats{" "}
+              <span className="fw-bold">{glassboxService.bookedSeats}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -99,45 +146,55 @@ const MappingOverview = ({ isActive, onClose }) => {
           <button className="btn btn-secondary" onClick={onClose}>
             Close
           </button>
-          <h3>Mapping - {floor}</h3>
-          <select onChange={handleFloorChange} value={floor}>
-            <option>Ground Floor</option>
-            <option>Second Floor</option>
-            <option>Third Floor</option>
-          </select>
+          <div className="d-flex justify-content-between align-items-center">
+            <h3>
+              Mapping -{" "}
+              <select onChange={handleFloorChange} value={floor}>
+                <option>Ground Floor</option>
+                <option>Second Floor</option>
+                <option>Third Floor</option>
+              </select>
+            </h3>{" "}
+            <p>
+              {formatDate(currentDate)} {currentTime}
+            </p>
+          </div>
           {floor === "Ground Floor" && (
-            <div className="area">
-              <div className="seat-container">
-                <div className="seats-left">
-                  {seatingArrangement["Ground Floor"]
-                    .slice(0, 5)
-                    .map((seat) => (
+            <div className="d-flex m-2">
+              <div className="area d-block">
+                <div className="seat-container">
+                  <div className="seats-left">
+                    {seatingArrangement["Ground Floor"]
+                      .slice(0, 5)
+                      .map((seat) => (
+                        <div className="seat" key={seat.id}>
+                          {seat.id}
+                          <div className="chair"></div>
+                        </div>
+                      ))}
+                  </div>
+
+                  <div className="seats-right">
+                    {seatingArrangement[floor].slice(5, 10).map((seat) => (
                       <div className="seat" key={seat.id}>
                         {seat.id}
-                        <div className="chair"></div>
                       </div>
                     ))}
+                  </div>
                 </div>
-
-                <div className="seats-right">
-                  {seatingArrangement[floor].slice(5, 10).map((seat) => (
-                    <div className="seat" key={seat.id}>
-                      {seat.id}
-                    </div>
-                  ))}
+                <div className="stairs">
+                  <span>Stairs</span>
                 </div>
-              </div>
-              <div className="stairs">
-                <span>Stairs</span>
-              </div>
-              <div className="bottom-area">
-                <div className="lobby">
-                  <span>Lobby</span>
-                </div>
-                <div className="counter">
-                  <span>Counter</span>
+                <div className="bottom-area">
+                  <div className="lobby">
+                    <span>Lobby</span>
+                  </div>
+                  <div className="counter">
+                    <span>Counter</span>
+                  </div>
                 </div>
               </div>
+              {serviceContent}
             </div>
           )}
 
@@ -278,7 +335,7 @@ const MappingOverview = ({ isActive, onClose }) => {
                     </div>
                   </div>
                 </div>
-                <div className="middle-area-3 d-flex">
+                {/* <div className="middle-area-3 d-flex">
                   <div className="d-block">
                     <div className="middle-left-bottom">
                       {seatingArrangement["Second Floor"]
@@ -291,17 +348,8 @@ const MappingOverview = ({ isActive, onClose }) => {
                         ))}
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
-
-              {/* <div className="bottom-area">
-                <div className="lobby">
-                  <span>Lobby</span>
-                </div>
-                <div className="counter">
-                  <span>Counter</span>
-                </div>
-              </div> */}
             </div>
           )}
         </div>

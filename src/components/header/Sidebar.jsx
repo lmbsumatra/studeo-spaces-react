@@ -22,6 +22,7 @@ const links = [
   { path: "/admin/services", label: "Services", icon: servicesIcon },
   { path: "/admin/feedbacks", label: "Feedback Management", icon: blogsIcon },
   { path: "/admin/blogs", label: "Blogs", icon: blogsIcon },
+  { path: "/admin/settings", label: "Settings", icon: blogsIcon },
 ];
 
 const Sidebar = ({ isExpanded, toggleSidebar }) => {

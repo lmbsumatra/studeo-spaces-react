@@ -61,10 +61,11 @@
 
 .lobby,
 .counter {
-  padding: 20px 76px;
+  padding: 20px 66px;
   background: #e0e0e0;
   text-align: center;
   border-radius: 5px;
+  margin: 10px 0px;
 }
 
 .lobby2 {
@@ -73,15 +74,15 @@
   text-align: center;
   border-radius: 5px;
   transform: rotate(90deg);
-  margin-left: 97px;
+  margin-left: 51px;
 }
 
 .stairs {
   position: absolute;
-  left: 240px;
-  top: 120px;
+  left: 190px;
+  top: 106px;
   background-color: #e0e0e0;
-  padding: 130px 84px;
+  padding: 130px 92px;
   border-radius: 5px;
 }
 
