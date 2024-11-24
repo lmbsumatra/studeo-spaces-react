@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
+import html2canvas from "html2canvas"; // Import html2canvas
 
 const BookingSummary = () => {
   const location = useLocation();
@@ -29,6 +30,16 @@ const BookingSummary = () => {
     return `${hours}:${minutes} ${period}`;
   };
 
+  // Function to generate Customer ID
+  const generateCustomerID = (userId) => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0"); // Add leading zero
+    const day = String(today.getDate()).padStart(2, "0"); // Add leading zero
+    const incrementalId = String(userId).padStart(3, "0"); // Pad the user ID to 3 digits
+    return `${year}${month}${day}-${incrementalId}`;
+  };
+
   useEffect(() => {
     if (!location.state) {
       navigate("/booking");
@@ -37,6 +48,7 @@ const BookingSummary = () => {
 
   const {
     service_id = "N/A",
+    service_name = "N/A",
     price = "N/A",
     date = "N/A",
     time = "N/A",
@@ -48,9 +60,29 @@ const BookingSummary = () => {
     customerID = "N/A",
   } = location.state || {};
 
+  // Generate the formatted Customer ID
+  const formattedCustomerID = generateCustomerID(customerID);
+
   if (!location.state) {
     return null;
   }
+
+  const saveReceiptAsImage = () => {
+    const element = document.querySelector(".card-body"); // Target only the card-body
+    html2canvas(element, { scale: 2 }) // Higher scale for better quality
+      .then((canvas) => {
+        const link = document.createElement("a");
+        link.download = `BookingSummary_${new Date().toISOString()}.png`; // Suggest a file name
+        link.href = canvas.toDataURL("image/png");
+        link.click(); // Programmatically trigger download
+      })
+      .catch((error) => {
+        console.error("Failed to save receipt as image:", error);
+        alert(
+          "Something went wrong while saving the receipt. Please try again."
+        );
+      });
+  };
 
   return (
     <div className="container mt-5">
@@ -65,7 +97,7 @@ const BookingSummary = () => {
           <div className="mt-4">
             <h3 className="fs-500 ff-serif">Booking Details</h3>
             <p>
-              <strong>Service ID:</strong> {service_id}
+              <strong>Service Name:</strong> {service_name}
             </p>
             <p>
               <strong>Price:</strong> {price}
@@ -95,13 +127,19 @@ const BookingSummary = () => {
             <hr />
             <h3 className="fs-500 ff-serif">Customer ID</h3>
             <p>
-              <strong>Customer ID:</strong> {customerID}
+              <strong>Customer ID:</strong> {formattedCustomerID}
             </p>
           </div>
           <div className="mt-5 text-center">
             <h4 className="fs-500 ff-serif">Thank you for your booking!</h4>
             <p className="fs-400">We look forward to serving you.</p>
           </div>
+        </div>
+        {/* Button to trigger the saveReceiptAsImage function */}
+        <div className="text-center mt-4">
+          <button className="btn btn-primary" onClick={saveReceiptAsImage}>
+            Download Receipt as Image
+          </button>
         </div>
       </div>
       <Footer />

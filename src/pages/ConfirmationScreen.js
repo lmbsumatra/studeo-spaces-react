@@ -29,6 +29,7 @@ const ConfirmationScreen = () => {
   // Extract the state
   const {
     service_id,
+    service_name,
     price,
     currentDate,
     time,
@@ -41,6 +42,7 @@ const ConfirmationScreen = () => {
   // Create the bookingDetails object
   const bookingDetails = {
     service_id,
+    service_name,
     price,
     currentDate,
     time,
@@ -61,7 +63,7 @@ const ConfirmationScreen = () => {
       <div className="container">
         <h2 className="fs-600 ff-serif">Booking Details</h2>
         <p>
-          <strong>Service:</strong> {service_id}
+          <strong>Service:</strong> {service_name}
         </p>
         <p>
           <strong>Price:</strong> {price}
