@@ -87,7 +87,10 @@ const AdminLoginScreen = () => {
   
 
   // Handle "Forgot Password" modal toggle
-  const handleForgotPasswordModalShow = () => setShowForgotPasswordModal(true);
+const handleForgotPasswordModalShow = () => {
+  setCurrentStep(1);  // Reset to step 1 when modal is shown
+  setShowForgotPasswordModal(true);
+};
 
   const resetForgotPasswordForm = () => {
     setForgotUsername("");
@@ -96,7 +99,7 @@ const AdminLoginScreen = () => {
     setSecurityQuestion("");
     setSecurityAnswer("");
     setPasswordVisible(false);
-    setConfirmNewPassword(false)
+    setConfirmPasswordVisible(false)
   };
 
   const handleForgotPasswordModalClose = () => {
@@ -203,6 +206,7 @@ const AdminLoginScreen = () => {
       console.log("Password change response:", response.data);  // Log the response
       toast.success("Password changed successfully!");
       setShowForgotPasswordModal(false); // Close modal after success
+      resetForgotPasswordForm();
     } catch (error) {
       if (!error.response) {
         toast.error("Network error: Please check your internet connection.");
