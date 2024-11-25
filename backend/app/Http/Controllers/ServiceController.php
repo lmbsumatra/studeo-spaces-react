@@ -45,8 +45,8 @@ class ServiceController extends Controller
 
     public function available(Request $request)
     {
-        $date = $request->query('date');
-
+        $date = $request->query('date', Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d'));
+        
         // Fetch services and calculate bookings count for the selected date
         $services = Service::leftJoin('bookings', function ($join) use ($date) {
             $join->on('services.id', '=', 'bookings.service_id')

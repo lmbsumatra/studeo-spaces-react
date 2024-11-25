@@ -32,7 +32,7 @@ const Service = ({
 
         const [serviceResponse, seatsResponse] = await Promise.all([
           fetch(`${baseApiUrl}services`),
-          fetch(`${baseApiUrl}available?date=${today}`),
+          fetch(`${baseApiUrl}available?date=2024-11-26`),
         ]);
 
         if (!serviceResponse.ok || !seatsResponse.ok) {
@@ -52,6 +52,7 @@ const Service = ({
 
         setServices(servicesData);
         setAvailableSeats(availableSeatsMap);
+        console.log(availableSeats)
       } catch (error) {
         console.error(error);
       } finally {
