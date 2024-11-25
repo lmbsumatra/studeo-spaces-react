@@ -11,20 +11,7 @@ const Payment = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
-  const [socket, setSocket] = useState(null);
-
-  useEffect(() => {
-    // Initialize the socket connection once
-    const newSocket = io(`${baseSocketUrl}:3002`, {
-      transports: ["websocket"],
-    });
-    setSocket(newSocket);
-
-    // Clean up socket connection on component unmount
-    return () => {
-      newSocket.close();
-    };
-  }, []);
+  const socket = io(`${baseSocketUrl}:3002`, { transports: ["websocket"] });
 
   const generateReferenceNumber = () => {
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -38,35 +25,40 @@ const Payment = () => {
   };
 
   const referenceNumber = generateReferenceNumber();
+  
 
   const handleBookingSummary = async () => {
     if (!location.state) return;
-
+  
     const bookingDetailsWithRef = {
       ...location.state,
       refNumber: referenceNumber,
       date: location.state.currentDate, // Using currentDate from location.state
     };
-
+  
     const notificationData = {
       customer_id: location.state.customerID || null,
       customer_name: location.state.name,
       message: "A customer has booked.",
-      type: "new_booking",
+      type: "booking",
       action_url: null,
     };
-
+  
     try {
       setLoading(true);
-
-      console.log(bookingDetailsWithRef);
-
+  
+      console.log("Booking details:", bookingDetailsWithRef);
+  
       // Step 1: Make the POST request for booking
       const response = await axios.post(
         `${baseApiUrl}bookings`,
         bookingDetailsWithRef
       );
 
+      const bookingId = response.data.id; // Assuming 'id' is returned in the response
+      notificationData.related_data_id = bookingId;
+      console.log(notificationData)
+      await axios.post(`${baseApiUrl}notifications`, notificationData);
       // Step 2: Send the email receipt
       const emailData = {
         email: location.state.email,
@@ -78,40 +70,52 @@ const Payment = () => {
         refNumber: referenceNumber,
       };
 
+      const { customerID } = response.data;
+      // toast.success("Your booking has been successful!");
+
+     
       const emailResponse = await axios.post(
         `${baseApiUrl}send-receipt`,
         emailData
       ); // API endpoint for sending the receipt email
       if (emailResponse.status !== 200) {
         throw new Error("Failed to send email.");
-      } // API endpoint for sending the receipt email
-
-      // Step 3: Send the notification
-      await axios.post(`${baseApiUrl}notifications`, notificationData);
-
-      // Emit a socket event for real-time notification
-      if (socket) {
-        socket.emit("Notification", { message: "A customer has booked." });
       }
-
+      else { console.log(emailResponse)}
+  
+      // Step 3: Send the notification
+       // Ensure socket is connected before emitting
+       socket.emit("booking", {
+        ...notificationData,
+        message_id: bookingId, // Include message ID in the notification data
+      });
+  
       toast.success("Your booking has been successful!");
-
+  
       // Step 4: Redirect to Booking Summary
-      const { customerID } = response.data;
       navigate("/booking-successful", {
         state: { ...bookingDetailsWithRef, customerID, emailSent: true }, // Pass emailSent flag
       });
     } catch (error) {
-      console.error(
-        "There was an error creating the booking or sending the email!",
-        error
-      );
+      console.error("Error during booking process:", error);
+  
+      // Log specific error details for easier debugging
+      if (error.response) {
+        console.error("Error response:", error.response.data);
+        console.error("Error status:", error.response.status);
+      } else if (error.request) {
+        console.error("Error request:", error.request);
+      } else {
+        console.error("Error message:", error.message);
+      }
+  
       toast.error("Booking failed. Please try again.");
       navigate("/booking", { state: location.state });
     } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     if (!location.state) {

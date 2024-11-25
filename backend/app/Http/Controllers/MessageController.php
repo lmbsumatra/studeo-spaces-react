@@ -28,7 +28,10 @@ class MessageController extends Controller
             ]);
         }
 
-        return response()->json($message, 201);
+        return response()->json([
+            'id' => $message->id, // Explicitly return the message ID
+            'message' => $message, // Return the entire message data, if needed
+        ], 201);
     }
 
     public function index()

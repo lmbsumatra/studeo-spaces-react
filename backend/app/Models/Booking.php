@@ -21,6 +21,7 @@ class Booking extends Model
         'refNumber',
         'status',
         'customer_id',
+        'pass_type'
     ];
 
     public function customer()

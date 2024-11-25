@@ -45,21 +45,9 @@ const Header = () => {
     // Poll for notifications every 30 seconds
     const intervalId = setInterval(fetchNotifications, 20000);
 
-    // Socket connection to listen for new notifications
-    socket.on("connect", () => {
-      console.log("Socket connected");
-    });
-
-    socket.on("notification", (newNotification) => {
-      setNotifications((prev) => [...prev, newNotification]);
-      setUnreadCount((prev) => prev + 1);
-      toast.info("New notification received!");
-    });
-
     // Cleanup on unmount
     return () => {
       clearInterval(intervalId);
-      socket.off("notification");
       socket.disconnect();
     };
   }, []);
@@ -83,18 +71,42 @@ const Header = () => {
     }
   };
 
+  // Function to format notification and provide corresponding URL for redirection
   const formatNotification = (notification) => {
-    const { type, customer_name, message } = notification;
+    const { type, customer_name, message, related_data_id } = notification;
+    let formattedMessage = "";
+    let redirectTo = "";
+
     switch (type) {
       case "payment":
-        return `${customer_name} has made a payment: ${message}`;
+        formattedMessage = `${customer_name} has made a payment: ${message}`;
+        redirectTo = `/messages/${related_data_id}`; // Redirect to messages for payment notification
+        break;
       case "booking":
-        return `${customer_name} has a new booking: ${message}`;
+        formattedMessage = `${customer_name} has a new booking: ${message}`;
+        redirectTo = `admin/bookings?highlight=${related_data_id}`; // Redirect to bookings for booking notification
+        break;
       case "message":
-        return `${customer_name} sent you a message: ${message}`;
+        formattedMessage = `${customer_name} sent you a message: ${message}`;
+        redirectTo = `/admin/messages?highlight=${related_data_id}`; // Redirect to messages for message notification
+        break;
+        case "cancelbooking":
+        formattedMessage = `${customer_name} has a new booking: ${message}`;
+        redirectTo = `admin/bookings?highlight=${related_data_id}`; // Redirect to bookings for booking notification
+        break;
       default:
-        return `You have a new notification: ${message}`;
+        formattedMessage = `You have a new notification: ${message}`;
+        redirectTo = `/admin/messages?highlight=${related_data_id}`; // Default route for other types of notifications
+        break;
     }
+
+    return { formattedMessage, redirectTo };
+  };
+
+  const handleNotificationClick = (notification) => {
+    const { redirectTo } = formatNotification(notification);
+    navigate(redirectTo); // Navigate to the relevant page
+    setShowNotifications(false); // Close the notification popup after a notification is clicked
   };
 
   return (
@@ -108,7 +120,9 @@ const Header = () => {
                 <li className="nav-item">
                   <img src={user} height="40px" alt="User Icon" />
                 </li>
-                <li className={`nav-item btn-notif ${showNotifications ? "active" : ""}`}>
+                <li
+                  className={`nav-item btn-notif ${showNotifications ? "active" : ""}`}
+                >
                   <img
                     src={notif}
                     height="40px"
@@ -126,27 +140,52 @@ const Header = () => {
             ) : (
               <>
                 <li className="nav-item">
-                  <NavLink to="/" className={({ isActive }) => (isActive ? "nav-link active-nav" : "nav-link")}>
+                  <NavLink
+                    to="/"
+                    className={({ isActive }) =>
+                      isActive ? "nav-link active-nav" : "nav-link"
+                    }
+                  >
                     Home
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink to="/blogs" className={({ isActive }) => (isActive ? "nav-link active-nav" : "nav-link")}>
+                  <NavLink
+                    to="/blogs"
+                    className={({ isActive }) =>
+                      isActive ? "nav-link active-nav" : "nav-link"
+                    }
+                  >
                     Blogs
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink to="/services" className={({ isActive }) => (isActive ? "nav-link active-nav" : "nav-link")}>
+                  <NavLink
+                    to="/services"
+                    className={({ isActive }) =>
+                      isActive ? "nav-link active-nav" : "nav-link"
+                    }
+                  >
                     Services
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink to="/faqs" className={({ isActive }) => (isActive ? "nav-link active-nav" : "nav-link")}>
+                  <NavLink
+                    to="/faqs"
+                    className={({ isActive }) =>
+                      isActive ? "nav-link active-nav" : "nav-link"
+                    }
+                  >
                     FAQs
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink to="/booking" className={({ isActive }) => (isActive ? "nav-link active-nav" : "nav-link")}>
+                  <NavLink
+                    to="/booking"
+                    className={({ isActive }) =>
+                      isActive ? "nav-link active-nav" : "nav-link"
+                    }
+                  >
                     <button className="btn btn-primary-clr">Book now!</button>
                   </NavLink>
                 </li>
@@ -158,27 +197,37 @@ const Header = () => {
             <div className="notification-popup active">
               <div className="popup-header">
                 <h5>Notifications</h5>
-                <button className="close-popup" onClick={() => setShowNotifications(false)}>
+                <button
+                  className="close-popup"
+                  onClick={() => setShowNotifications(false)}
+                >
                   X
                 </button>
               </div>
               <div className="popup-content">
-                {notifications.map((notif) => (
-                  <div
-                    key={notif.id}
-                    className="notification-item"
-                    onMouseEnter={(e) => e.currentTarget.classList.add("hover")}
-                    onMouseLeave={(e) => e.currentTarget.classList.remove("hover")}
-                  >
-                    <p>{formatNotification(notif)}</p>
-                    <span className="timestamp">
-                      {dayjs(notif.created_at).fromNow()}
-                    </span>
-                    <button className="delete-btn" onClick={() => handleDelete(notif.id)}>
-                      X
-                    </button>
-                  </div>
-                ))}
+                {notifications.map((notif) => {
+                  const { formattedMessage, redirectTo } = formatNotification(notif);
+                  return (
+                    <div
+                      key={notif.id}
+                      className="notification-item"
+                      onMouseEnter={(e) => e.currentTarget.classList.add("hover")}
+                      onMouseLeave={(e) => e.currentTarget.classList.remove("hover")}
+                      onClick={() => handleNotificationClick(notif)} // Handle notification click
+                    >
+                      <p>{formattedMessage}</p>
+                      <span className="timestamp">
+                        {dayjs(notif.created_at).fromNow()}
+                      </span>
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDelete(notif.id)}
+                      >
+                        X
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('total_bullets');
             $table->integer('remaining_bullets');
             $table->boolean('is_shared');
+            $table->string('reference_number')->unique();
             $table->timestamps();
         });
     }

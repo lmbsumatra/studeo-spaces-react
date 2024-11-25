@@ -28,8 +28,9 @@ Route::get('/bookings', [BookingController::class, 'index']);
 Route::get('/bookings/{refNumber}', [BookingController::class, 'show']);
 
 Route::post('/check-pass', [BookingController::class, 'checkPass']);
+Route::post('/check-pass-by-reference', [BookingController::class, 'checkPassByReference']);
 Route::post('/use-pass', [BookingController::class, 'usePass']);
-Route::post('/share-pass', [BookingController::class, 'sharePass']);
+
 
 Route::post('/customers', [CustomerController::class, 'store']);
 Route::get('/customers', [CustomerController::class, 'index']);
@@ -72,7 +73,7 @@ Route::get('/booking-chart-data', [ChartDataController::class, 'booking']);
 Route::get('/top-customers-data', [ChartDataController::class, 'topCustomers']);
 Route::get('/user-growth-data', [ChartDataController::class, 'userGrowth']);
 
-
+use Illuminate\Support\Facades\Mail;
 
 Route::post('/send-receipt', [BookingController::class, 'sendEmailReceipt']);
 

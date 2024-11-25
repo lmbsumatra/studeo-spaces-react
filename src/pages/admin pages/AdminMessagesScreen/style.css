@@ -1,3 +1,11 @@
 .table-reponsive {
     overflow-x: scroll;
 }
+
+.highlight {
+    background-color: yellow; /* or any color you prefer */
+  }
+
+  .bg-red {
+    background-color: red !important;
+  }

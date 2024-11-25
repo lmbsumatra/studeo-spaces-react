@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
 import Promo from "../promo/Promo";
-import Tooltip from "@mui/material/Tooltip";
+import { Tooltip } from '@mui/material';
 import { baseApiUrl } from "../../App";
 
 const Service = ({
