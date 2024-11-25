@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\DB;
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Service;
 use App\Models\Pass;
 use App\Models\PassShare;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BookingSummaryMail; 
 
 class BookingController extends Controller
 {
@@ -23,7 +26,7 @@ class BookingController extends Controller
     }
 
     public function store(Request $request)
-{
+    {
     $validatedData = $request->validate([
         'service_id' => 'required|exists:services,id',
         'price' => 'required|numeric',
@@ -35,6 +38,12 @@ class BookingController extends Controller
         'refNumber' => 'required|string|unique:bookings,refNumber',
         'payment_method' => 'required|in:GCash,Pay on Counter,Bank Card',
     ]);
+
+    // Find the service
+    $service = Service::find($validatedData['service_id']);
+    if (!$service) {
+        return response()->json(['error' => 'Service not found'], 404);
+    }
 
     // Find or create the customer
     $customer = Customer::firstOrCreate(
@@ -70,23 +79,60 @@ class BookingController extends Controller
     $booking->customer()->associate($customer);
     $booking->save();
 
-        // Create a 15-day pass if applicable (e.g., if service ID is 4)
-        if ($service->id == 40) { // Assuming 4 is the ID for the 15-day pass service
-            Pass::create([
-                'customer_id' => $customer->id,
-                'total_days' => 15,
-                'remaining_days' => 15,
-                'total_bullets' => 15,
-                'remaining_bullets' => 15,
-                'is_shared' => false
-            ]);
-        }
+    // Create a 15-day pass if applicable (e.g., if service ID is 40)
+    if ($service->id == 4) { // Assuming 40 is the ID for the 15-day pass service
+        Pass::create([
+            'customer_id' => $customer->id,
+            'total_days' => 15,
+            'remaining_days' => 15,
+            'total_bullets' => 15,
+            'remaining_bullets' => 15,
+            'is_shared' => false,
+            'reference_number' => $this->generatePassReference()
+        ]);
+    }
 
     return response()->json(['booking' => $booking, 'customerID' => $customer->id], 201);
-}
+    }
+
+    public function sendEmailReceipt(Request $request)
+    {
+        // Validate the incoming request
+        $validatedData = $request->validate([
+            'email' => 'required|email',
+            'service_name' => 'required|string',
+            'date' => 'required|date',
+            'time' => 'required',
+            'price' => 'required|numeric',
+            'refNumber' => 'required|string', 
+        ]);
+
+        Log::info('Email data received: ', $validatedData);
+        Log::info('Received email data: ', $request->all());
 
 
+        // Prepare booking details for the email
+        $bookingDetails = [
+            'service_name' => $validatedData['service_name'],
+            'date' => $validatedData['date'],
+            'time' => $validatedData['time'],
+            'price' => $validatedData['price'],
+            'refNumber' => $validatedData['refNumber'], 
+        ];
+        
 
+        // Send the email
+        try {
+            Log::info('Sending email to: ' . $validatedData['email']);  // Log email address being sent to
+            Mail::to($validatedData['email'])->send(new BookingSummaryMail($bookingDetails));
+            Log::info('Email sent successfully to: ' . $validatedData['email']);
+            return response()->json(['message' => 'Email sent successfully!'], 200);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error('Failed to send booking email: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to send email. Please try again later.'], 500);
+        }
+    }
 
     public function index()
     {
@@ -182,9 +228,8 @@ class BookingController extends Controller
         ]);
     }
 
-
-    public function usePass(Request $request)
-    {
+    public function usePass(Request $request) {
+        
     Log::info('usePass method triggered');
 
     // Validate the request
@@ -280,35 +325,4 @@ class BookingController extends Controller
     }
     }
 
-
-
-    
-
-
-
-    /*public function sharePass(Request $request)
-    {
-        $pass = Pass::findOrFail($request->passId);
-        $sharedWithCustomer = Customer::findOrFail($request->sharedWithCustomerId);
-
-        if ($pass->is_shared) {
-            return response()->json(['error' => 'This pass has already been shared'], 400);
-        }
-
-        $pass->is_shared = true;
-        $pass->save();
-
-        $passShare = new PassShare([
-            'pass_id' => $pass->id,
-            'shared_with_customer_id' => $sharedWithCustomer->id,
-            'share_date' => now(),
-            'name' => $validatedData['name'] 
-        ]);
-        $passShare->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Pass shared successfully'
-        ]);
-    }
 }

@@ -41,13 +41,13 @@ const Payment = () => {
 
   const handleBookingSummary = async () => {
     if (!location.state) return;
-
+  
     const bookingDetailsWithRef = {
       ...location.state,
       refNumber: referenceNumber,
       date: location.state.currentDate, // Using currentDate from location.state
     };
-
+  
     const notificationData = {
       customer_id: location.state.customerID || null,
       customer_name: location.state.name,
@@ -55,18 +55,16 @@ const Payment = () => {
       type: "new_booking",
       action_url: null,
     };
-
+  
     try {
       setLoading(true);
-
-      console.log(bookingDetailsWithRef);
-
+  
+      console.log("Booking details:", bookingDetailsWithRef);
+  
       // Step 1: Make the POST request for booking
-      const response = await axios.post(
-        `${baseApiUrl}bookings`,
-        bookingDetailsWithRef
-      );
-
+      const response = await axios.post(`${baseApiUrl}bookings`, bookingDetailsWithRef);
+      console.log("Booking response:", response);
+  
       // Step 2: Send the email receipt
       const emailData = {
         email: location.state.email,
@@ -77,41 +75,49 @@ const Payment = () => {
         time: location.state.time,
         refNumber: referenceNumber,
       };
-
-      const emailResponse = await axios.post(
-        `${baseApiUrl}send-receipt`,
-        emailData
-      ); // API endpoint for sending the receipt email
+  
+      const emailResponse = await axios.post(`${baseApiUrl}send-receipt`, emailData);
+      console.log("Email response:", emailResponse);
       if (emailResponse.status !== 200) {
         throw new Error("Failed to send email.");
-      } // API endpoint for sending the receipt email
-
+      }
+  
       // Step 3: Send the notification
-      await axios.post(`${baseApiUrl}notifications`, notificationData);
-
+      const notificationResponse = await axios.post(`${baseApiUrl}notifications`, notificationData);
+      console.log("Notification response:", notificationResponse);
+  
       // Emit a socket event for real-time notification
       if (socket) {
         socket.emit("Notification", { message: "A customer has booked." });
       }
-
+  
       toast.success("Your booking has been successful!");
-
+  
       // Step 4: Redirect to Booking Summary
       const { customerID } = response.data;
       navigate("/booking-successful", {
         state: { ...bookingDetailsWithRef, customerID, emailSent: true }, // Pass emailSent flag
       });
     } catch (error) {
-      console.error(
-        "There was an error creating the booking or sending the email!",
-        error
-      );
+      console.error("Error during booking process:", error);
+  
+      // Log specific error details for easier debugging
+      if (error.response) {
+        console.error("Error response:", error.response.data);
+        console.error("Error status:", error.response.status);
+      } else if (error.request) {
+        console.error("Error request:", error.request);
+      } else {
+        console.error("Error message:", error.message);
+      }
+  
       toast.error("Booking failed. Please try again.");
       navigate("/booking", { state: location.state });
     } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     if (!location.state) {
