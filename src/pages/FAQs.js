@@ -64,7 +64,7 @@ const FAQs = () => {
         message_id: testNotificationData.related_data_id, // Include message ID in the notification data
       });
       // Clear form fields after successful submission
-      // setFormData({ email: "", name: "", message: "", message_type: "" });
+      setFormData({ email: "", name: "", message: "", message_type: "" });
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Oops! Failed to send message. Please try again.");

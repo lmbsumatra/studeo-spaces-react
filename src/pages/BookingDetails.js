@@ -69,7 +69,7 @@ const BookingDetails = () => {
           ...notificationData,
           message_id: bookingId, // Include message ID in the notification data
         });
-        // navigate("/booking");
+        navigate("/booking");
       } catch (error) {
         console.error("Error cancelling booking:", error);
         toast.error("Failed to cancel booking.");
