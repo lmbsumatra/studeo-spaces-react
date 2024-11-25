@@ -78,3 +78,65 @@
 .light-blue {
   color: rgb(111, 214, 255);
 }
+.bullet {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 500;
+  position: relative;
+  cursor: default;
+  transition: all 0.3s ease;
+  padding-right: 0; 
+  line-height: 1; 
+  margin: 0;
+}
+
+.bullet > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute; 
+}
+
+
+.bullet {
+  background-color: #e0e0e0; /* Light gray for unused bullets */
+  color: #333;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.bullet.used {
+  background-color: #a0a0a0; /* Darker gray for used bullets */
+  color: #666;
+}
+
+.bullet .checkmark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.bullet.used .checkmark {
+  opacity: 1;
+}
+
+.bullet .number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.bullet.used .number {
+  opacity: 0;
+}

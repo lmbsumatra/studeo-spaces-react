@@ -3,91 +3,99 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log; 
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Service;
 use App\Models\Pass;
 use App\Models\PassShare;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
-    public function store(Request $request)
+    private function generatePassReference()
     {
-        $validatedData = $request->validate([
-            'service_id' => 'required|exists:services,id',
-            'price' => 'required|numeric',
-            'date' => 'required|date',
-            'time' => 'required|date_format:H:i',
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'contact_number' => 'required|string|max:20',
-            'payment_method' => 'required|string|max:50',
-            'refNumber' => 'required|string|unique:bookings,refNumber'
-        ]);
-
-        // Find the service associated with the booking
-        $service = Service::findOrFail($validatedData['service_id']);
-
-        // Check if service count is greater than 0
-        if ($service->count <= 0) {
-            return response()->json(['error' => 'Service is not available'], 400);
-        }
-
-        // Check if the customer already exists
-        $customer = Customer::where('email', $validatedData['email'])
-            ->where('name', $validatedData['name'])
-            ->where('contact_number', $validatedData['contact_number'])
-            ->first();
-
-        // If customer doesn't exist, create a new one
-        if (!$customer) {
-            $customer = Customer::create([
-                'name' => $validatedData['name'],
-                'email' => $validatedData['email'],
-                'contact_number' => $validatedData['contact_number'],
-            ]);
-        }
-
-        // Create the booking and associate it with the customer
-        $booking = new Booking([
-            'service_id' => $validatedData['service_id'],
-            'price' => $validatedData['price'],
-            'date' => $validatedData['date'],
-            'time' => $validatedData['time'],
-            'name' => $validatedData['name'],
-            'email' => $validatedData['email'],
-            'contact_number' => $validatedData['contact_number'],
-            'payment_method' => $validatedData['payment_method'],
-            'refNumber' => $validatedData['refNumber'],
-            'status' => 'Pending',
-        ]);
-        $booking->customer()->associate($customer);
-        $booking->save();
-
-        // Create a 15-day pass if applicable (e.g., if service ID is 4)
-        if ($service->id == 40) { // Assuming 4 is the ID for the 15-day pass service
-            Pass::create([
-                'customer_id' => $customer->id,
-                'total_days' => 15,
-                'remaining_days' => 15,
-                'total_bullets' => 15,
-                'remaining_bullets' => 15,
-                'is_shared' => false
-            ]);
-        }
-
-        // Return booking details along with the customer ID
-        return response()->json(['booking' => $booking, 'customerID' => $customer->id], 201);
+        do {
+            $reference = 'PASS-' . strtoupper(substr(md5(uniqid()), 0, 8));
+        } while (Pass::where('reference_number', $reference)->exists());
+        
+        return $reference;
     }
+
+    public function store(Request $request)
+{
+    $validatedData = $request->validate([
+        'service_id' => 'required|exists:services,id',
+        'price' => 'required|numeric',
+        'date' => 'required|date',
+        'time' => 'required|date_format:H:i',
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'contact_number' => 'required|string|max:20',
+        'refNumber' => 'required|string|unique:bookings,refNumber',
+        'payment_method' => 'required|in:GCash,Pay on Counter,Bank Card',
+    ]);
+
+    // Find or create the customer
+    $customer = Customer::firstOrCreate(
+        ['email' => $validatedData['email']],
+        [
+            'name' => $validatedData['name'],
+            'contact_number' => $validatedData['contact_number']
+        ]
+    );
+
+    // Retrieve the pass for the customer if it exists
+    $pass = Pass::where('customer_id', $customer->id)->first();
+
+    // Determine pass type based on ownership and shared status
+    $isOwner = $pass && $pass->customer_id == $customer->id;
+    $isSharedPass = $pass && PassShare::where('pass_id', $pass->id)->where('shared_with_customer_id', $customer->id)->exists();
+
+    if ($isOwner) {
+        $validatedData['pass_type'] = 'Owner';
+        $validatedData['payment_method'] = 'Shared Pass';
+    } elseif ($isSharedPass) {
+        $validatedData['pass_type'] = 'Shared';
+        $validatedData['payment_method'] = 'Shared Pass';
+    } else {
+        $validatedData['pass_type'] = 'Regular';
+        // Keep the user's chosen payment method
+    }
+
+    // Create the booking
+    $booking = new Booking(array_merge($validatedData, [
+        'status' => 'Pending',
+    ]));
+    $booking->customer()->associate($customer);
+    $booking->save();
+
+    // Create a 15-day pass if applicable (e.g., if service ID is 4)
+    $service = Service::findOrFail($validatedData['service_id']);
+    if ($service->id == 4) {
+        Pass::create([
+            'customer_id' => $customer->id,
+            'total_days' => 15,
+            'remaining_days' => 15,
+            'total_bullets' => 15,
+            'remaining_bullets' => 15,
+            'is_shared' => false,
+            'reference_number' => $this->generatePassReference()
+        ]);
+    }
+
+    return response()->json(['booking' => $booking, 'customerID' => $customer->id], 201);
+}
+
+
+
 
     public function index()
     {
-        // Fetch bookings with customer and service relations, sorted by created_at in descending order
         $bookings = Booking::with(['customer', 'service'])->orderBy('created_at', 'desc')->get();
         return response()->json($bookings);
     }
-
 
     public function show($refNumber)
     {
@@ -150,41 +158,138 @@ class BookingController extends Controller
         ]);
     }
 
-    public function usePass(Request $request)
+    public function checkPassByReference(Request $request)
     {
-        $pass = Pass::findOrFail($request->passId);
-
-        if ($pass->remaining_days <= 0) {
-            return response()->json(['error' => 'Pass has no remaining days'], 400);
-        }
-
-        $pass->remaining_days--;
-        $pass->remaining_bullets--;
-        $pass->save();
-
-        $booking = new Booking([
-            'service_id' => 4, // Assuming 4 is the ID for the 15-day pass service
-            'price' => 0, // It's prepaid, so no additional cost
-            'date' => now()->toDateString(),
-            'time' => now()->toTimeString(),
-            'name' => $pass->customer->name,
-            'email' => $pass->customer->email,
-            'contact_number' => $pass->customer->contact_number,
-            'payment_method' => 'Prepaid Pass',
-            'refNumber' => 'PASS-' . Str::uuid(),
-            'status' => 'confirmed'
+        $validatedData = $request->validate([
+            'reference_number' => 'required|string',
+            'name' => 'required|string'
         ]);
-        $booking->save();
+
+        $pass = Pass::where('reference_number', $validatedData['reference_number'])
+            ->where('remaining_days', '>', 0)
+            ->with('customer')
+            ->first();
+
+        if (!$pass) {
+            return response()->json([
+                'error' => 'Invalid or expired pass'
+            ], 404);
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Pass used successfully',
-            'remainingDays' => $pass->remaining_days,
-            'booking' => $booking
+            'pass' => $pass,
+            'customer' => $pass->customer,
+            'remaining_days' => $pass->remaining_days,
+            'remaining_bullets' => $pass->remaining_bullets
         ]);
     }
 
-    public function sharePass(Request $request)
+
+    public function usePass(Request $request)
+    {
+    Log::info('usePass method triggered');
+
+    // Validate the request
+    $validatedData = $request->validate([
+    'reference_number' => 'required|string',
+    'name' => 'required|string|max:255',
+    'email' => 'required|email',
+    'contact_number' => 'required|string'
+    ]);
+
+    // Retrieve the pass
+    $pass = Pass::where('reference_number', $validatedData['reference_number'])
+    ->where('remaining_days', '>', 0)
+    ->first();
+
+    if (!$pass || !$pass->isValid()) {
+    Log::error('Pass not found, expired, or invalid', ['reference_number' => $validatedData['reference_number']]);
+    return response()->json(['error' => 'Pass not found or expired'], 404);
+    }
+
+    // Find or create the customer
+    $customer = Customer::firstOrCreate(
+    ['email' => $validatedData['email']],
+    [
+    'name' => $validatedData['name'],
+    'contact_number' => $validatedData['contact_number']
+    ]
+    );
+
+    // Determine if the customer is the pass owner or using a shared pass
+    $isOwner = $pass->customer_id == $customer->id;
+    $isSharedPass = !$isOwner && $pass->is_shared;
+    $pass_type = $isOwner ? 'Owner' : 'Shared';
+    $payment_method = 'Shared Pass';
+
+    // Create or retrieve a shared pass entry if it's a shared pass
+    if ($isSharedPass) {
+    $existingShare = PassShare::firstOrCreate([
+    'pass_id' => $pass->id,
+    'shared_with_customer_id' => $customer->id
+    ], [
+    'share_date' => now(),
+    'name' => $validatedData['name'],
+    'email' => $validatedData['email'],
+    'contact' => $validatedData['contact_number']
+    ]);
+
+    if ($existingShare->wasRecentlyCreated) {
+    Log::info('Pass share entry created', ['pass_id' => $pass->id, 'shared_with_customer_id' => $customer->id]);
+    } else {
+    Log::info('Pass share entry already exists', ['pass_id' => $pass->id, 'shared_with_customer_id' => $customer->id]);
+    }
+    }
+
+    DB::beginTransaction();
+    try {
+    // Update pass usage
+    $pass->decrement('remaining_days');
+    $pass->decrement('remaining_bullets');
+
+    // Create the booking record
+    $booking = new Booking([
+    'service_id' => 4, // Example service ID for a 15-day pass
+    'price' => 0,
+    'date' => now()->toDateString(),
+    'time' => now()->toTimeString(),
+    'name' => $validatedData['name'],
+    'email' => $validatedData['email'],
+    'contact_number' => $validatedData['contact_number'],
+    'payment_method' => $payment_method,
+    'refNumber' => 'SHARED-' . Str::uuid(),
+    'status' => 'Confirmed',
+    'pass_type' => $pass_type
+    ]);
+    $booking->customer()->associate($customer);
+    $booking->save();
+
+    DB::commit();
+
+    Log::info('Transaction committed successfully');
+
+    return response()->json([
+    'success' => true,
+    'message' => 'Pass used successfully',
+    'remaining_days' => $pass->remaining_days,
+    'remaining_bullets' => $pass->remaining_bullets,
+    'booking' => $booking
+    ]);
+    } catch (\Exception $e) {
+    DB::rollBack();
+    Log::error('Error: ' . $e->getMessage());
+    return response()->json(['error' => 'An error occurred while using the pass'], 500);
+    }
+    }
+
+
+
+    
+
+
+
+    /*public function sharePass(Request $request)
     {
         $pass = Pass::findOrFail($request->passId);
         $sharedWithCustomer = Customer::findOrFail($request->sharedWithCustomerId);
@@ -199,7 +304,8 @@ class BookingController extends Controller
         $passShare = new PassShare([
             'pass_id' => $pass->id,
             'shared_with_customer_id' => $sharedWithCustomer->id,
-            'share_date' => now()
+            'share_date' => now(),
+            'name' => $validatedData['name'] 
         ]);
         $passShare->save();
 
@@ -207,5 +313,6 @@ class BookingController extends Controller
             'success' => true,
             'message' => 'Pass shared successfully'
         ]);
-    }
+    }*/
+
 }

@@ -12,6 +12,9 @@ return new class extends Migration
             $table->id('share_id');
             $table->unsignedBigInteger('pass_id');
             $table->unsignedBigInteger('shared_with_customer_id');
+            $table->string('name'); 
+            $table->string('email')->nullable();
+            $table->string('contact')->nullable(); 
             $table->date('share_date');
             $table->timestamps();
 
