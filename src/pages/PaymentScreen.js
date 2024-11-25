@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import io from "socket.io-client";
 import { Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
-import { baseApiUrl, baseSocketUrl} from "../App.js"
+import { baseApiUrl, baseSocketUrl } from "../App.js";
 
 const Payment = () => {
   const navigate = useNavigate();
@@ -15,7 +15,9 @@ const Payment = () => {
 
   useEffect(() => {
     // Initialize the socket connection once
-    const newSocket = io(`${baseSocketUrl}:3002`, { transports: ['websocket'] });
+    const newSocket = io(`${baseSocketUrl}:3002`, {
+      transports: ["websocket"],
+    });
     setSocket(newSocket);
 
     // Clean up socket connection on component unmount
@@ -59,30 +61,51 @@ const Payment = () => {
 
       console.log(bookingDetailsWithRef);
 
-      // Make the POST request for booking
+      // Step 1: Make the POST request for booking
       const response = await axios.post(
         `${baseApiUrl}bookings`,
         bookingDetailsWithRef
       );
 
-      await axios.post(
-        `${baseApiUrl}notifications`,
-        notificationData
-      );
+      // Step 2: Send the email receipt
+      const emailData = {
+        email: location.state.email,
+        name: location.state.name,
+        service_name: location.state.service_name,
+        price: location.state.price,
+        date: location.state.currentDate,
+        time: location.state.time,
+        refNumber: referenceNumber,
+      };
 
-      const { customerID } = response.data;
-      toast.success("Your booking has been successful!");
+      const emailResponse = await axios.post(
+        `${baseApiUrl}send-receipt`,
+        emailData
+      ); // API endpoint for sending the receipt email
+      if (emailResponse.status !== 200) {
+        throw new Error("Failed to send email.");
+      } // API endpoint for sending the receipt email
 
-      // Ensure socket is connected before emitting
+      // Step 3: Send the notification
+      await axios.post(`${baseApiUrl}notifications`, notificationData);
+
+      // Emit a socket event for real-time notification
       if (socket) {
         socket.emit("Notification", { message: "A customer has booked." });
       }
 
+      toast.success("Your booking has been successful!");
+
+      // Step 4: Redirect to Booking Summary
+      const { customerID } = response.data;
       navigate("/booking-successful", {
-        state: { ...bookingDetailsWithRef, customerID },
+        state: { ...bookingDetailsWithRef, customerID, emailSent: true }, // Pass emailSent flag
       });
     } catch (error) {
-      console.error("There was an error creating the booking!", error);
+      console.error(
+        "There was an error creating the booking or sending the email!",
+        error
+      );
       toast.error("Booking failed. Please try again.");
       navigate("/booking", { state: location.state });
     } finally {

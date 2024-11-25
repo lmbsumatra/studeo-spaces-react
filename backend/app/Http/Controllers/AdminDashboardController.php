@@ -130,7 +130,7 @@ class AdminDashboardController extends Controller
                 'service_id' => $booking->service_id,
                 'customer_name' => $booking->customer->name, // Accessing customer name
                 'service_name' => $booking->service->name,   // Accessing service name
-                'time' =>$booking->time,
+                'time' => $booking->time,
             ];
         });
 
@@ -148,5 +148,44 @@ class AdminDashboardController extends Controller
             'userGrowthData' => $userGrowthData,
             'upcomingBookings' => $upcomingBookings, // New field added for upcoming bookings
         ]);
+    }
+
+    public function getMappingData(Request $request)
+    {
+        // Get the selected date (default to today in Manila timezone)
+        $selectedDate = $request->input('date', Carbon::now()->setTimezone('Asia/Manila')->toDateString());
+
+        // Get all services and their associated seat count
+        $services = Service::all();
+
+        // Initialize an array to hold the mapping data per service
+        $serviceData = [];
+
+        foreach ($services as $service) {
+            // Get total available seats for this service
+            $totalSeats = $service->count;
+
+            // Get the number of bookings made for the selected date for this service
+            $bookedSeats = Booking::where('service_id', $service->id)
+                ->where('status', 'Completed')
+                ->whereDate('date', $selectedDate)
+                ->count(); // Count of bookings for the selected date and service
+
+            // Calculate available seats for this service
+            $availableSeats = $totalSeats - $bookedSeats;
+
+            // Store the data for this service
+            $serviceData[] = [
+                'service_id' => $service->id,
+                'service_name' => $service->name, // Assuming 'name' is a field in the 'services' table
+                'totalSeats' => $totalSeats,
+                'bookedSeats' => $bookedSeats,
+                'availableSeats' => $availableSeats,
+                'duration' => $service->duration,
+            ];
+        }
+
+        // Return the data as JSON
+        return response()->json($serviceData);
     }
 }

@@ -10,7 +10,6 @@ use App\Models\Service;
 use App\Models\Pass;
 use App\Models\PassShare;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
@@ -71,19 +70,17 @@ class BookingController extends Controller
     $booking->customer()->associate($customer);
     $booking->save();
 
-    // Create a 15-day pass if applicable (e.g., if service ID is 4)
-    $service = Service::findOrFail($validatedData['service_id']);
-    if ($service->id == 4) {
-        Pass::create([
-            'customer_id' => $customer->id,
-            'total_days' => 15,
-            'remaining_days' => 15,
-            'total_bullets' => 15,
-            'remaining_bullets' => 15,
-            'is_shared' => false,
-            'reference_number' => $this->generatePassReference()
-        ]);
-    }
+        // Create a 15-day pass if applicable (e.g., if service ID is 4)
+        if ($service->id == 40) { // Assuming 4 is the ID for the 15-day pass service
+            Pass::create([
+                'customer_id' => $customer->id,
+                'total_days' => 15,
+                'remaining_days' => 15,
+                'total_bullets' => 15,
+                'remaining_bullets' => 15,
+                'is_shared' => false
+            ]);
+        }
 
     return response()->json(['booking' => $booking, 'customerID' => $customer->id], 201);
 }
@@ -313,6 +310,5 @@ class BookingController extends Controller
             'success' => true,
             'message' => 'Pass shared successfully'
         ]);
-    }*/
-
+    }
 }

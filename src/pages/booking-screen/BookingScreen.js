@@ -140,6 +140,7 @@ const Book = () => {
 
     const bookingDetails = {
       service_id: selectedService.id,
+      service_name: selectedService.name, // Pass the service name
       price: selectedService.price,
       currentDate,
       time,
@@ -458,7 +459,11 @@ const Book = () => {
                   <p className="fs-small">
                     If you have registered already, Customer ID is provided to
                     automatically fill the form with your personal details.
-                    Review our <a href="#" className="light-blue">Privacy Policy</a> about your information usage.
+                    Review our{" "}
+                    <a href="#" className="light-blue">
+                      Privacy Policy
+                    </a>{" "}
+                    about your information usage.
                   </p>
                 </div>
 

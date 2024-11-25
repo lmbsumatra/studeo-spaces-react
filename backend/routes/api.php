@@ -25,7 +25,7 @@ Route::middleware('auth:sanctum')->get('/admin', function (Request $request) {
 
 Route::post('/bookings', [BookingController::class, 'store']);
 Route::get('/bookings', [BookingController::class, 'index']);
-Route::get('/bookings/{refNumber}', [BookingController::class, 'show']);    
+Route::get('/bookings/{refNumber}', [BookingController::class, 'show']);
 
 Route::post('/check-pass', [BookingController::class, 'checkPass']);
 Route::post('/check-pass-by-reference', [BookingController::class, 'checkPassByReference']);
@@ -57,7 +57,14 @@ Route::put('/bookings/{id}/status', [BookingController::class, 'updateStatus']);
 Route::get('/payments', [PaymentController::class, 'index']);
 
 Route::get('/admin-dashboard-data', [AdminDashboardController::class, 'getData']);
+Route::get('/booking-data', [AdminDashboardController::class, 'getMappingData']);
 Route::post('/admins', [AuthController::class, 'login']);
+
+Route::post('/update-username', [AdminController::class, 'changeUsername']);
+Route::post('/update-password', [AdminController::class, 'changePassword']);
+Route::post('/update-security-question', [AdminController::class, 'updateSecurityQuestion']);
+Route::post('/reset-password', [AdminController::class, 'forgotPassword']);
+
 
 Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->middleware('admin.auth');
 
@@ -65,3 +72,8 @@ Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->middlewar
 Route::get('/booking-chart-data', [ChartDataController::class, 'booking']);
 Route::get('/top-customers-data', [ChartDataController::class, 'topCustomers']);
 Route::get('/user-growth-data', [ChartDataController::class, 'userGrowth']);
+
+
+
+Route::post('/send-receipt', [BookingController::class, 'sendEmailReceipt']);
+
