@@ -10,6 +10,10 @@ use App\Models\Pass;
 use App\Models\PassShare;
 use Illuminate\Support\Str;
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BookingSummaryMail;
+use Illuminate\Support\Facades\Log;
+
 class BookingController extends Controller
 {
     public function store(Request $request)
@@ -208,4 +212,44 @@ class BookingController extends Controller
             'message' => 'Pass shared successfully'
         ]);
     }
+
+    public function sendEmailReceipt(Request $request)
+    {
+        // Validate the incoming request
+        $validatedData = $request->validate([
+            'email' => 'required|email',
+            'service_name' => 'required|string',
+            'date' => 'required|date',
+            'time' => 'required',
+            'price' => 'required|numeric',
+            'refNumber' => 'required|string', 
+        ]);
+
+        Log::info('Email data received: ', $validatedData);
+        Log::info('Received email data: ', $request->all());
+
+
+        // Prepare booking details for the email
+        $bookingDetails = [
+            'service_name' => $validatedData['service_name'],
+            'date' => $validatedData['date'],
+            'time' => $validatedData['time'],
+            'price' => $validatedData['price'],
+            'refNumber' => $validatedData['refNumber'], 
+        ];
+        
+
+        // Send the email
+        try {
+            Log::info('Sending email to: ' . $validatedData['email']);  // Log email address being sent to
+            Mail::to($validatedData['email'])->send(new BookingSummaryMail($bookingDetails));
+            Log::info('Email sent successfully to: ' . $validatedData['email']);
+            return response()->json(['message' => 'Email sent successfully!'], 200);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error('Failed to send booking email: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to send email. Please try again later.'], 500);
+        }
+    }
+
 }

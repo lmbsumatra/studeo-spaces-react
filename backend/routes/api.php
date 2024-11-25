@@ -71,3 +71,8 @@ Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->middlewar
 Route::get('/booking-chart-data', [ChartDataController::class, 'booking']);
 Route::get('/top-customers-data', [ChartDataController::class, 'topCustomers']);
 Route::get('/user-growth-data', [ChartDataController::class, 'userGrowth']);
+
+
+
+Route::post('/send-receipt', [BookingController::class, 'sendEmailReceipt']);
+
