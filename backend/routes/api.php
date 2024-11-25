@@ -64,6 +64,9 @@ Route::post('/update-username', [AdminController::class, 'changeUsername']);
 Route::post('/update-password', [AdminController::class, 'changePassword']);
 Route::post('/update-security-question', [AdminController::class, 'updateSecurityQuestion']);
 Route::post('/reset-password', [AdminController::class, 'forgotPassword']);
+Route::post('/check-username', [AdminController::class, 'findUsername']);
+Route::post('/check-security', [AdminController::class, 'verifySecurity']);
+Route::post('/change-password', [AdminController::class, 'updatePassword']);
 
 
 Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->middleware('admin.auth');
