@@ -30,15 +30,15 @@ const BookingSummary = () => {
     return `${hours}:${minutes} ${period}`;
   };
 
-  // Function to generate Customer ID
-  const generateCustomerID = (userId) => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0"); // Add leading zero
-    const day = String(today.getDate()).padStart(2, "0"); // Add leading zero
-    const incrementalId = String(userId).padStart(3, "0"); // Pad the user ID to 3 digits
-    return `${year}${month}${day}-${incrementalId}`;
-  };
+  // // Function to generate Customer ID
+  // const generateCustomerID = (userId) => {
+  //   const today = new Date();
+  //   const year = today.getFullYear();
+  //   const month = String(today.getMonth() + 1).padStart(2, "0"); // Add leading zero
+  //   const day = String(today.getDate()).padStart(2, "0"); // Add leading zero
+  //   const incrementalId = String(userId).padStart(3, "0"); // Pad the user ID to 3 digits
+  //   return `${year}${month}${day}-${incrementalId}`;
+  // };
 
   useEffect(() => {
     if (!location.state) {
@@ -60,8 +60,8 @@ const BookingSummary = () => {
     customerID = "N/A",
   } = location.state || {};
 
-  // Generate the formatted Customer ID
-  const formattedCustomerID = generateCustomerID(customerID);
+  // // Generate the formatted Customer ID
+  // const formattedCustomerID = generateCustomerID(customerID);
 
   if (!location.state) {
     return null;
@@ -127,7 +127,7 @@ const BookingSummary = () => {
             <hr />
             <h3 className="fs-500 ff-serif">Customer ID</h3>
             <p>
-              <strong>Customer ID:</strong> {formattedCustomerID}
+              <strong>Customer ID:</strong> {customerID}
             </p>
           </div>
           <div className="mt-5 text-center">

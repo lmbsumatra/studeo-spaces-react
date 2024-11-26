@@ -25,30 +25,29 @@ const Payment = () => {
   };
 
   const referenceNumber = generateReferenceNumber();
-  
 
   const handleBookingSummary = async () => {
     if (!location.state) return;
-  
+
     const bookingDetailsWithRef = {
       ...location.state,
       refNumber: referenceNumber,
       date: location.state.currentDate, // Using currentDate from location.state
     };
-  
+
     const notificationData = {
       customer_id: location.state.customerID || null,
       customer_name: location.state.name,
       message: "A customer has booked.",
-      type: "booking",
+      type: "new_booking",
       action_url: null,
     };
-  
+
     try {
       setLoading(true);
-  
+
       console.log("Booking details:", bookingDetailsWithRef);
-  
+
       // Step 1: Make the POST request for booking
       const response = await axios.post(
         `${baseApiUrl}bookings`,
@@ -57,7 +56,7 @@ const Payment = () => {
 
       const bookingId = response.data.id; // Assuming 'id' is returned in the response
       notificationData.related_data_id = bookingId;
-      console.log(notificationData)
+      console.log(notificationData);
       await axios.post(`${baseApiUrl}notifications`, notificationData);
       // Step 2: Send the email receipt
       const emailData = {
@@ -73,32 +72,32 @@ const Payment = () => {
       const { customerID } = response.data;
       // toast.success("Your booking has been successful!");
 
-     
       const emailResponse = await axios.post(
         `${baseApiUrl}send-receipt`,
         emailData
       ); // API endpoint for sending the receipt email
       if (emailResponse.status !== 200) {
         throw new Error("Failed to send email.");
+      } else {
+        console.log(emailResponse);
       }
-      else { console.log(emailResponse)}
-  
+
       // Step 3: Send the notification
-       // Ensure socket is connected before emitting
-       socket.emit("booking", {
+      // Ensure socket is connected before emitting
+      socket.emit("booking", {
         ...notificationData,
         message_id: bookingId, // Include message ID in the notification data
       });
-  
+
       toast.success("Your booking has been successful!");
-  
+
       // Step 4: Redirect to Booking Summary
       navigate("/booking-successful", {
         state: { ...bookingDetailsWithRef, customerID, emailSent: true }, // Pass emailSent flag
       });
     } catch (error) {
       console.error("Error during booking process:", error);
-  
+
       // Log specific error details for easier debugging
       if (error.response) {
         console.error("Error response:", error.response.data);
@@ -108,14 +107,13 @@ const Payment = () => {
       } else {
         console.error("Error message:", error.message);
       }
-  
+
       toast.error("Booking failed. Please try again.");
       navigate("/booking", { state: location.state });
     } finally {
       setLoading(false);
     }
   };
-  
 
   useEffect(() => {
     if (!location.state) {
