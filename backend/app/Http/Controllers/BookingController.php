@@ -94,45 +94,45 @@ class BookingController extends Controller
 
         return response()->json(['booking' => $booking, 'id' => $booking->id, 'customerID' => $customer->id], 201);
     }
-
+//SENDING RECEIPT MAIL
     public function sendEmailReceipt(Request $request)
-    {
-        // Validate the incoming request
-        $validatedData = $request->validate([
-            'email' => 'required|email',
-            'service_name' => 'required|string',
-            'date' => 'required|date',
-            'time' => 'required',
-            'price' => 'required|numeric',
-            'refNumber' => 'required|string',
-        ]);
+{
+    // Validate the incoming request
+    $validatedData = $request->validate([
+        'email' => 'required|email',
+        'service_name' => 'required|string',
+        'date' => 'required|date',
+        'time' => 'required',
+        'price' => 'required|numeric',
+        'refNumber' => 'required|string',
+        'customer_id' => 'nullable|integer', // Add validation for customer_id
+    ]);
 
-        Log::info('Email data received: ', $validatedData);
-        Log::info('Received email data: ', $request->all());
+    Log::info('Email data received: ', $validatedData);
+    Log::info('Received email data: ', $request->all());
 
+    // Prepare booking details for the email
+    $bookingDetails = [
+        'service_name' => $validatedData['service_name'],
+        'date' => $validatedData['date'],
+        'time' => $validatedData['time'],
+        'price' => $validatedData['price'],
+        'refNumber' => $validatedData['refNumber'],
+        'customer_id' => $validatedData['customer_id'] ?? 'N/A', // Include customer_id or 'N/A' if not provided
+    ];
 
-        // Prepare booking details for the email
-        $bookingDetails = [
-            'service_name' => $validatedData['service_name'],
-            'date' => $validatedData['date'],
-            'time' => $validatedData['time'],
-            'price' => $validatedData['price'],
-            'refNumber' => $validatedData['refNumber'],
-        ];
-
-
-        // Send the email
-        try {
-            Log::info('Sending email to: ' . $validatedData['email']);  // Log email address being sent to
-            Mail::to($validatedData['email'])->send(new BookingSummaryMail($bookingDetails));
-            Log::info('Email sent successfully to: ' . $validatedData['email']);
-            return response()->json(['message' => 'Email sent successfully!'], 200);
-        } catch (\Exception $e) {
-            // Log the error for debugging
-            Log::error('Failed to send booking email: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to send email. Please try again later.'], 500);
-        }
+    // Send the email
+    try {
+        Log::info('Sending email to: ' . $validatedData['email']);
+        Mail::to($validatedData['email'])->send(new BookingSummaryMail($bookingDetails));
+        Log::info('Email sent successfully to: ' . $validatedData['email']);
+        return response()->json(['message' => 'Email sent successfully!'], 200);
+    } catch (\Exception $e) {
+        Log::error('Failed to send booking email: ' . $e->getMessage());
+        return response()->json(['error' => 'Failed to send email. Please try again later.'], 500);
     }
+}
+
 
 
     public function index()

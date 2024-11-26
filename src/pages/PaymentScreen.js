@@ -53,7 +53,7 @@ const Payment = () => {
         `${baseApiUrl}bookings`,
         bookingDetailsWithRef
       );
-
+      const { customerID } = response.data;
       const bookingId = response.data.id; // Assuming 'id' is returned in the response
       notificationData.related_data_id = bookingId;
       console.log(notificationData);
@@ -67,9 +67,10 @@ const Payment = () => {
         date: location.state.currentDate,
         time: location.state.time,
         refNumber: referenceNumber,
+        customer_id: customerID,
       };
-
-      const { customerID } = response.data;
+      // console.log("Customer ID:", customerID);
+      // console.log(emailData);
       // toast.success("Your booking has been successful!");
 
       const emailResponse = await axios.post(
