@@ -13,6 +13,7 @@ use App\Models\PassShare;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BookingSummaryMail;
+use App\Mail\CancellationConfirmationMail;
 
 class BookingController extends Controller
 {
@@ -94,6 +95,7 @@ class BookingController extends Controller
 
         return response()->json(['booking' => $booking, 'id' => $booking->id, 'customerID' => $customer->id], 201);
     }
+
 //SENDING RECEIPT MAIL
     public function sendEmailReceipt(Request $request)
 {
@@ -132,6 +134,38 @@ class BookingController extends Controller
         return response()->json(['error' => 'Failed to send email. Please try again later.'], 500);
     }
 }
+
+//SENDING CANCELLATION EMAIL
+public function cancelBooking($refNumber)
+{
+    try {
+        Log::info("Cancel booking initiated for refNumber: $refNumber");
+
+        // Retrieve booking by reference number
+        $booking = Booking::where('refNumber', $refNumber)->first();
+
+        if (!$booking) {
+            Log::warning("Booking not found for refNumber: $refNumber");
+            return response()->json(['message' => 'Booking not found'], 404);
+        }
+
+        // Update booking status to 'Canceled'
+        $booking->status = 'Canceled';
+        $booking->save();
+        Log::info("Booking status updated to 'Canceled' for refNumber: $refNumber");
+
+        // Send cancellation confirmation email
+        Mail::to($booking->email)->send(new CancellationConfirmationMail($booking));
+        Log::info("Cancellation confirmation email sent to: {$booking->email}");
+
+        return response()->json(['message' => 'Booking canceled successfully.']);
+    } catch (\Exception $e) {
+          Log::info('Test log before error handling');
+        Log::error("Cancellation failed for refNumber $refNumber: " . $e->getMessage());
+        return response()->json(['message' => 'Cancellation failed'], 500);
+    }
+}
+
 
 
 

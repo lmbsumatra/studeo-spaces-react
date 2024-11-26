@@ -79,4 +79,4 @@ Route::get('/user-growth-data', [ChartDataController::class, 'userGrowth']);
 use Illuminate\Support\Facades\Mail;
 
 Route::post('/send-receipt', [BookingController::class, 'sendEmailReceipt']);
-
+Route::post('/bookings/cancel/{refNumber}', [BookingController::class, 'cancelBooking']);

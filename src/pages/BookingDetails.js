@@ -52,25 +52,35 @@ const BookingDetails = () => {
       const notificationData = {
         customer_id: location.state.customerID || null,
         customer_name: location.state.name,
-        message: "A customer has booked.",
+        message: "A customer has canceled their booking.",
         type: "cancelbooking",
         action_url: null,
       };
+
       try {
+        // Send cancellation request to backend
         const response = await axios.post(
           `${baseApiUrl}bookings/cancel/${bookingDetails.refNumber}`
         );
+        //console.log("Backend response:", response.data);
+
         const bookingId = response.data.id; // Assuming 'id' is returned in the response
         notificationData.related_data_id = bookingId;
-        console.log(response.data.id)
-        await axios.post(`${baseApiUrl}notifications`, notificationData);
-        toast.success("Booking cancelled successfully.");
+
+        // Optional: Notify via WebSocket (if required)
         socket.emit("cancelbooking", {
           ...notificationData,
           message_id: bookingId, // Include message ID in the notification data
         });
+
+        // Show success message and redirect
+        toast.success("Booking cancelled successfully.");
         navigate("/booking");
       } catch (error) {
+        console.error(
+          "Error response from backend:",
+          error.response?.data || error
+        );
         console.error("Error cancelling booking:", error);
         toast.error("Failed to cancel booking.");
       }
