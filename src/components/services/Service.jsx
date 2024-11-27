@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
 import Promo from "../promo/Promo";
-import Tooltip from "@mui/material/Tooltip";
+import { Tooltip } from '@mui/material';
 import { baseApiUrl } from "../../App";
 
 const Service = ({
@@ -32,7 +32,7 @@ const Service = ({
 
         const [serviceResponse, seatsResponse] = await Promise.all([
           fetch(`${baseApiUrl}services`),
-          fetch(`${baseApiUrl}available?date=${today}`),
+          fetch(`${baseApiUrl}available?date=2024-11-26`),
         ]);
 
         if (!serviceResponse.ok || !seatsResponse.ok) {
@@ -52,6 +52,7 @@ const Service = ({
 
         setServices(servicesData);
         setAvailableSeats(availableSeatsMap);
+        console.log(availableSeats)
       } catch (error) {
         console.error(error);
       } finally {

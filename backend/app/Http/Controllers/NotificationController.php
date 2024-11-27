@@ -21,11 +21,12 @@ class NotificationController extends Controller
     public function createNotification(Request $request)
     {
         Notification::create([
-            'customer_id' => $request->input('customer_id'),
-            'customer_name' => $request->input('customer_name'),
+            'customer_id' => $request->input('customer_id', null),
+            'customer_name' => $request->input('customer_name', null),
             'message' => $request->input('message'),
             'type' => $request->input('type', 'message'), // Default to 'message'
             'action_url' => $request->input('action_url', null),
+            'related_data_id' => $request->input('related_data_id', null)
         ]);
 
         return response()->json(['message' => 'Notification created successfully.']);

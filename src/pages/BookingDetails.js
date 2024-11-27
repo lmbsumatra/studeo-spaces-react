@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { baseApiUrl } from "../App";
+import io from "socket.io-client";
+import { baseApiUrl, baseSocketUrl } from "../App.js";
 
 const BookingDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [bookingDetails, setBookingDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  const socket = io(`${baseSocketUrl}:3002`, { transports: ["websocket"] });
 
   const formatTimeTo12Hour = (time) => {
     let [hours, minutes] = time.split(":");
@@ -47,13 +49,38 @@ const BookingDetails = () => {
       "Are you sure you want to cancel this booking?"
     );
     if (confirmCancel) {
+      const notificationData = {
+        customer_id: location.state.customerID || null,
+        customer_name: location.state.name,
+        message: "A customer has canceled their booking.",
+        type: "cancelbooking",
+        action_url: null,
+      };
+
       try {
-        await axios.post(
+        // Send cancellation request to backend
+        const response = await axios.post(
           `${baseApiUrl}bookings/cancel/${bookingDetails.refNumber}`
         );
-        alert("Booking cancelled successfully.");
+        //console.log("Backend response:", response.data);
+
+        const bookingId = response.data.id; // Assuming 'id' is returned in the response
+        notificationData.related_data_id = bookingId;
+
+        // Optional: Notify via WebSocket (if required)
+        socket.emit("cancelbooking", {
+          ...notificationData,
+          message_id: bookingId, // Include message ID in the notification data
+        });
+
+        // Show success message and redirect
+        toast.success("Booking cancelled successfully.");
         navigate("/booking");
       } catch (error) {
+        console.error(
+          "Error response from backend:",
+          error.response?.data || error
+        );
         console.error("Error cancelling booking:", error);
         toast.error("Failed to cancel booking.");
       }

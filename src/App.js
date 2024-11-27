@@ -12,7 +12,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import io from "socket.io-client";
 import "./App.css";
-import { NotificationProvider } from "../src/pages/context/notificationContext";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
@@ -35,8 +34,7 @@ import AdminMessagesScreen from "./pages/admin pages/AdminMessagesScreen/AdminMe
 import AdminServices from "./pages/admin pages/admin-services/AdminServices";
 import AdminAddService from "./pages/admin pages/admin-services/AdminAddService";
 import AdminEditService from "./pages/admin pages/admin-services/AdminEditService";
-import PrivateRoute from "./PrivateRoute";
-import Card from "./Card";
+import PrivateRoute from "./context/PrivateRoute";
 import Admin from "../src/pages/admin pages/Admin";
 
 import PageNotAvailable from "./pages/PageNotAvailable";
@@ -55,7 +53,6 @@ const App = () => {
       {!isLoginPage && (isAdminPath ? <Header /> : <Header />)}
 
       <Routes>
-        <Route path="/card" element={<Card />} />
         <Route path="/" element={<Home />} />
         <Route path="/blogs" element={<Blog />} />
         <Route path="/services" element={<Services />} />

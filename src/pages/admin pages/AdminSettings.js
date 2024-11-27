@@ -180,7 +180,7 @@ const AdminSettings = () => {
           // If it's a validation error, show specific details
           errorMessage = data?.errors ? data.errors.join(", ") : errorMessage;
         }
-        toast.error(`Backend error: ${errorMessage}`); // Show backend error message in toast
+        toast.error(`Error: ${errorMessage}`); // Show backend error message in toast
       } else if (error.request) {
         // If no response was received
         errorMessage = "No response from the server";
@@ -230,7 +230,7 @@ const AdminSettings = () => {
           // If it's a validation error, show specific details
           errorMessage = data?.errors ? data.errors.join(", ") : errorMessage;
         }
-        toast.error(`Backend error: ${errorMessage}`); // Show backend error message in toast
+        toast.error(`Error: ${errorMessage}`); // Show backend error message in toast
       } else if (error.request) {
         // If no response was received
         errorMessage = "No response from the server";

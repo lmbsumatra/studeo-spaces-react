@@ -11,11 +11,13 @@ const AdminMessagesScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
   const [selectedDate, setSelectedDate] = useState("");
+  const [highlightedRow, setHighlightedRow] = useState(null);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); // 10 items per page
-
+  const params = new URLSearchParams(window.location.search);
+  const highlightId = params.get("highlight");
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -92,14 +94,56 @@ const AdminMessagesScreen = () => {
     setSortConfig({ key: "", direction: "" });
   };
 
-// Calculate the indices of the first and last messages on the current page
-const indexOfLastMessage = currentPage * itemsPerPage;
-const indexOfFirstMessage = indexOfLastMessage - itemsPerPage;
+  // Calculate the indices of the first and last messages on the current page
+  const indexOfLastMessage = currentPage * itemsPerPage;
+  const indexOfFirstMessage = indexOfLastMessage - itemsPerPage;
 
-// Pagination logic: slice the sortedMessages array
-const currentMessages = sortedMessages.slice(indexOfFirstMessage, indexOfLastMessage);
-const totalPages = Math.ceil(sortedMessages.length / itemsPerPage);
+  // Pagination logic: slice the sortedMessages array
+  const currentMessages = sortedMessages.slice(
+    indexOfFirstMessage,
+    indexOfLastMessage
+  );
+  const totalPages = Math.ceil(sortedMessages.length / itemsPerPage);
 
+  useEffect(() => {
+    if (highlightId && sortedMessages.length > 0) {
+      // Find the index of the message to highlight
+      const messageIndex = sortedMessages.findIndex(
+        (msg) => msg.id.toString() === highlightId
+      );
+
+      setTimeout(() => {
+        const highlightElement = document.getElementById(highlightId);
+        if (highlightElement) {
+          highlightElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }, 200); // Delay to ensure page renders before scrolling
+
+      if (messageIndex !== -1) {
+        // Calculate which page the highlighted message is on
+        const pageNumber = Math.floor(messageIndex / itemsPerPage) + 1;
+        setCurrentPage(pageNumber); // Update currentPage to the page where the highlighted message exists
+      }
+    }
+  }, [highlightId, sortedMessages, itemsPerPage]);
+
+  useEffect(() => {
+    if (highlightId) {
+      // Set the highlight for the row
+      setHighlightedRow(highlightId);
+
+      // Remove the highlight after 5 seconds
+      const timer = setTimeout(() => {
+        setHighlightedRow(null);
+      }, 5000);
+
+      // Clear timeout if the component unmounts or highlightId changes
+      return () => clearTimeout(timer);
+    }
+  }, [highlightId]); // Re-run when highlightId changes
 
   return (
     <div className="container mt-5">
@@ -159,7 +203,9 @@ const totalPages = Math.ceil(sortedMessages.length / itemsPerPage);
                   <div className="d-flex justify-content-between align-items-center">
                     Email
                     <select
-                      onChange={(e) => handleSortChange("email", e.target.value)}
+                      onChange={(e) =>
+                        handleSortChange("email", e.target.value)
+                      }
                       className="form-control form-control-sm w-auto"
                     >
                       <option value="">Sort</option>
@@ -186,7 +232,9 @@ const totalPages = Math.ceil(sortedMessages.length / itemsPerPage);
                   <div className="d-flex justify-content-between align-items-center">
                     Date
                     <select
-                      onChange={(e) => handleSortChange("created_at", e.target.value)}
+                      onChange={(e) =>
+                        handleSortChange("created_at", e.target.value)
+                      }
                       className="form-control form-control-sm w-auto"
                     >
                       <option value="">Sort</option>
@@ -201,7 +249,16 @@ const totalPages = Math.ceil(sortedMessages.length / itemsPerPage);
             </thead>
             <tbody>
               {currentMessages.map((msg) => (
-                <tr key={msg.id}>
+                <tr
+                  key={msg.id}
+                  id={msg.id}
+                  className={
+                    highlightedRow &&
+                    highlightedRow.toString() === msg.id.toString()
+                      ? "table-primary"
+                      : ""
+                  }
+                >
                   <td>{msg.id}</td>
                   <td>{msg.email}</td>
                   <td>{msg.name}</td>

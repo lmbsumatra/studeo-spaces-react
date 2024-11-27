@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ class Notification extends Model
         'is_read',
         'action_url',
         'is_deleted',
+        'related_data_id',
     ];
 
     // Relationship with the Customer model
@@ -25,4 +27,3 @@ class Notification extends Model
         'is_deleted' => 'boolean',
     ];
 }
-

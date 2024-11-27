@@ -21,6 +21,7 @@ const AdminLoginScreen = () => {
   const [securityQuestion, setSecurityQuestion] = useState("");
   const [securityAnswer, setSecurityAnswer] = useState("");
   const [loading, setLoading] = useState(false); // Spinner state
+  const [currentStep, setCurrentStep] = useState(1); // Track current step in forgot password flow
 
   // Password visibility state
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -82,92 +83,155 @@ const AdminLoginScreen = () => {
     }
   };
 
+
+  
+
   // Handle "Forgot Password" modal toggle
-  const handleForgotPasswordModalShow = () => setShowForgotPasswordModal(true);
+const handleForgotPasswordModalShow = () => {
+  setCurrentStep(1);  // Reset to step 1 when modal is shown
+  setShowForgotPasswordModal(true);
+};
+
   const resetForgotPasswordForm = () => {
     setForgotUsername("");
     setNewPassword("");
     setConfirmNewPassword("");
     setSecurityQuestion("");
     setSecurityAnswer("");
+    setPasswordVisible(false);
+    setConfirmPasswordVisible(false)
   };
 
   const handleForgotPasswordModalClose = () => {
     resetForgotPasswordForm();
     setShowForgotPasswordModal(false);
+    setCurrentStep(1); // Reset to step 1
   };
 
-  // Handle submit for forgot password
-  const handleForgotPasswordSubmit = async (e) => {
+  const handleUsernameCheckSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Reset error before submitting
-    setLoading(true); // Show spinner
-
-    // Validation for empty fields in forgot password form
-    if (!forgotUsername) {
-      const errorMessage = "Username cannot be empty.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      setLoading(false); // Hide spinner
-      return;
-    }
-    if (!newPassword) {
-      const errorMessage = "New password cannot be empty.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      setLoading(false); // Hide spinner
-      return;
-    }
-    if (!confirmNewPassword) {
-      const errorMessage = "Please confirm your new password.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      setLoading(false); // Hide spinner
-      return;
-    }
-    if (newPassword !== confirmNewPassword) {
-      const errorMessage = "New password and confirm password do not match.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      setLoading(false); // Hide spinner
-      return;
-    }
-    if (!securityQuestion) {
-      const errorMessage = "Please select a security question.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      setLoading(false); // Hide spinner
-      return;
-    }
-    if (!securityAnswer) {
-      const errorMessage = "Security answer cannot be empty.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      setLoading(false); // Hide spinner
-      return;
-    }
-
+    setLoading(true); // Start loading
+  
     try {
-      const response = await axios.post(`${baseApiUrl}reset-password`, {
+      const response = await axios.post(`${baseApiUrl}check-username`, {
         username: forgotUsername,
-        new_password: newPassword,
-        new_password_confirmation: confirmNewPassword,
+      });
+  
+      if (response.data.exists) {
+        // Move to step 2 if username exists
+        setCurrentStep(2);
+      } else {
+        toast.error("Username not found.");
+      }
+    } catch (error) {
+      // Check if error is due to network failure
+      if (!error.response) {
+        toast.error("Network error: Please check your internet connection.");
+      } else {
+        // Check for backend error status codes
+        if (error.response.status === 400) {
+          toast.error("Bad request: Invalid data.");
+        } else if (error.response.status === 404) {
+          toast.error("Admin not found.");
+        } else if (error.response.status === 500) {
+          toast.error("Server error: Please try again later.");
+        } else {
+          toast.error("Error checking username. Please try again.");
+        }
+      }
+    } finally {
+      setLoading(false); // Ensure loading is set to false after the API call finishes
+    }
+  };
+  
+  
+  const handleSecurityCheckSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true); // Show spinner
+  
+    try {
+      const response = await axios.post(`${baseApiUrl}check-security`, {
+        username: forgotUsername,
         security_question: securityQuestion,
         security_answer: securityAnswer,
       });
-
-      toast.success(response.data.message || "Password reset successfully!");
-      setShowForgotPasswordModal(false);
+  
+      if (response.data.valid) {
+        setCurrentStep(3); // Move to step 3 if security answer is correct
+      } else {
+        toast.error("Incorrect security answer.");
+      }
     } catch (error) {
-      const errorMessage = error.response
-        ? error.response.data.message
-        : "Error resetting password. Please try again.";
-      toast.error(errorMessage); // Show toast notification
-      setError(errorMessage); // Display error below form
+      // Handle network errors
+      if (!error.response) {
+        toast.error("Network error: Please check your internet connection.");
+      } else {
+        // Backend error status codes
+        if (error.response.status === 400) {
+          toast.error("Invalid security verification.");
+        } else if (error.response.status === 401) {
+          toast.error("Unauthorized: Please check your credentials.");
+        } else if (error.response.status === 500) {
+          toast.error("Server error: Please try again later.");
+        } else {
+          toast.error("Error validating security question.");
+        }
+      }
     } finally {
-      setLoading(false); // Hide spinner regardless of success or failure
+      setLoading(false); // Hide spinner after the request completes
     }
   };
+  
+  
+  const handlePasswordChangeSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+  
+    console.log("Changing password for user:", forgotUsername);  // Log the username
+  
+    if (newPassword !== confirmNewPassword) {
+      toast.error("Passwords do not match.");
+      console.warn("Passwords do not match:", forgotUsername);  // Log password mismatch
+      setLoading(false);
+      return;
+    }
+  
+    try {
+      const response = await axios.post(`${baseApiUrl}change-password`, {
+        username: forgotUsername,
+        new_password: newPassword,
+        new_password_confirmation: confirmNewPassword
+      });
+  
+      console.log("Password change response:", response.data);  // Log the response
+      toast.success("Password changed successfully!");
+      setShowForgotPasswordModal(false); // Close modal after success
+      resetForgotPasswordForm();
+    } catch (error) {
+      if (!error.response) {
+        toast.error("Network error: Please check your internet connection.");
+        console.error("Network error while changing password:", error);  // Log network error
+      } else {
+        if (error.response.status === 400) {
+          toast.error("Bad request: Invalid data.");
+          console.error("400 Bad Request:", error.response.data);  // Log 400 error
+        } else if (error.response.status === 401) {
+          toast.error("Unauthorized: Please check your credentials.");
+          console.warn("401 Unauthorized - Invalid credentials:", forgotUsername);  // Log 401 error
+        } else if (error.response.status === 500) {
+          toast.error("Server error: Please try again later.");
+          console.error("500 Internal Server Error:", error.response.data);  // Log 500 error
+        } else {
+          toast.error("Error changing password.");
+          console.error("Error changing password:", error.response.data);  // Log unknown error
+        }
+      }
+    } finally {
+      setLoading(false); // Ensure loading is set to false after the API call finishes
+      console.log("Password change process completed for:", forgotUsername);  // Log completion
+    }
+  };
+  
 
   // List of sample security questions
   const securityQuestions = [
@@ -265,118 +329,161 @@ const AdminLoginScreen = () => {
           <Modal.Title>Forgot Password</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form onSubmit={handleForgotPasswordSubmit}>
-            <div className="mb-3">
-              <label htmlFor="forgotUsername" className="form-label">
-                Username
-              </label>
-              <input
-                type="text"
-                id="forgotUsername"
-                className="form-control"
-                value={forgotUsername}
-                onChange={(e) => setForgotUsername(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
-
-            <div className="position-relative mb-3">
-              <label htmlFor="newPassword" className="form-label">
-                New Password
-              </label>
-              <input
-                type={newPasswordVisible ? "text" : "password"}
-                id="newPassword"
-                className="form-control"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-              <img
-                src={newPasswordVisible ? viewPassword : hidePassword}
-                alt="toggle visibility"
-                onClick={toggleNewPasswordVisibility}
-                className="show password"
-              />
-            </div>
-
-            <div className="position-relative mb-3">
-              <label htmlFor="confirmNewPassword" className="form-label">
-                Confirm New Password
-              </label>
-              <input
-                type={confirmPasswordVisible ? "text" : "password"}
-                id="confirmNewPassword"
-                className="form-control"
-                value={confirmNewPassword}
-                onChange={(e) => setConfirmNewPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-              <img
-                src={confirmPasswordVisible ? viewPassword : hidePassword}
-                alt="toggle visibility"
-                onClick={toggleConfirmPasswordVisibility}
-                className="show password"
-              />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="securityQuestion" className="form-label">
-                Select Security Question
-              </label>
-              <select
-                id="securityQuestion"
-                className="form-control"
-                value={securityQuestion}
-                onChange={(e) => setSecurityQuestion(e.target.value)}
-                required
+          {currentStep === 1 && (
+            <form onSubmit={handleUsernameCheckSubmit}>
+              <div className="mb-3">
+                <label htmlFor="forgotUsername" className="form-label">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  id="forgotUsername"
+                  className="form-control"
+                  value={forgotUsername}
+                  onChange={(e) => setForgotUsername(e.target.value)}
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn btn-primary"
                 disabled={loading}
               >
-                <option value="">Select a Question</option>
-                {securityQuestions.map((question, index) => (
-                  <option key={index} value={question}>
-                    {question}
-                  </option>
-                ))}
-              </select>
-            </div>
+                {loading ? (
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  "Next"
+                )}
+              </button>
+            </form>
+          )}
 
-            <div className="mb-3">
-              <label htmlFor="securityAnswer" className="form-label">
-                Answer
-              </label>
-              <input
-                type="text"
-                id="securityAnswer"
-                className="form-control"
-                value={securityAnswer}
-                onChange={(e) => setSecurityAnswer(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? (
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
+          {currentStep === 2 && (
+            <form onSubmit={handleSecurityCheckSubmit}>
+              <div className="mb-3">
+                <label htmlFor="securityQuestion" className="form-label">
+                  Select Security Question
+                </label>
+                <select
+                  id="securityQuestion"
+                  className="form-control"
+                  value={securityQuestion}
+                  onChange={(e) => setSecurityQuestion(e.target.value)}
+                  required
+                  disabled={loading}
+                >
+                  <option value="">Select a Question</option>
+                  {securityQuestions.map((question, index) => (
+                    <option key={index} value={question}>
+                      {question}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-3">
+                <label htmlFor="securityAnswer" className="form-label">
+                  Answer
+                </label>
+                <input
+                  type="text"
+                  id="securityAnswer"
+                  className="form-control"
+                  value={securityAnswer}
+                  onChange={(e) => setSecurityAnswer(e.target.value)}
+                  required
+                  disabled={loading}
                 />
-              ) : (
-                "Reset Password"
-              )}
-            </button>
-          </form>
+              </div>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                {loading ? (
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  "Next"
+                )}
+              </button>
+            </form>
+          )}
+
+          {currentStep === 3 && (
+            <form onSubmit={handlePasswordChangeSubmit}>
+              <div className="position-relative mb-3">
+                <label htmlFor="newPassword" className="form-label">
+                  New Password
+                </label>
+                <input
+                  type={newPasswordVisible ? "text" : "password"}
+                  id="newPassword"
+                  className="form-control"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                />
+                <img
+                  src={newPasswordVisible ? viewPassword : hidePassword}
+                  alt="toggle visibility"
+                  onClick={toggleNewPasswordVisibility}
+                  className="show password"
+                />
+              </div>
+
+              <div className="position-relative mb-3">
+                <label htmlFor="confirmNewPassword" className="form-label">
+                  Confirm New Password
+                </label>
+                <input
+                  type={confirmPasswordVisible ? "text" : "password"}
+                  id="confirmNewPassword"
+                  className="form-control"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                />
+                <img
+                  src={confirmPasswordVisible ? viewPassword : hidePassword}
+                  alt="toggle visibility"
+                  onClick={toggleConfirmPasswordVisibility}
+                  className="show password"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                {loading ? (
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  "Change Password"
+                )}
+              </button>
+            </form>
+          )}
         </Modal.Body>
       </Modal>
     </div>

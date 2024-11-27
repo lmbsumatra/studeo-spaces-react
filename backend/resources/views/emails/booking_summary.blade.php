@@ -33,6 +33,7 @@
             <p><strong>Time:</strong> {{ $bookingDetails['time'] }}</p>
             <p><strong>Price:</strong> ₱{{ $bookingDetails['price'] }}</p>
             <p><strong>Reference Number:</strong> {{ $bookingDetails['refNumber'] }}</p>
+            <p><strong>Customer ID:</strong> {{ $bookingDetails['customer_id'] }}</p>
         </div>
         <p>We look forward to serving you!</p>
     </div>

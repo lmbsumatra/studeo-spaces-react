@@ -15,6 +15,9 @@ const AdminBookings = () => {
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [dateSortOption, setDateSortOption] = useState("default"); // State for date sorting
   const [isLoading, setLoading] = useState(true);
+  const params = new URLSearchParams(window.location.search);
+  const [highlightedRow, setHighlightedRow] = useState(null);
+  const highlightId = params.get("highlight");
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,8 +51,14 @@ const AdminBookings = () => {
     // Sorting logic
     if (sortConfig.key && sortConfig.direction) {
       sortedData.sort((a, b) => {
-        const aValue = sortConfig.key === "customer.name" ? a.customer?.name : a[sortConfig.key];
-        const bValue = sortConfig.key === "customer.name" ? b.customer?.name : b[sortConfig.key];
+        const aValue =
+          sortConfig.key === "customer.name"
+            ? a.customer?.name
+            : a[sortConfig.key];
+        const bValue =
+          sortConfig.key === "customer.name"
+            ? b.customer?.name
+            : b[sortConfig.key];
         if (aValue < bValue) {
           return sortConfig.direction === "asc" ? -1 : 1;
         }
@@ -85,92 +94,145 @@ const AdminBookings = () => {
     if (searchQuery) {
       sortedData = sortedData.filter(
         (booking) =>
-          booking.id.toString().includes(searchQuery) || 
-          (booking.customer?.name && booking.customer.name.toLowerCase().includes(searchQuery.toLowerCase()))
+          booking.id.toString().includes(searchQuery) ||
+          (booking.customer?.name &&
+            booking.customer.name
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()))
       );
     }
 
-      setSortedBookings(sortedData);
-    }, [bookings, sortConfig, serviceFilter, statusFilter, statuses, searchQuery, dateSortOption]); // Add dateSortOption as a dependency
+    setSortedBookings(sortedData);
+  }, [
+    bookings,
+    sortConfig,
+    serviceFilter,
+    statusFilter,
+    statuses,
+    searchQuery,
+    dateSortOption,
+  ]); // Add dateSortOption as a dependency
 
-    const handleSortChange = (key, direction) => {
-      setSortConfig({ key, direction });
-    };
+  const handleSortChange = (key, direction) => {
+    setSortConfig({ key, direction });
+  };
 
-    const handleServiceFilterChange = (event) => {
-      setServiceFilter(event.target.value); // Set selected service filter
-    };
+  const handleServiceFilterChange = (event) => {
+    setServiceFilter(event.target.value); // Set selected service filter
+  };
 
-    const handleStatusFilterChange = (event) => {
-      setStatusFilter(event.target.value); // Set selected status filter
-    };
+  const handleStatusFilterChange = (event) => {
+    setStatusFilter(event.target.value); // Set selected status filter
+  };
 
-    const handleDateSortChange = (event) => {
-      setDateSortOption(event.target.value); // Set selected date sort option
-    };
+  const handleDateSortChange = (event) => {
+    setDateSortOption(event.target.value); // Set selected date sort option
+  };
 
-    const handleStatusChange = async (bookingId, newStatus) => {
-      try {
-        setLoading(true);
-        setStatuses((prevStatuses) => ({
-          ...prevStatuses,
-          [bookingId]: newStatus,
-        }));
+  const handleStatusChange = async (bookingId, newStatus) => {
+    try {
+      setLoading(true);
+      setStatuses((prevStatuses) => ({
+        ...prevStatuses,
+        [bookingId]: newStatus,
+      }));
 
-        const response = await axios.put(
-          `http://127.0.0.1:8000/api/bookings/${bookingId}/status`,
-          {
-            status: newStatus,
-          }
-        );
-
-        if (response.status === 200) {
-          console.log("Booking status updated successfully");
-
-          if (newStatus === "Completed") {
-            const bookingDetails = bookings.find(
-              (booking) => booking.id === bookingId
-            );
-
-            const paymentData = {
-              customerName: bookingDetails.customer?.name,
-              amount: bookingDetails.service?.price,
-              date: bookingDetails.date,
-            };
-
-            const paymentResponse = await axios.post(
-              "http://127.0.0.1:8000/api/payments",
-              paymentData
-            );
-
-            if (paymentResponse.status === 201) {
-              console.log("Payment added successfully");
-            } else {
-              throw new Error("Failed to add payment");
-            }
-          }
-        } else {
-          throw new Error("Failed to update status");
+      const response = await axios.put(
+        `http://127.0.0.1:8000/api/bookings/${bookingId}/status`,
+        {
+          status: newStatus,
         }
-      } catch (error) {
-        console.error("Error updating booking status:", error);
-        setStatuses((prevStatuses) => ({
-          ...prevStatuses,
-          [bookingId]: prevStatuses[bookingId],
-        }));
-      } finally {
-        setLoading(false);
-      }
-    };
+      );
 
+      if (response.status === 200) {
+        console.log("Booking status updated successfully");
+
+        if (newStatus === "Completed") {
+          const bookingDetails = bookings.find(
+            (booking) => booking.id === bookingId
+          );
+
+          const paymentData = {
+            customerName: bookingDetails.customer?.name,
+            amount: bookingDetails.service?.price,
+            date: bookingDetails.date,
+          };
+
+          const paymentResponse = await axios.post(
+            "http://127.0.0.1:8000/api/payments",
+            paymentData
+          );
+
+          if (paymentResponse.status === 201) {
+            console.log("Payment added successfully");
+          } else {
+            throw new Error("Failed to add payment");
+          }
+        }
+      } else {
+        throw new Error("Failed to update status");
+      }
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      setStatuses((prevStatuses) => ({
+        ...prevStatuses,
+        [bookingId]: prevStatuses[bookingId],
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Calculate the indices of the first and last bookings on the current page
-    const indexOfLastBooking = currentPage * itemsPerPage;
-    const indexOfFirstBooking = indexOfLastBooking - itemsPerPage;
+  const indexOfLastBooking = currentPage * itemsPerPage;
+  const indexOfFirstBooking = indexOfLastBooking - itemsPerPage;
   // Pagination logic
-    const currentBookings = sortedBookings.slice(indexOfFirstBooking, indexOfLastBooking);
-    const totalPages = Math.ceil(sortedBookings.length / itemsPerPage);
+  const currentBookings = sortedBookings.slice(
+    indexOfFirstBooking,
+    indexOfLastBooking
+  );
+  const totalPages = Math.ceil(sortedBookings.length / itemsPerPage);
 
+  useEffect(() => {
+    if (highlightId && sortedBookings.length > 0) {
+      // Find the index of the booking to highlight
+      const bookingIndex = sortedBookings.findIndex(
+        (booking) => booking.id.toString() === highlightId.toString()
+      );
+
+      if (bookingIndex !== -1) {
+        // Calculate the page number where this booking resides
+        const pageNumber = Math.floor(bookingIndex / itemsPerPage) + 1;
+        setCurrentPage(pageNumber); // Update currentPage to the page where the highlighted booking is
+
+        // Scroll into view after the page has updated
+        setTimeout(() => {
+          const highlightElement = document.getElementById(highlightId);
+          if (highlightElement) {
+            highlightElement.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        }, 200); // Delay to ensure page renders before scrolling
+      }
+    }
+  }, [highlightId, sortedBookings, itemsPerPage]);
+
+  useEffect(() => {
+    if (highlightId) {
+      // Set the highlight for the row
+      setHighlightedRow(highlightId);
+
+      // Remove the highlight after 5 seconds
+      const timer = setTimeout(() => {
+        setHighlightedRow(null);
+      }, 5000);
+
+      // Clear timeout if the component unmounts or highlightId changes
+      return () => clearTimeout(timer);
+    }
+  }, [highlightId]); // Re-run when highlightId changes
 
   return (
     <div className="container mt-5">
@@ -212,9 +274,7 @@ const AdminBookings = () => {
                   <th scope="col">
                     Booking ID
                     <select
-                      onChange={(e) =>
-                        handleSortChange("id", e.target.value)
-                      }
+                      onChange={(e) => handleSortChange("id", e.target.value)}
                       className="form-control form-control-sm"
                     >
                       <option value="">Sort</option>
@@ -243,25 +303,21 @@ const AdminBookings = () => {
                       className="form-control form-control-sm"
                     >
                       <option value="All Services">All Services</option>
-                      {Array.from(new Set(bookings.map((b) => b.service?.name))).map(
-                        (service) => (
-                          <option key={service} value={service}>
-                            {service}
-                          </option>
-                        )
-                      )}
+                      {Array.from(
+                        new Set(bookings.map((b) => b.service?.name))
+                      ).map((service) => (
+                        <option key={service} value={service}>
+                          {service}
+                        </option>
+                      ))}
                     </select>
                   </th>
-                  <th scope="col">
-                    Payment
-                  </th>
+                  <th scope="col">Payment</th>
                   <th scope="col">Date</th>
                   <th scope="col">
                     Time
                     <select
-                      onChange={(e) =>
-                        handleSortChange("time", e.target.value)
-                      }
+                      onChange={(e) => handleSortChange("time", e.target.value)}
                       className="form-control form-control-sm"
                     >
                       <option value="">Sort</option>
@@ -287,7 +343,16 @@ const AdminBookings = () => {
               </thead>
               <tbody>
                 {currentBookings.map((booking) => (
-                  <tr key={booking.id}>
+                  <tr
+                    key={booking.id}
+                    id={booking.id}
+                    className={
+                      highlightedRow &&
+                      highlightedRow.toString() === booking.id.toString()
+                        ? "table-primary"
+                        : ""
+                    }
+                  >
                     <td>{booking.id}</td>
                     <td>{booking.customer?.name}</td>
                     <td>{booking.service?.name}</td>
@@ -298,7 +363,9 @@ const AdminBookings = () => {
                     <td>
                       <select
                         value={statuses[booking.id] || ""}
-                        onChange={(e) => handleStatusChange(booking.id, e.target.value)}
+                        onChange={(e) =>
+                          handleStatusChange(booking.id, e.target.value)
+                        }
                         className="form-control"
                       >
                         <option value="Pending">Pending</option>
@@ -309,15 +376,14 @@ const AdminBookings = () => {
                   </tr>
                 ))}
               </tbody>
-
             </table>
           </div>
           {/* Pagination */}
           <PaginationComponent
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
     </div>

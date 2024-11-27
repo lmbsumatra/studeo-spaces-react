@@ -64,6 +64,9 @@ Route::post('/update-username', [AdminController::class, 'changeUsername']);
 Route::post('/update-password', [AdminController::class, 'changePassword']);
 Route::post('/update-security-question', [AdminController::class, 'updateSecurityQuestion']);
 Route::post('/reset-password', [AdminController::class, 'forgotPassword']);
+Route::post('/check-username', [AdminController::class, 'findUsername']);
+Route::post('/check-security', [AdminController::class, 'verifySecurity']);
+Route::post('/change-password', [AdminController::class, 'updatePassword']);
 
 
 Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->middleware('admin.auth');
@@ -73,7 +76,7 @@ Route::get('/booking-chart-data', [ChartDataController::class, 'booking']);
 Route::get('/top-customers-data', [ChartDataController::class, 'topCustomers']);
 Route::get('/user-growth-data', [ChartDataController::class, 'userGrowth']);
 
-
+use Illuminate\Support\Facades\Mail;
 
 Route::post('/send-receipt', [BookingController::class, 'sendEmailReceipt']);
-
+Route::post('/bookings/cancel/{refNumber}', [BookingController::class, 'cancelBooking']);

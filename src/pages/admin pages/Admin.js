@@ -6,101 +6,160 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./style.css";
 import { baseSocketUrl } from "../../App";
+import { formatDate } from "../../utils/dateFormat";
+import { formatTimeTo12Hour } from "../../utils/timeFormat";
 
-const notificationTypes = {
-  new_booking: "success",
-  booking_confirmation: "info",
-  booking_cancellation: "warning",
-  booking_rescheduled: "info",
-  booking_reminder: "info",
-  payment_received: "success",
-  payment_failed: "error",
-  refund_processed: "success",
-  system_alert: "warning",
-  feature_update: "info",
-  scheduled_maintenance: "warning",
-  customer_registration: "success",
-  customer_feedback: "info",
-  customer_report: "warning",
-  special_event: "info",
-  event_reminder: "info",
-  admin_action_required: "warning",
-  policy_change: "info",
-  error_alert: "error",
-  warning_message: "warning",
-  customer_message: "info",
-  admin_add_service: "success",
-  admin_edit_service: "info",
-  admin_delete_service: "success",
-  admin_login: "info",
-  admin_logout: "info",
-};
+
 
 const Admin = () => {
   const [isSidebarExpanded, setSidebarExpanded] = useState(true);
   const navigate = useNavigate();
 
-  // Initialize socket
-  const socket = io(`${baseSocketUrl}:3002`, { transports: ['websocket'] });
+ 
 
   const toggleSidebar = () => {
     setSidebarExpanded(!isSidebarExpanded);
   };
 
-  useEffect(() => {
-    const socket = io(`${baseSocketUrl}:3002`, { transports: ['websocket'] });
+    // Handle notifications based on message type
+    const handleNotification = (data, type) => {
+      const { message, time, date, id } = data;
   
-    socket.on("connect", () => {
-      // console.log("Socket connected:", socket.id);
-    });
-  
-    socket.on("Notification", (data) => {
-      const { message, type } = data;
-      const category = notificationTypes[type] || "info";
-  
-      switch (category) {
-        case "success":
-          toast.success(message, {
-            onClick: () => navigate(`/admin/bookings?highlight=1`),
-          });
+      // Toast notifications for different message types
+      switch (type) {
+        case "inquiry":
+          toast.info(<div className="notification-toast">
+            <h4 className="header">New Inquiry</h4>
+            <p className="message">{message}</p>
+            <span className="datetime">{formatTimeTo12Hour(time)} {formatDate(date)}</span>
+            <br/>
+            <a className="link" href={`/admin/messages?highlight=${id}`}>View</a>
+          </div>);
           break;
-        case "warning":
-          toast.warning(message, {
-            onClick: () => navigate(`/admin/bookings?highlight=1`),
-          });
+        case "feedback":
+          toast.success(<div className="notification-toast">
+            <h4 className="header">New Feedback</h4>
+            <p className="message">{message}</p>
+            <span className="datetime">{formatTimeTo12Hour(time)} {formatDate(date)}</span>
+            <br/>
+            <a className="link" href={`/admin/messages?highlight=${id}`}>View</a>
+          </div>);
           break;
-        case "error":
-          toast.error(message, {
-            onClick: () => navigate(`/admin/bookings?highlight=1`),
-          });
+        case "complaint":
+          toast.error(<div className="notification-toast">
+            <h4 className="header">Complaint</h4>
+            <p className="message">{message}</p>
+            <span className="datetime">{formatTimeTo12Hour(time)} {formatDate(date)}</span>
+            <br/>
+            <a className="link" href={`/admin/messages?highlight=${id}`}>View</a>
+          </div>);
+          break;
+        case "request":
+          toast.info(<div className="notification-toast">
+            <h4 className="header">New Request</h4>
+            <p className="message">{message}</p>
+            <span className="datetime">{formatTimeTo12Hour(time)} {formatDate(date)}</span>
+            <br/>
+            <a className="link" href={`/admin/messages?highlight=${id}`}>View</a>
+          </div>);
+          break;
+        case "suggestion":
+          toast.info(<div className="notification-toast">
+            <h4 className="header">New Suggestion</h4>
+            <p className="message">{message}</p>
+            <span className="datetime">{formatTimeTo12Hour(time)} {formatDate(date)}</span>
+            <br/>
+            <a className="link" href={`/admin/messages?highlight=${id}`}>View</a>
+          </div>);
+          break;
+        case "booking":
+          toast.success(<div className="notification-toast">
+            <h4 className="header">New Booking!</h4>
+            <p className="message">{message}</p>
+            <span className="datetime">{formatTimeTo12Hour(time)} {formatDate(date)}</span>
+            <br/>
+            <a className="link" href={`/admin/bookings?highlight=${id}`}>View</a>
+          </div>);
+          break;
+        case "cancelbooking":
+          toast.warning(<div className="notification-toast">
+            <h4 className="header">Booking Cancelled</h4>
+            <p className="message">{message}</p>
+            <span className="datetime">{formatTimeTo12Hour(time)} {formatDate(date)}</span>
+            <br/>
+            <a className="link" href={`/admin/bookings?highlight=${id}`}>View</a>
+          </div>);
           break;
         default:
-          toast.info(message, {
-            onClick: () => navigate(`/admin/bookings?highlight=1`),
-          });
+          toast.info(`New message: ${message}`);
       }
-    });
-  
-    socket.on("disconnect", () => {
-      // console.log("Socket disconnected");
-    });
-  
-    return () => {
-      socket.off("Notification");
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.disconnect(); // Clean up socket connection
     };
-  }, [navigate]);
-  
+
+  useEffect(() => {
+     // Initialize socket
+  const socket = io(`${baseSocketUrl}:3002`, { transports: ["websocket"] });
+    // Connect to the socket
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id); // Debugging
+    });
+
+    // Listen for different types of messages from socket
+    socket.on("inquiry", (data) => {
+      console.log("Received inquiry:", data); // Debugging
+      handleNotification(data, "inquiry");
+    });
+    socket.on("feedback", (data) => {
+      console.log("Received feedback:", data); // Debugging
+      handleNotification(data, "feedback");
+    });
+    socket.on("complaint", (data) => {
+      console.log("Received complaint:", data); // Debugging
+      handleNotification(data, "complaint");
+    });
+    socket.on("request", (data) => {
+      console.log("Received request:", data); // Debugging
+      handleNotification(data, "request");
+    });
+    socket.on("suggestion", (data) => {
+      console.log("Received suggestion:", data); // Debugging
+      handleNotification(data, "suggestion");
+    });
+    socket.on("booking", (data) => {
+      console.log("Received booking:", data); // Debugging
+      handleNotification(data, "booking");
+    });
+    socket.on("cancelbooking", (data) => {
+      console.log("Received cancelbooking:", data); // Debugging
+      handleNotification(data, "cancelbooking");
+    });
+
+    // Clean up socket connection on unmount
+    return () => {
+      socket.off("inquiry");
+      socket.off("feedback");
+      socket.off("complaint");
+      socket.off("request");
+      socket.off("suggestion");
+      socket.off("booking");
+      socket.off("cancelbooking");
+      socket.disconnect();
+    };
+  }, []);
+
 
   return (
     <div>
-      <div className={`sidebar ${isSidebarExpanded ? "expanded" : "collapsed"}`}>
+      <div
+        className={`sidebar ${isSidebarExpanded ? "expanded" : "collapsed"}`}
+      >
         <Sidebar isExpanded={isSidebarExpanded} toggleSidebar={toggleSidebar} />
       </div>
-      <main className={`main-content ${isSidebarExpanded ? "expanded" : "collapsed"}`}>
-        <Outlet/>
+      <main
+        className={`main-content ${
+          isSidebarExpanded ? "expanded" : "collapsed"
+        }`}
+      >
+        <Outlet />
       </main>
     </div>
   );

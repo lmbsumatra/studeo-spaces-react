@@ -26,10 +26,9 @@ const FAQs = () => {
   const socket = io(`${baseSocketUrl}:3002`, { transports: ["websocket"] });
 
   const testNotificationData = {
-    customer_id: null,
     customer_name: formData.name,
     message: `${formData.name} has sent you a message: ${formData.message}`,
-    type: "customer_message", // Match this type with the keys in notificationTypes
+    type: formData.message_type || "inquiry", // Match this type with the form input
   };
 
   const handleChange = (e) => {
@@ -40,25 +39,32 @@ const FAQs = () => {
     e.preventDefault();
     setLoading(true); // Set loading to true when form is submitted
 
-    // Create a copy of formData with message_type defaulting to "inquiry" if empty
+    // Ensure message_type defaults to "inquiry" if empty
     const dataToSend = {
       ...formData,
       message_type: formData.message_type || "inquiry",
     };
 
     try {
-      // Sending the message
-      await axios.post(`${baseApiUrl}messages`, dataToSend);
-      await axios.post(`${baseApiUrl}notifications`, testNotificationData);
+      // // Sending the message via API
+      const response = await axios.post(`${baseApiUrl}messages`, dataToSend);
 
+      // Extract the message ID from the response
+      const messageId = response.data.id; // Assuming 'id' is returned in the response
+      testNotificationData.related_data_id = messageId;
+      console.log(testNotificationData)
+      await axios.post(`${baseApiUrl}notifications`, testNotificationData);
+      
       // Notify user about success
       toast.success(
         "Message sent successfully! We will get back to you after 2 days."
       );
-      socket.emit("Notification", testNotificationData);
-
+      socket.emit(formData.message_type, {
+        ...testNotificationData,
+        message_id: testNotificationData.related_data_id, // Include message ID in the notification data
+      });
       // Clear form fields after successful submission
-      setFormData({ email: "", name: "", message: "", message_type: "" });
+      // setFormData({ email: "", name: "", message: "", message_type: "" });
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Oops! Failed to send message. Please try again.");
@@ -131,7 +137,7 @@ const FAQs = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  disabled={loading} // Disable input when loading
+                  disabled={loading}
                 />
               </Form.Group>
               <Form.Group className="mb-3" controlId="exampleInputName">
@@ -143,7 +149,7 @@ const FAQs = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  disabled={loading} // Disable input when loading
+                  disabled={loading}
                 />
               </Form.Group>
               <Form.Group
@@ -161,7 +167,7 @@ const FAQs = () => {
                       value={formData.message}
                       onChange={handleChange}
                       required
-                      disabled={loading} // Disable input when loading
+                      disabled={loading}
                     />
                   </div>
                   <div className="w-25 m-2">
@@ -171,38 +177,23 @@ const FAQs = () => {
                       value={formData.message_type}
                       onChange={handleChange}
                       required
-                      disabled={loading} // Disable input when loading
+                      disabled={loading}
                     >
                       <option value="">Select a message type</option>
                       <option value="inquiry">Inquiry</option>
                       <option value="feedback">Feedback</option>
                       <option value="complaint">Complaint</option>
-                      <option value="request">Request</option>
                       <option value="suggestion">Suggestion</option>
-                      <option value="other">Other</option>
+                      <option value="request">Request</option>
                     </Form.Select>
                   </div>
                 </div>
               </Form.Group>
-              <Button
-                variant="primary"
-                className="btn btn-primary-clr"
-                type="submit"
-                disabled={loading}
-              >
+              <Button variant="primary" type="submit" disabled={loading}>
                 {loading ? (
-                  <>
-                    <Spinner
-                      as="span"
-                      animation="border"
-                      size="sm"
-                      role="status"
-                      aria-hidden="true"
-                    />{" "}
-                    Sending...
-                  </>
+                  <Spinner animation="border" size="sm" />
                 ) : (
-                  "Send"
+                  "Send Message"
                 )}
               </Button>
             </Form>
