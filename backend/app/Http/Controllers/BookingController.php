@@ -180,18 +180,23 @@ class BookingController extends Controller
 
     public function checkPass(Request $request)
     {
-        $customer = Customer::find($request->customer_id);
+        // Validate incoming request
+        $validatedData = $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+            'pass_id' => 'required|exists:passes,pass_id',
+        ]);
 
-        if (!$customer) {
-            return response()->json(['error' => 'Customer not found'], 404);
-        }
+        // Retrieve the customer
+        $customer = Customer::find($validatedData['customer_id']);
 
-        $pass = Pass::where('customer_id', $customer->id)
+        // Find the pass with matching customer_id and pass_id
+        $pass = Pass::where('pass_id', $validatedData['pass_id'])
+            ->where('customer_id', $customer->id)
             ->where('remaining_days', '>', 0)
             ->first();
 
         if (!$pass) {
-            return response()->json(['error' => 'No valid 15-day pass found for this customer'], 404);
+            return response()->json(['error' => 'No valid pass found for this customer'], 404);
         }
 
         return response()->json([

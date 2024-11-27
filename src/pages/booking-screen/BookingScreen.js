@@ -248,8 +248,8 @@ const Book = () => {
               : {
                   reference_number: referenceNumber,
                   name: name,
-                  email: email, // New email field
-                  contact: contact, // New contact field
+                  email: email, 
+                  contact: contact,
               };
 
           const url = isOwner
@@ -258,8 +258,12 @@ const Book = () => {
 
           const response = await axios.post(url, payload);
 
+          console.log("API Response (Check Pass):", response.data);
+
           if (response.data.success) {
-              setPassID(response.data.pass);
+            setPassID(response.data.pass.pass_id || "");
+              console.log("Pass ID:", passID);
+
               setPassDetails({   
                   customer: response.data.customer,
                   pass: response.data.pass
@@ -273,7 +277,7 @@ const Book = () => {
           console.log('Request Payload:', payload); // Log the request payload
 
       } catch (error) {
-          console.error('Error:', error.response?.data?.error || error); // Log error
+          console.error('Error:', error.response?.data?.error || error);
           toast.error(error.response?.data?.error || 'Error checking pass');
       } finally {
           setLoading(false);
@@ -349,8 +353,6 @@ const Book = () => {
         setLoading(false);
     }
 };
-
-
 
   return (
     <div className="container mt-5">
@@ -481,103 +483,110 @@ const Book = () => {
           </div>
         </div>
 
-        {/* Pass Modal */}
-        <Modal show={showPassModal} onHide={handleClosePassModal} centered>
-          <Modal.Header closeButton>
-            <Modal.Title className="w-100 text-center">
-              Use 15 Day Pass
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <form>
-              <div className="mb-3 form-check">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  checked={isOwner}
-                  onChange={(e) => setIsOwner(e.target.checked)}
-                />
-                <label className="form-check-label">I am the pass owner</label>
-              </div>
+      {/* Pass Modal */}
+      <Modal show={showPassModal} onHide={handleClosePassModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title className="w-100 text-center">
+            Use 15 Day Pass
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form>
+            {/* Toggle Checkbox */}
+            <div className="mb-3 form-check">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                checked={!isOwner} 
+                onChange={(e) => setIsOwner(!e.target.checked)} // Update isOwner accordingly
+              />
+              <label className="form-check-label">
+                Use with reference number
+              </label>
+            </div>
 
-              {isOwner ? (
-                <>
-                  <div className="mb-3">
-                    <label className="form-label">Enter Pass ID</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Enter Pass ID"
-                      value={passID}
-                      onChange={(e) => setPassID(e.target.value)}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Enter Your Customer ID</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Enter Customer ID"
-                      value={customerID}
-                      onChange={(e) => setCustomerID(e.target.value)}
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="mb-3">
-                    <label className="form-label">Enter Reference Number</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Enter Reference Number"
-                      value={referenceNumber}
-                      onChange={(e) => setReferenceNumber(e.target.value)}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Enter Your Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Enter Your Name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Enter Your Email</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      placeholder="Enter Your Email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Enter Your Contact Number</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Enter Your Contact Number"
-                      value={contact}
-                      onChange={(e) => setContact(e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-            </form>
-          </Modal.Body>
-          <Modal.Footer>
-            <button className="btn btn-secondary-clr" onClick={handleClosePassModal}>
-              Close
-            </button>
-            <button className="btn btn-primary-clr" onClick={handleCheckPass}>
-              Check
-            </button>
-          </Modal.Footer>
-        </Modal>
+            {/* Conditional Rendering */}
+            {isOwner ? (
+              // Owner's view: Customer ID and Pass ID fields
+              <>
+                <div className="mb-3">
+                  <label className="form-label">Enter Customer ID</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter Customer ID"
+                    value={customerID}
+                    onChange={(e) => setCustomerID(e.target.value)}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Enter Pass ID</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter Pass ID"
+                    value={passID}
+                    onChange={(e) => setPassID(e.target.value)}
+                  />
+                </div>
+              </>
+            ) : (
+              // Non-owner's view: Reference number and personal details
+              <>
+                <div className="mb-3">
+                  <label className="form-label">Enter Reference Number</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter Reference Number"
+                    value={referenceNumber}
+                    onChange={(e) => setReferenceNumber(e.target.value)}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Enter Your Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter Your Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Enter Your Email</label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    placeholder="Enter Your Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Enter Your Contact Number</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter Your Contact Number"
+                    value={contact}
+                    onChange={(e) => setContact(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <button className="btn btn-secondary-clr" onClick={handleClosePassModal}>
+            Close
+          </button>
+          <button className="btn btn-primary-clr" onClick={handleCheckPass}>
+            Check
+          </button>
+        </Modal.Footer>
+      </Modal>
+
 
         {/* Card Modal */}
         <Modal show={showCardModal} onHide={handleCloseCardModal} centered>
