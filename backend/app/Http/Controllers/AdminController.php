@@ -244,66 +244,66 @@ class AdminController extends Controller
         return response()->json(['message' => 'Invalid admin password'], 400);
     }
 
-    public function forgotPassword(Request $request)
-    {
-        // Log the request data for debugging purposes
-        Log::info('Forgot Password request received', ['request_data' => $request->all()]);
+    // public function forgotPassword(Request $request)
+    // {
+    //     // Log the request data for debugging purposes
+    //     Log::info('Forgot Password request received', ['request_data' => $request->all()]);
 
-        // Validate the request
-        $request->validate([
-            'username' => 'required|string',  // Ensure username is passed
-            'new_password' => 'required|string|min:8|confirmed',  // Ensure password is strong and confirmed
-            'security_question' => 'required|string',  // Security question should be provided
-            'security_answer' => 'required|string',  // Security answer should be provided
-        ]);
+    //     // Validate the request
+    //     $request->validate([
+    //         'username' => 'required|string',  // Ensure username is passed
+    //         'new_password' => 'required|string|min:8|confirmed',  // Ensure password is strong and confirmed
+    //         'security_question' => 'required|string',  // Security question should be provided
+    //         'security_answer' => 'required|string',  // Security answer should be provided
+    //     ]);
 
-        // Retrieve the admin using the provided username (email or username)
-        $admin = Admin::where('username', $request->username)  // Or check for username
-            ->first();
+    //     // Retrieve the admin using the provided username (email or username)
+    //     $admin = Admin::where('username', $request->username)  // Or check for username
+    //         ->first();
 
-        if (!$admin) {
-            Log::error('Admin not found', ['username' => $request->username]);
-            return response()->json(['message' => 'Admin not found'], 404);
-        }
+    //     if (!$admin) {
+    //         Log::error('Admin not found', ['username' => $request->username]);
+    //         return response()->json(['message' => 'Admin not found'], 404);
+    //     }
 
-        Log::info('Admin found', ['admin_id' => $admin->id]);
+    //     Log::info('Admin found', ['admin_id' => $admin->id]);
 
-        // Verify if the provided security question matches the one in the database
-        if ($admin->security_question !== $request->security_question) {
-            Log::warning('Security question mismatch', ['admin_id' => $admin->id]);
-            return response()->json(['message' => 'Incorrect security question'], 400);
-        }
+    //     // Verify if the provided security question matches the one in the database
+    //     if ($admin->security_question !== $request->security_question) {
+    //         Log::warning('Security question mismatch', ['admin_id' => $admin->id]);
+    //         return response()->json(['message' => 'Incorrect security question'], 400);
+    //     }
 
-        // Verify the provided security answer against the stored hash
-        $isMatch = Hash::check($request->security_answer, $admin->security_answer);
+    //     // Verify the provided security answer against the stored hash
+    //     $isMatch = Hash::check($request->security_answer, $admin->security_answer);
 
-        if (!$isMatch) {
-            Log::warning('Incorrect security answer', ['admin_id' => $admin->id]);
-            return response()->json(['message' => 'Incorrect security answer'], 400);
-        }
+    //     if (!$isMatch) {
+    //         Log::warning('Incorrect security answer', ['admin_id' => $admin->id]);
+    //         return response()->json(['message' => 'Incorrect security answer'], 400);
+    //     }
 
-        Log::info('Security question and answer matched, allowing password reset.');
+    //     Log::info('Security question and answer matched, allowing password reset.');
 
-        // Hash the new password
-        $hashedPassword = Hash::make($request->new_password);
+    //     // Hash the new password
+    //     $hashedPassword = Hash::make($request->new_password);
 
-        // Log the password hash before updating
-        Log::info('New password hash being saved for admin', ['admin_id' => $admin->id, 'new_password_hash' => $hashedPassword]);
+    //     // Log the password hash before updating
+    //     Log::info('New password hash being saved for admin', ['admin_id' => $admin->id, 'new_password_hash' => $hashedPassword]);
 
-        // Update the password in the database using the update() method
-        $updateStatus = Admin::where('id', $admin->id)->update(['password' => $hashedPassword]);
-        Log::info('Updated Hash from DB: ' . $admin->password);
-        Log::info('Hashed: ' . $hashedPassword);
+    //     // Update the password in the database using the update() method
+    //     $updateStatus = Admin::where('id', $admin->id)->update(['password' => $hashedPassword]);
+    //     Log::info('Updated Hash from DB: ' . $admin->password);
+    //     Log::info('Hashed: ' . $hashedPassword);
 
-        if ($updateStatus) {
-            Log::info('Password updated successfully for admin', ['admin_id' => $admin->id]);
-            // Return a success response
-            return response()->json(['message' => 'Password reset successfully']);
-        } else {
-            Log::warning('Password update failed for admin', ['admin_id' => $admin->id]);
-            return response()->json(['message' => 'Password reset failed'], 500);
-        }
-    }
+    //     if ($updateStatus) {
+    //         Log::info('Password updated successfully for admin', ['admin_id' => $admin->id]);
+    //         // Return a success response
+    //         return response()->json(['message' => 'Password reset successfully']);
+    //     } else {
+    //         Log::warning('Password update failed for admin', ['admin_id' => $admin->id]);
+    //         return response()->json(['message' => 'Password reset failed'], 500);
+    //     }
+    // }
 
     public function findUsername(Request $request)
     {
@@ -361,7 +361,7 @@ class AdminController extends Controller
         // Log the incoming request data (use caution with sensitive data)
         Log::info('Password update request received', [
             'username' => $request->username,
-            'new_password' => '*****' // Don't log the actual password, just mask it
+            'new_password' => $request->newpassword // Don't log the actual password, just mask it
         ]);
     
         // Retrieve the admin using the username
@@ -377,16 +377,17 @@ class AdminController extends Controller
         Log::info('Admin found', ['username' => $request->username]);
     
         // Hash the new password
-        $hashedPassword = Hash::make($request->new_password);
+        // $hashedPassword = Hash::make($request->new_password);
     
         // Log the password hash (optional, but typically sensitive, so avoid logging it)
-        Log::debug('Password hashed', ['username' => $request->username]);
+        Log::debug('Password hashed', ['username' => $request->username, 'hashed'=> $request->new_password]);
     
         // Update the admin's password in the database
-        $admin->update(['password' => $hashedPassword]);
+        $admin->update(['password' => $request->new_password]);
     
         // Log the successful password update
         Log::info('Password updated successfully', ['username' => $request->username]);
+        Log::info('Updated password hash from DB: ' . $admin->password);
     
         return response()->json(['message' => 'Password updated successfully.'], 200);
     }

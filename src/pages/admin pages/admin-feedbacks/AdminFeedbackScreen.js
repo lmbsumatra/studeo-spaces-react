@@ -4,6 +4,7 @@ import "./adminFeedbackStyles.css";
 import { Spinner } from "react-bootstrap";
 import { baseApiUrl } from "../../../App";
 import user from "../../../assets/images/icons/user.svg";
+import { ToastContainer, toast } from "react-toastify";
 
 const AdminFeedbackScreen = () => {
   const [feedbacks, setFeedbacks] = useState([]);
@@ -51,8 +52,12 @@ const AdminFeedbackScreen = () => {
         body: JSON.stringify({ publish: updatedStatus }), // Send the updated status
       });
       if (!response.ok) throw new Error("Failed to update feedback status");
+      toast.success(
+        updatedStatus ? "Feedback published successfully!" : "Feedback unpublished successfully!"
+      );
     } catch (error) {
       setError(error.message);
+      toast.error("Failed to update feedback status.");
 
       // If there is an error, revert the status back to the original state
       setFeedbacks((prevFeedbacks) =>
@@ -61,6 +66,7 @@ const AdminFeedbackScreen = () => {
             ? { ...feedback, publish: currentStatus } // Revert to original status
             : feedback
         )
+        
       );
     } finally {
       setLoadingFeedbackId(null); // Reset loading state after operation
@@ -107,7 +113,7 @@ const AdminFeedbackScreen = () => {
                     } card-subtitle m-2`}
                   >
                     Status:{" "}
-                    {feedback.publish === 0 ? "Not published" : "Published"}
+                    {loadingFeedbackId ? "Loading..." : <>{feedback.publish === 0 ? "Not published" : "Published"}</>}
                   </h6>
                   <button
                     className={`btn ${
