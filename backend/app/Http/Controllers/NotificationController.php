@@ -40,4 +40,30 @@ class NotificationController extends Controller
 
         return response()->json(['message' => 'Notification marked as deleted.']);
     }
+
+    // Mark a notification as read
+    public function markAsRead(Request $request, $id)
+    {
+        // Find the notification by ID
+        $notification = Notification::findOrFail($id);
+        
+        // Mark it as read
+        $notification->is_read = true;
+        $notification->save();
+
+        return response()->json(['message' => 'Notification marked as read.']);
+    }
+
+    // Mark a notification as unread (optional, in case you want to toggle back)
+    public function markAsUnread(Request $request, $id)
+    {
+        // Find the notification by ID
+        $notification = Notification::findOrFail($id);
+
+        // Mark it as unread
+        $notification->is_read = false;
+        $notification->save();
+
+        return response()->json(['message' => 'Notification marked as unread.']);
+    }
 }

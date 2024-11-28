@@ -40,7 +40,6 @@
 
 .sidebar-item {
   padding: 10px;
-  
 }
 
 .sidebar-link {
@@ -66,14 +65,14 @@
   height: 24px;
   width: auto;
   display: inline;
-  margin: 2px 0 1px 0 ;
+  margin: 2px 0 1px 0;
 }
 
-.sidebar-item.no-indent{
+.sidebar-item.no-indent {
   padding-left: 4px;
 }
 
-.icon-indent{
+.icon-indent {
   width: 100%;
 }
 
@@ -124,11 +123,9 @@
   margin: 0;
 }
 
-.close-popup {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
+.close-popup, .delete-btn {
+  height: 24px;
+  width: auto;
 }
 
 .popup-content {
@@ -142,50 +139,91 @@
 
 .popup-content ul li {
   margin-bottom: 8px;
-}
+} /* Notification Item Styles */
 .notification-item {
   padding: 10px;
   border-bottom: 1px solid #ddd;
   position: relative;
+  transition: background-color 0.3s ease;
 }
 
-.notification-item:hover {
-  background-color: #f0f0f0;
+.notification-item.unread {
+  background-color: #f9f9f9; /* Lighter background for unread notifications */
+  font-weight: bold; /* Bold text for unread notifications */
 }
 
-.delete-btn {
-  background: none;
-  border: none;
-  color: red;
-  cursor: pointer;
-  position: absolute;
-  top: 10px;
-  right: 10px;
+.notification-item.read {
+  background-color: #e0e0e0; /* Softer background for read notifications */
+  font-weight: normal; /* Normal text for read notifications */
 }
 
-.timestamp {
+.notification-item.unread:hover {
+  background-color: #f0f0f0; /* Slightly darker on hover for unread */
+}
+
+.notification-item.read:hover {
+  background-color: #d3d3d3; /* Slightly darker on hover for read */
+}
+
+.notification-item .timestamp {
   display: block;
   font-size: 0.8em;
   color: #888;
 }
 
+
+/* Adjust Hover Effect for Notification Item */
+.notification-item:hover {
+  cursor: pointer;
+  background-color: #f0f0f0;
+}
+
+/* Timestamp Styling */
+.timestamp {
+  display: block;
+  font-size: 0.8em;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* Notification Popup Styling */
+.notification-popup {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  width: 380px;
+  max-height: 500px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10000;
+  overflow-y: scroll;
+}
+
+/* Notification Popup Header */
 .popup-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.popup-header h5 {
+  margin: 0;
 }
 
 .close-popup {
   background: none;
   border: none;
-  font-size: 1.5em;
+  font-size: 18px;
   cursor: pointer;
 }
 
 .notification-counter {
   position: absolute;
-  top: 0px; /* Adjust as necessary */
-  right: 2px; /* Adjust as necessary */
+  top: 0px;
+  right: 2px;
   color: white;
   background-color: red;
   font-size: 10px;
@@ -195,4 +233,32 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

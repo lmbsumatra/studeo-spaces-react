@@ -17,6 +17,7 @@ use App\Http\Controllers\NotificationController;
 Route::post('/notifications', [NotificationController::class, 'createNotification']);
 Route::get('/notifications', [NotificationController::class, 'index']);
 Route::delete('/notifications/{id}', [NotificationController::class, 'softDelete']);
+Route::patch('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead']);
 
 
 Route::middleware('auth:sanctum')->get('/admin', function (Request $request) {

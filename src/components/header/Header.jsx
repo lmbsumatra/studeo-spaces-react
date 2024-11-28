@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import user from "../../assets/images/icons/user.svg";
 import notif from "../../assets/images/icons/notif.svg";
+import closeButton from "../../assets/images/icons/xmark.svg";
 import "./style.css";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -18,6 +19,8 @@ const Header = () => {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false); // Loading state for deleting
+  const [isRedirecting, setIsRedirecting] = useState(false); // Loading state for redirecting
 
   const isAdminPath = location.pathname.startsWith("/admin");
 
@@ -59,15 +62,20 @@ const Header = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, event) => {
+    event.stopPropagation(); // Prevent event propagation to stop highlighting
+    setIsDeleting(true); // Set loading state to true
     try {
       await axios.delete(`${baseApiUrl}notifications/${id}`);
       setNotifications(notifications.filter((notif) => notif.id !== id));
       setUnreadCount(unreadCount - 1);
+      setShowNotifications(false); // Close notification popup
       toast.info("Notification removed.");
     } catch (error) {
       toast.error("Failed removing notification.");
       console.error("Error deleting notification:", error);
+    } finally {
+      setIsDeleting(false); // Reset loading state
     }
   };
 
@@ -90,7 +98,7 @@ const Header = () => {
         formattedMessage = `${customer_name} sent you a message: ${message}`;
         redirectTo = `/admin/messages?highlight=${related_data_id}`; // Redirect to messages for message notification
         break;
-        case "cancelbooking":
+      case "cancelbooking":
         formattedMessage = `${customer_name} has a new booking: ${message}`;
         redirectTo = `admin/bookings?highlight=${related_data_id}`; // Redirect to bookings for booking notification
         break;
@@ -103,11 +111,37 @@ const Header = () => {
     return { formattedMessage, redirectTo };
   };
 
-  const handleNotificationClick = (notification) => {
+  const handleNotificationClick = async (notification) => {
+    setIsRedirecting(true);
+    if (!notification.is_read) {
+      try {
+        await axios.patch(
+          `${baseApiUrl}notifications/${notification.id}/mark-as-read`
+        );
+        setNotifications((prevNotifications) =>
+          prevNotifications.map((notif) =>
+            notif.id === notification.id ? { ...notif, is_read: true } : notif
+          )
+        );
+        setUnreadCount(unreadCount - 1);
+      } catch (error) {
+        console.error("Error marking notification as read:", error);
+      }
+    }
+
     const { redirectTo } = formatNotification(notification);
-    navigate(redirectTo); // Navigate to the relevant page
-    setShowNotifications(false); // Close the notification popup after a notification is clicked
+
+    // Navigate with a short delay to prevent the spinner from hanging
+    setTimeout(() => {
+      navigate(redirectTo); // Navigate to the relevant page
+      setShowNotifications(false); // Close notification popup
+    }, 500); // You can adjust the delay (500ms is usually enough)
   };
+
+  useEffect(() => {
+    // Reset redirecting state when location changes
+    setIsRedirecting(false);
+  }, [location]);
 
   return (
     <nav className="navbar">
@@ -121,7 +155,9 @@ const Header = () => {
                   <img src={user} height="40px" alt="User Icon" />
                 </li>
                 <li
-                  className={`nav-item btn-notif ${showNotifications ? "active" : ""}`}
+                  className={`nav-item btn-notif ${
+                    showNotifications ? "active" : ""
+                  }`}
                 >
                   <img
                     src={notif}
@@ -197,38 +233,54 @@ const Header = () => {
             <div className="notification-popup active">
               <div className="popup-header">
                 <h5>Notifications</h5>
-                <button
+                <img
+                  src={closeButton}
                   className="close-popup"
                   onClick={() => setShowNotifications(false)}
-                >
-                  X
-                </button>
+                />
               </div>
               <div className="popup-content">
                 {notifications.map((notif) => {
-                  const { formattedMessage, redirectTo } = formatNotification(notif);
+                  const { formattedMessage, redirectTo } =
+                    formatNotification(notif);
                   return (
                     <div
                       key={notif.id}
-                      className="notification-item"
-                      onMouseEnter={(e) => e.currentTarget.classList.add("hover")}
-                      onMouseLeave={(e) => e.currentTarget.classList.remove("hover")}
+                      className={`notification-item ${
+                        notif.is_read ? "read" : "unread"
+                      }`} // Add read/unread class
+                      onMouseEnter={(e) =>
+                        e.currentTarget.classList.add("hover")
+                      }
+                      onMouseLeave={(e) =>
+                        e.currentTarget.classList.remove("hover")
+                      }
                       onClick={() => handleNotificationClick(notif)} // Handle notification click
                     >
-                      <p>{formattedMessage}</p>
-                      <span className="timestamp">
-                        {dayjs(notif.created_at).fromNow()}
-                      </span>
-                      <button
-                        className="delete-btn"
-                        onClick={() => handleDelete(notif.id)}
-                      >
-                        X
-                      </button>
+                      <div className="d-flex">
+                        <div>
+                          <p>{formattedMessage}</p>
+                          <span className="timestamp">
+                            {dayjs(notif.created_at).fromNow()} •{" "}
+                            {notif.is_read ? "Read" : "Not read"}
+                          </span>
+                        </div>
+                        <img
+                          className="delete-btn"
+                          src={closeButton}
+                          onClick={(e) => handleDelete(notif.id, e)}
+                        />
+                      </div>
                     </div>
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {(isDeleting || isRedirecting) && (
+            <div className="loading-overlay">
+              <div className="loading-spinner"></div>
             </div>
           )}
         </div>
