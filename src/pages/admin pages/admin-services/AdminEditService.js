@@ -69,55 +69,99 @@ const AdminEditService = () => {
   }, [id]);
 
   const generateSeats = debounce((count, serviceCode) => {
-    const bookedSeatCodes = formData.booked_seat_codes_today || []; // The booked seat codes for today
-    
-    // Ensure that the updated seats array contains the correct floor numbers.
-    const updatedSeats = Array.from({ length: count }, (_, i) => {
-      const seatIndex = i; // Current seat index
-      const existingSeat = formData.seats[seatIndex]; // Get the existing seat, if any
-  
-      const seatCode = `${serviceCode}-${i + 1}`;
-      const isBooked = bookedSeatCodes.includes(seatCode); // Check if the seat is booked
-  
-      // If the seat already exists, reuse its floor_number, otherwise set it as empty.
-      const floorNumber = existingSeat ? existingSeat.floor_number : "";
-  
-      return {
-        seat_code: seatCode,
-        floor_number: floorNumber, // Use existing floor_number or empty
-        booking_count_today: existingSeat ? existingSeat.booking_count_today : 0, // Retain booking count if the seat already exists
-        booked: isBooked, // Mark as booked if the seat is in the booked seat codes
-      };
-    });
-  
+    const bookedSeatCodes = formData.booked_seat_codes_today || []; // Get the booked seat codes for today
+    console.log("Booked seats for today:", bookedSeatCodes); // Log the booked seat codes
+
+    // Step 1: Get the current list of seat codes
+    const currentSeatsCount = formData.seats.length;
+    console.log("Current seats count:", currentSeatsCount);
+
+    // Step 2: Calculate how many new seats are needed
+    const seatsToGenerateCount = count - currentSeatsCount;
+
+    // If no new seats are needed, return
+    if (seatsToGenerateCount <= 0) {
+      console.log("No new seats to generate.");
+      return;
+    }
+
+    // Step 3: Generate new seats with updated seat codes
+    const updatedSeats = [];
+    for (let i = 0; i < seatsToGenerateCount; i++) {
+      const lastSeatCode =
+        formData.seats[formData.seats.length - 1]?.seat_code ||
+        `${serviceCode}-0`;
+      const lastSeatNumber = parseInt(lastSeatCode.split("-")[1], 10); // Extract the seat number from the code (e.g., "ADAN-5" => 5)
+      console.log("Last seat number:", lastSeatNumber);
+
+      const nextSeatNumber = lastSeatNumber + i + 1; // Calculate the next seat number
+      const seatCode = `${serviceCode}-${nextSeatNumber}`; // Generate the seat code based on the serviceCode
+
+      // Check if the seat code already exists in the current list of seats
+      if (!formData.seats.some((seat) => seat.seat_code === seatCode)) {
+        const isBooked = bookedSeatCodes.includes(seatCode); // Check if this seat is booked
+
+        console.log(`Generating seat: ${seatCode}, isBooked: ${isBooked}`);
+
+        updatedSeats.push({
+          seat_code: seatCode,
+          booked: isBooked,
+          floor_number: "", // Placeholder; adjust as needed
+          booking_count_today: 0, // Placeholder; adjust as needed
+        });
+      }
+    }
+
+    console.log("Newly generated seats:", updatedSeats); // Log the newly generated seats
+
+    // Step 4: Combine the new seats with the existing ones
+    const allSeats = [...formData.seats, ...updatedSeats];
+
+    console.log("All seats after adding new ones:", allSeats); // Log the full list of seats (old + new)
+
+    // Step 5: Update the form data with the new seat list
     setFormData((prevFormData) => ({
       ...prevFormData,
-      seats: updatedSeats, // Update the seats array with the new seats
+      seats: allSeats, // Set the full list of seats
     }));
   }, 300);
-  
 
-  useEffect(() => {
-    if (formData.count && formData.service_code) {
-      generateSeats(parseInt(formData.count, 10), formData.service_code);
-    }
-  }, [formData.count, formData.service_code]);
+  const adjustSeatsAfterDecrease = (newCount) => {
+    const bookedSeatCodes = formData.booked_seat_codes_today || []; // Get the booked seats
+
+    // Step 1: Filter out the booked seats, and also ensure the total count respects the new count.
+    const updatedSeats = formData.seats.filter((seat, index) => {
+      // Step 1.1: Always keep booked seats
+      if (bookedSeatCodes.includes(seat.seat_code)) {
+        return true;
+      }
+
+      // // Step 1.2: For unbooked seats, keep them only if they are within the new count limit
+      // return index < newCount;
+    });
+
+    // Step 2: Update the form data with the new seats list
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      seats: updatedSeats, // Update the seats after decreasing
+    }));
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-  
+
     setFormData((prevFormData) => {
       let updatedForm = {
         ...prevFormData,
         [name]: type === "checkbox" ? checked : value,
       };
-  
+
       // Automatically regenerate seats when count changes
       if (name === "count" && value && !isNaN(value)) {
         const newCount = parseInt(value, 10);
         const bookedSeatsCount = prevFormData.booked_seat_codes_today.length;
-  
-        // Check if the new count is lower than the booked seats
+
+        // Step 1: Prevent reducing seat count below the number of booked seats
         if (newCount < bookedSeatsCount) {
           // Set error message and prevent the change
           setError((prevError) => ({
@@ -125,6 +169,9 @@ const AdminEditService = () => {
             count: `Cannot remove booked seats. Currently, ${bookedSeatsCount} seats are booked today.`,
           }));
           return prevFormData; // Return the previous form data to prevent count change
+        } else if (newCount < prevFormData.count) {
+          // Decrease the count - remove excess seats
+          adjustSeatsAfterDecrease(newCount);
         } else {
           // Remove the error if count is valid
           setError((prevError) => {
@@ -134,12 +181,39 @@ const AdminEditService = () => {
           generateSeats(newCount, prevFormData.service_code); // Regenerate seats
         }
       }
-  
+
       return updatedForm;
     });
   };
-  
-  
+
+  const handleSeatChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedSeats = [...formData.seats];
+
+    // Update the specific seat's field
+    updatedSeats[index][name] = value;
+
+    // Filter out the seats based on the new count while keeping booked seats intact
+    const bookedSeatCodes = formData.booked_seat_codes_today || [];
+
+    // Filter the seats to ensure booked ones are retained
+    const filteredSeats = updatedSeats.filter((seat, idx) => {
+      // Keep booked seats or seats within the new count limit
+      return bookedSeatCodes.includes(seat.seat_code) || idx < formData.count;
+    });
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      seats: filteredSeats, // Updated seat list
+      count: filteredSeats.length, // Automatically update count based on seats
+    }));
+  };
+
+  useEffect(() => {
+    if (formData.count && formData.service_code) {
+      generateSeats(parseInt(formData.count, 10), formData.service_code);
+    }
+  }, [formData.count, formData.service_code]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -253,32 +327,6 @@ const AdminEditService = () => {
     }
   };
 
-  const handleSeatChange = (index, e) => {
-    const { name, value } = e.target;
-    const updatedSeats = [...formData.seats];
-  
-    // Update the specific seat's field
-    updatedSeats[index][name] = value;
-  
-    // Filter out the seats based on the new count while keeping booked seats intact
-    const bookedSeatCodes = formData.booked_seat_codes_today || [];
-  
-    // Filter the seats to ensure booked ones are retained
-    const filteredSeats = updatedSeats.filter((seat, idx) => {
-      // Keep booked seats or seats within the new count limit
-      return bookedSeatCodes.includes(seat.seat_code) || idx < formData.count;
-    });
-  
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      seats: filteredSeats, // Updated seat list
-      count: filteredSeats.length, // Automatically update count based on seats
-    }));
-  };
-  
-  
-  
-
   return (
     <div className="container items mt-5">
       <h1 className="fs-700 ff-serif text-center">Edit Service</h1>
@@ -368,16 +416,17 @@ const AdminEditService = () => {
           {error.images && (
             <div className="invalid-feedback">{error.images}</div>
           )}
-          {imagePreview || formData.images && (
-            <div className="mt-2">
-              <img
-                src={imagePreview || formData.images}
-                alt="Service preview"
-                style={{ maxWidth: "200px", maxHeight: "200px" }}
-                className="mt-2 img-thumbnail"
-              />
-            </div>
-          )}
+          {imagePreview ||
+            (formData.images && (
+              <div className="mt-2">
+                <img
+                  src={imagePreview || formData.images}
+                  alt="Service preview"
+                  style={{ maxWidth: "200px", maxHeight: "200px" }}
+                  className="mt-2 img-thumbnail"
+                />
+              </div>
+            ))}
         </div>
 
         <div className="mb-3">
@@ -431,7 +480,7 @@ const AdminEditService = () => {
             disabled={loading}
             min="0"
           />
-          
+
           {error.count && <div className="invalid-feedback">{error.count}</div>}
         </div>
 

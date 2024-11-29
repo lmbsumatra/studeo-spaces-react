@@ -7,6 +7,8 @@ use App\Models\Service;
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Message;
+use App\Models\Seat;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class AdminDashboardController extends Controller
@@ -154,38 +156,71 @@ class AdminDashboardController extends Controller
     {
         // Get the selected date (default to today in Manila timezone)
         $selectedDate = $request->input('date', Carbon::now()->setTimezone('Asia/Manila')->toDateString());
-
-        // Get all services and their associated seat count
-        $services = Service::all();
-
-        // Initialize an array to hold the mapping data per service
-        $serviceData = [];
-
-        foreach ($services as $service) {
-            // Get total available seats for this service
-            $totalSeats = $service->count;
-
-            // Get the number of bookings made for the selected date for this service
-            $bookedSeats = Booking::where('service_id', $service->id)
-                ->where('status', 'Completed')
-                ->whereDate('date', $selectedDate)
-                ->count(); // Count of bookings for the selected date and service
-
-            // Calculate available seats for this service
-            $availableSeats = $totalSeats - $bookedSeats;
-
-            // Store the data for this service
-            $serviceData[] = [
+    
+        // Define the specific service IDs: 1 = Glassbox, 2 = All Day All Night
+        $servicesData = [];
+    
+        // Define your service IDs for Glassbox and All Day All Night
+        $serviceConditions = [
+            1 => 'Glassbox', // service_id 1 is Glassbox
+            3 => 'All Day All Night' // service_id 2 is All Day All Night
+        ];
+    
+        // Iterate over each service_id condition
+        foreach ($serviceConditions as $serviceId => $serviceName) {
+            // Fetch the service and its booking data for the selected date
+            $service = Service::leftJoin('bookings', function ($join) use ($selectedDate, $serviceId) {
+                $join->on('services.id', '=', 'bookings.service_id')
+                    ->where('bookings.date', '=', $selectedDate)
+                    // ->where('bookings.status', 'Completed') // Only completed bookings
+                    ->where('services.id', '=', $serviceId); // Filter by specific service_id
+            })
+            ->where('services.id', $serviceId)
+            ->select('services.id', 'services.name', 'services.count as totalSeats', 'services.duration')
+            ->selectRaw('COUNT(bookings.id) as bookedSeats') // Count the number of bookings
+            ->groupBy('services.id', 'services.name', 'services.count', 'services.duration')
+            ->first(); // We expect only one service
+    
+            if (!$service) {
+                return response()->json(['error' => "Service ID $serviceId ($serviceName) not found"], 404);
+            }
+    
+            // Fetch all seats for the service (no floor filter, all seats for the service)
+            $seats = Seat::where('service_id', $serviceId) // Ensure we fetch all seats for this service
+                ->get(['id', 'seat_code']); // Fetch all seat codes and IDs
+    
+            // Now, for each seat, check if it has a completed booking on the selected date
+            $seatsWithBookingStatus = $seats->map(function ($seat) use ($selectedDate, $serviceId) {
+                // Check if the seat has a completed booking for the selected date
+                $booking = Booking::where('service_id', $serviceId)
+                    ->where('seat_code', $seat->seat_code)
+                    ->where('date', $selectedDate)
+                    // ->where('status', 'Completed')
+                    ->first(); // Fetch the booking data for this seat
+    
+                $isBooked = $booking ? true : false; // True if booked, false if not
+                return [
+                    'id' => $seat->id,
+                    'seat_code' => $seat->seat_code,
+                    'isBooked' => $isBooked, // Indicate whether the seat is booked
+                ];
+            });
+    
+            // Prepare the response data for the current service
+            $servicesData[] = [
                 'service_id' => $service->id,
-                'service_name' => $service->name, // Assuming 'name' is a field in the 'services' table
-                'totalSeats' => $totalSeats,
-                'bookedSeats' => $bookedSeats,
-                'availableSeats' => $availableSeats,
+                'service_name' => $service->name,
+                'totalSeats' => $service->totalSeats,
+                'bookedSeats' => $service->bookedSeats,
+                'availableSeats' => $service->totalSeats - $service->bookedSeats,
                 'duration' => $service->duration,
+                'seats' => $seatsWithBookingStatus, // Include seat data with booking status
             ];
         }
-
+    
         // Return the data as JSON
-        return response()->json($serviceData);
+        return response()->json($servicesData);
     }
+    
+    
 }

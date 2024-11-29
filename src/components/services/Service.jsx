@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
 import Promo from "../promo/Promo";
-import { Tooltip } from '@mui/material';
+import { Tooltip } from "@mui/material";
 import { baseApiUrl } from "../../App";
 
 const Service = ({
@@ -21,18 +21,28 @@ const Service = ({
   const [date, setDate] = useState("");
   const navigate = useNavigate();
 
-
-
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const today = new Date().toISOString().split("T")[0];
-        setDate(today);
+        const today = new Date();
+
+        // Extract year, month, and day
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, "0"); // Month is 0-indexed, so add 1
+        const day = String(today.getDate()).padStart(2, "0");
+
+        // Construct the formatted date
+        const formattedDate = `${year}-${month}-${day}`;
+
+        console.log(formattedDate);
+
+        setDate(formattedDate);
         setLoading(true);
+        console.log(formattedDate);
 
         const [serviceResponse, seatsResponse] = await Promise.all([
           fetch(`${baseApiUrl}services`),
-          fetch(`${baseApiUrl}available?date=${today}`),
+          fetch(`${baseApiUrl}available?date=${formattedDate}`),
         ]);
 
         if (!serviceResponse.ok || !seatsResponse.ok) {
@@ -52,7 +62,7 @@ const Service = ({
 
         setServices(servicesData);
         setAvailableSeats(availableSeatsMap);
-        console.log(availableSeats)
+        console.log(availableSeatsMap);
       } catch (error) {
         console.error(error);
       } finally {

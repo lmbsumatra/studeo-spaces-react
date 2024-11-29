@@ -48,7 +48,13 @@ class ServiceController extends Controller
 
     public function available(Request $request)
     {
-        $date = $request->query('date', Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d'));
+        $date = $request->query('date');
+
+        // Check if the date is provided in the query, else use the current date in 'Asia/Manila' timezone
+        $date = $date ? Carbon::parse($date)->setTimezone('Asia/Manila')->format('Y-m-d') : Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d');
+
+        // Log the formatted date
+        // Log::info($date);
 
         // Fetch services and calculate bookings count for the selected date
         $services = Service::leftJoin('bookings', function ($join) use ($date) {
@@ -59,11 +65,13 @@ class ServiceController extends Controller
             ->selectRaw('COUNT(bookings.id) as bookings_count') // Count the number of bookings
             ->groupBy('services.id', 'services.name', 'services.count') // Group by necessary columns
             ->get();
-
+        Log::info($services);
         $result = $services->map(function ($service) {
             // Assuming 'default_count' holds the total available count for each service
             $availableSeats = $service->count ?? 0; // Default available count
             $bookingsCount = $service->bookings_count ?? 0; // Count of bookings for the date
+            // Log::info($availableSeats);
+            // Log::info($bookingsCount);
 
             // Calculate available seats
             $finalAvailableSeats = max($availableSeats - $bookingsCount, 0); // Ensure non-negative value
@@ -105,7 +113,7 @@ class ServiceController extends Controller
     {
         // Log incoming request data for debugging
         Log::info('Creating new service', ['request_data' => $request->all()]);
-    
+
         // Validate incoming request data
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
@@ -117,13 +125,13 @@ class ServiceController extends Controller
             'count' => 'required|integer|min:1', // Ensure count is at least 1
             'service_code' => 'required|string|max:255|unique:services,service_code', // Ensure unique service code
         ]);
-    
+
         // Enable query log to check queries being executed
         DB::enableQueryLog();
-    
+
         // Start database transaction
         DB::beginTransaction();
-    
+
         try {
             // Handle image upload if present
             if ($request->hasFile('images')) {
@@ -133,14 +141,14 @@ class ServiceController extends Controller
                 ])->getSecurePath();
                 $validatedData['images'] = $uploadedFileUrl;
             }
-    
+
             // Log the validated data to ensure image URL is present
             Log::info('Validated Data for Service Creation', ['validated_data' => $validatedData]);
-    
+
             // Create service
             $service = Service::create($validatedData);
             Log::info('Service created successfully', ['service_id' => $service->id]);
-    
+
             // Insert seats
             $seats = [];
             for ($i = 1; $i <= $validatedData['count']; $i++) {
@@ -154,17 +162,17 @@ class ServiceController extends Controller
                     'updated_at' => now(),
                 ];
             }
-            
+
             // Insert seats into the database
             DB::table('seats')->insert($seats);
             Log::info('Seats inserted successfully', ['seats_count' => count($seats)]);
-    
+
             // Commit transaction
             DB::commit();
-    
+
             // Log executed queries for debugging
             Log::info('Executed Database Queries', ['queries' => DB::getQueryLog()]);
-    
+
             // Return success response
             return response()->json([
                 'message' => 'Service and seats created successfully.',
@@ -173,13 +181,13 @@ class ServiceController extends Controller
         } catch (\Exception $e) {
             // Rollback transaction if error occurs
             DB::rollback();
-            
+
             // Log the error for debugging
             Log::error('Error creating service or inserting seats', ['error' => $e->getMessage()]);
-    
+
             // Log executed queries for debugging
             Log::info('Executed Database Queries', ['queries' => DB::getQueryLog()]);
-    
+
             // Return error response
             return response()->json([
                 'message' => 'Failed to create service or insert seats.',
@@ -187,20 +195,20 @@ class ServiceController extends Controller
             ], 500);
         }
     }
-    
+
     public function update(Request $request, $id)
     {
         Log::info('Updating service', ['service_id' => $id, 'request_data' => $request->all()]);
         Log::info('Incoming seat data', ['seats' => $request->input('seats')]);
-    
+
         // Find the service by ID
         $service = Service::find($id);
-    
+
         if (!$service) {
             Log::warning('Service not found', ['service_id' => $id]);
             return response()->json(['error' => 'Service not found'], 404);
         }
-    
+
         // Validate incoming request data including 'seats' and 'floor_number'
         $validatedData = $request->validate([
             'name' => 'sometimes|string|max:255',
@@ -213,10 +221,10 @@ class ServiceController extends Controller
             'availability' => 'required|boolean',
             'seats' => 'nullable|json',  // Ensure seats are passed as a valid JSON string
         ]);
-    
+
         Log::info('Validated data for update', ['validated_data' => $validatedData]);
         Log::info('Incoming seat data', ['seats' => $request->input('seats')]);  // Log the raw seat data
-    
+
         try {
             // Handle image upload if provided
             if ($request->hasFile('images')) {
@@ -232,15 +240,15 @@ class ServiceController extends Controller
                 $validatedData['images'] = $uploadedFileUrl; // Update image URL
                 Log::info('New image uploaded successfully', ['image_url' => $uploadedFileUrl]);
             }
-    
+
             // Update the service with validated data (except for the seats part)
             Log::info('Updating service data in the database');
             $service->update($validatedData);
             Log::info('Service updated successfully', ['service_id' => $service->id]);
-    
+
             // Get today's date in Philippine Time (PH Time)
             $todayPH = Carbon::now('Asia/Manila')->toDateString();  // Get today's date in PH timezone
-    
+
             // Fetch bookings for today with the corresponding seat_codes for this service
             $bookingsToday = DB::table('bookings')
                 ->join('seats', 'bookings.seat_code', '=', 'seats.seat_code')
@@ -248,38 +256,38 @@ class ServiceController extends Controller
                 ->whereDate('bookings.created_at', $todayPH)  // Only bookings for today
                 ->select('bookings.seat_code')  // Select the seat_code from bookings
                 ->get();  // Get the results
-    
+
             // Extract booked seat codes from the bookingsToday collection
             $bookedSeatCodesToday = $bookingsToday->pluck('seat_code')->toArray();
-    
+
             // If the count is updated and is greater than 0, generate or update seats
             if (isset($validatedData['count']) && $validatedData['count'] > 0) {
                 Log::info('Processing seat updates', ['requested_count' => $validatedData['count']]);
                 $existingSeats = DB::table('seats')->where('service_id', $service->id)->get();
                 Log::info('Fetched existing seats', ['existing_seats_count' => count($existingSeats)]);
-    
+
                 // Decode 'seats' if it was passed as JSON string
                 $seatsData = $request->has('seats') ? json_decode($request->input('seats'), true) : [];
                 Log::info('Decoded seat data', ['seats' => $seatsData]);
-    
+
                 // Determine the number of seats to save based on the count and booked seats
                 $seatsToSaveCount = max($validatedData['count'], count($bookedSeatCodesToday));
-                Log::info($seatsToSaveCount);
-    
+                // Log::info($seatsToSaveCount);
+
                 // If seats data is provided, update their floor numbers, but not seat codes if booked
                 if (count($seatsData) > 0) {
                     foreach ($seatsData as $index => $seat) {
                         $seatCode = "{$validatedData['service_code']}-" . ($index + 1);
-    
+
                         // Skip updating seat if it's already booked today
                         if (in_array($seatCode, $bookedSeatCodesToday)) {
                             Log::info('Skipping seat code update as it is already booked today', ['seat_code' => $seatCode]);
                             continue;  // Skip this seat
                         }
-    
+
                         $newFloorNumber = $seat['floor_number'] ?? null;
                         Log::info('Checking for floor number update', ['seat_code' => $seatCode, 'new_floor_number' => $newFloorNumber]);
-    
+
                         $existingSeat = $existingSeats->firstWhere('seat_code', $seatCode);
                         if ($existingSeat && $newFloorNumber && $existingSeat->floor_number !== $newFloorNumber) {
                             Log::info('Updating floor number for existing seat', ['seat_code' => $seatCode, 'old_floor_number' => $existingSeat->floor_number]);
@@ -291,33 +299,33 @@ class ServiceController extends Controller
                         }
                     }
                 }
-    
+
                 // Insert new seats if needed
                 $seatsNeeded = max(0, $seatsToSaveCount - count($existingSeats));
                 $service->update(['count' => $seatsToSaveCount]);
                 Log::info('Seats needed for insertion', ['seats_needed' => $seatsNeeded]);
-    
+
                 if ($seatsNeeded > 0) {
                     $seats = [];
                     $floorNumber = 2;  // Start with floor 2, but can be overridden by the request
                     $lastSeatCode = $existingSeats->last()?->seat_code ?? "{$validatedData['service_code']}-0";
-    
+
                     // Loop to create new seats
                     for ($i = 1; $i <= $seatsNeeded; $i++) {
                         // If the seat data has a floor number provided, use it, otherwise keep the default
                         $floorNumber = isset($seatsData[$i - 1]['floor_number'])
                             ? $seatsData[$i - 1]['floor_number']
                             : $floorNumber;
-    
+
                         // Generate a new seat code by incrementing the number part
                         $newSeatCode = "{$validatedData['service_code']}-" . (intval(explode('-', $lastSeatCode)[1]) + $i);
-    
+
                         // Skip this seat if it is booked today
                         if (in_array($newSeatCode, $bookedSeatCodesToday)) {
                             Log::info('Skipping seat insertion as it is already booked today', ['seat_code' => $newSeatCode]);
                             continue;
                         }
-    
+
                         // Prepare the seat data for insertion
                         $seats[] = [
                             'seat_code' => $newSeatCode,
@@ -328,28 +336,28 @@ class ServiceController extends Controller
                             'updated_at' => now(),
                         ];
                     }
-    
+
                     // Insert new seats in bulk
                     Log::info('Inserting new seats into the database');
                     DB::table('seats')->insert($seats);
                     Log::info('New seats inserted successfully', ['seats_count' => count($seats)]);
                 }
-    
+
                 // Delete extra seats that are not booked and are beyond the count
                 $seatsToDelete = DB::table('seats')
                     ->where('service_id', $service->id)
                     ->whereNotIn('seat_code', array_column($seatsData, 'seat_code')) // Keep the seats that exist in the new data
                     ->whereNotIn('seat_code', $bookedSeatCodesToday) // Avoid deleting booked seats
                     ->get();
-    
+
                 Log::info('Deleting unbooked extra seats', ['seats_to_delete' => $seatsToDelete]);
-    
+
                 foreach ($seatsToDelete as $seat) {
                     DB::table('seats')->where('id', $seat->id)->delete();
                     Log::info('Deleted seat', ['seat_code' => $seat->seat_code]);
                 }
             }
-    
+
             return response()->json([
                 'message' => 'Service updated successfully.',
                 'service' => $service,
@@ -368,8 +376,8 @@ class ServiceController extends Controller
             ], 500);
         }
     }
-    
-    
+
+
     public function delete(Request $request, $id)
     {
         $service = Service::find($id);
@@ -432,15 +440,15 @@ class ServiceController extends Controller
 
         // Get the current date in Philippine Time (PH Time)
         $todayPH = Carbon::now('Asia/Manila')->toDateString();  // Get today's date in PH timezone
-        Log::info($todayPH);
-        $bookings = Booking::whereDate('created_at', $todayPH)->get();
+        // Log::info($todayPH);
+        $bookings = Booking::whereDate('date', $todayPH)->get();
         Log::info('Booking created at: ' . $bookings);
 
         // Fetch bookings for today with the corresponding seat_codes for this service
         $bookingsToday = DB::table('bookings')
             ->join('seats', 'bookings.seat_code', '=', 'seats.seat_code')
             ->where('seats.service_id', $service->id)  // Filter by service ID
-            ->whereDate('bookings.created_at', $todayPH)  // Only bookings for today
+            ->whereDate('bookings.date', $todayPH)  // Only bookings for today
             ->select('bookings.seat_code')  // Select the seat_code from bookings
             ->get();  // Get the results
 
