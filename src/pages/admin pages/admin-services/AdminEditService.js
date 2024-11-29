@@ -5,6 +5,7 @@ import "./style.css";
 import { Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
 import { baseApiUrl } from "../../../App";
+import { debounce } from "lodash";
 
 const AdminEditService = () => {
   const { id } = useParams();
@@ -16,6 +17,8 @@ const AdminEditService = () => {
     description: "",
     count: "",
     availability: false,
+    seats: [],
+    service_code: "",
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -40,6 +43,8 @@ const AdminEditService = () => {
           description: data.description || "",
           count: data.count?.toString() || "",
           availability: Boolean(data.availability),
+          seats: data.seats,
+          service_code: data.service_code,
         });
         // Set image preview if exists
         if (data.images) {
@@ -55,12 +60,36 @@ const AdminEditService = () => {
     fetchService();
   }, [id]);
 
+  const generateSeats = debounce((count, serviceCode) => {
+    const seats = Array.from({ length: count }, (_, i) => ({
+      seat_code: `${serviceCode}-${i + 1}`,
+      floor_number: "",
+    }));
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      seats: seats,
+    }));
+  }, 300);
+
+  useEffect(() => {
+    if (formData.count && formData.service_code) {
+      generateSeats(parseInt(formData.count, 10), formData.service_code);
+    }
+  }, [formData.count, formData.service_code]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setFormData((prevFormData) => {
+      const updatedForm = {
+        ...prevFormData,
+        [name]: type === "checkbox" ? checked : value,
+      };
+      // Automatically generate seats when count changes
+      if (name === "count" && value && !isNaN(value)) {
+        generateSeats(parseInt(value, 10));
+      }
+      return updatedForm;
+    });
   };
 
   const handleImageChange = (e) => {
@@ -124,10 +153,11 @@ const AdminEditService = () => {
       updateData.append("description", formData.description.trim());
       updateData.append("count", Number(formData.count));
       updateData.append("availability", formData.availability ? 1 : 0);
+      updateData.append("service_code", formData.service_code);
 
       // Append image if a new one was selected
       if (imageFile) {
-        console.log(imageFile)
+        console.log(imageFile);
         updateData.append("image", imageFile);
       }
       // Iterate over FormData to log all key-value pairs
@@ -156,6 +186,16 @@ const AdminEditService = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSeatChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedSeats = [...formData.seats];
+    updatedSeats[index][name] = value;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      seats: updatedSeats,
+    }));
   };
 
   return (
@@ -259,6 +299,24 @@ const AdminEditService = () => {
         </div>
 
         <div className="mb-3">
+          <label htmlFor="service_code" className="form-label">
+            Service Code
+          </label>
+          <input
+            type="text"
+            className={`form-control ${error.service_code ? "is-invalid" : ""}`}
+            id="service_code"
+            name="service_code"
+            value={formData?.service_code}
+            onChange={handleChange}
+            disabled={loading}
+          />
+          {error.service_code && (
+            <div className="invalid-feedback">{error.service_code}</div>
+          )}
+        </div>
+
+        <div className="mb-3">
           <label htmlFor="count" className="form-label">
             Count
           </label>
@@ -287,6 +345,32 @@ const AdminEditService = () => {
           <label className="form-check-label" htmlFor="availability">
             Available
           </label>
+        </div>
+
+        {/* Seats Display */}
+        <div className="mb-3">
+          <h4>Seats</h4>
+          {formData.seats.map((seat, index) => (
+            <div key={index} className="d-flex align-items-center mb-2">
+              <input
+                type="text"
+                className="form-control me-2"
+                placeholder="Seat Code"
+                value={seat.seat_code}
+                readOnly // Generated automatically
+                disabled={loading}
+              />
+              <input
+                type="text"
+                className="form-control me-2"
+                placeholder="Floor Number"
+                name="floor_number"
+                value={seat.floor_number}
+                onChange={(e) => handleSeatChange(index, e)} // Handle floor number change
+                disabled={loading}
+              />
+            </div>
+          ))}
         </div>
 
         {error.general && (

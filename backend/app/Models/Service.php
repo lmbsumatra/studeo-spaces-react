@@ -13,6 +13,7 @@ class Service extends Model
     // protected $table = 'services';
 
     protected $fillable = [
+        'service_code',
         'name',
         'duration',
         'price',
@@ -31,4 +32,9 @@ class Service extends Model
     {
         return $this->hasMany(ServiceAvailability::class);
     }
+
+    public function seats()
+{
+    return $this->hasMany(Seat::class); // Assuming "Seat" is your Seat model
+}
 }
