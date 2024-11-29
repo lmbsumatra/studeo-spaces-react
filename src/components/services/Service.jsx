@@ -32,7 +32,7 @@ const Service = ({
 
         const [serviceResponse, seatsResponse] = await Promise.all([
           fetch(`${baseApiUrl}services`),
-          fetch(`${baseApiUrl}available?date=2024-11-26`),
+          fetch(`${baseApiUrl}available?date=${today}`),
         ]);
 
         if (!serviceResponse.ok || !seatsResponse.ok) {

@@ -13,9 +13,12 @@ class AddServiceCodeToServicesTable extends Migration
      */
     public function up()
     {
-        Schema::table('services', function (Blueprint $table) {
-            $table->string('service_code')->unique()->after('id'); // Add a unique service_code column
-        });
+        // Check if the 'service_code' column already exists
+        if (!Schema::hasColumn('services', 'service_code')) {
+            Schema::table('services', function (Blueprint $table) {
+                $table->string('service_code'); // Add the 'service_code' column if it doesn't exist
+            });
+        }
     }
 
     /**
@@ -25,8 +28,11 @@ class AddServiceCodeToServicesTable extends Migration
      */
     public function down()
     {
-        Schema::table('services', function (Blueprint $table) {
-            $table->dropColumn('service_code');
-        });
+        // Check if the 'service_code' column exists before dropping it
+        if (Schema::hasColumn('services', 'service_code')) {
+            Schema::table('services', function (Blueprint $table) {
+                $table->dropColumn('service_code');
+            });
+        }
     }
 }

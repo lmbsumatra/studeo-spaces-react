@@ -28,7 +28,7 @@
     "react-facebook": "^9.0.12",
     "react-messenger-chat-plugin": "^3.0.5",
     "react-router-dom": "^6.23.1",
-    "react-scripts": "^5.0.1",
+    
     "react-slick": "^0.30.2",
     "react-toastify": "^10.0.5",
     "slick-carousel": "^1.8.1",
@@ -64,6 +64,7 @@
     ]
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "react-scripts": "^5.0.1"
   }
 }

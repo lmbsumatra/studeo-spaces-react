@@ -21,6 +21,7 @@ class Service extends Model
         'description',
         'count',
         'availability',
+        'type',
     ];
 
     public function bookings()

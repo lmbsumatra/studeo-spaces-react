@@ -7,6 +7,7 @@ import { debounce } from "lodash";
 const AdminAddService = () => {
   const [formData, setFormData] = useState({
     name: "",
+    type: "",
     duration: "",
     price: "",
     description: "",
@@ -118,7 +119,10 @@ const AdminAddService = () => {
           formDataToSend.append(key, formData[key]);
         }
       });
-      formDataToSend.append("image", imageFile);
+      formDataToSend.append("seats", JSON.stringify(formData.seats));
+      formDataToSend.append("images", imageFile);
+
+      console.log("HERE",formDataToSend)
 
       const response = await fetch(`${baseApiUrl}services`, {
         method: "POST",
@@ -129,8 +133,8 @@ const AdminAddService = () => {
         throw new Error("Failed to add service");
       }
       toast.success("New service has been added.");
-      navigate("/admin/services");
-      resetForm(); // Reset the form after successful submission
+      // navigate("/admin/services");
+      // resetForm(); // Reset the form after successful submission
     } catch (error) {
       toast.error("Failed to add service.");
       setError({ general: error.message });
@@ -142,6 +146,7 @@ const AdminAddService = () => {
   const resetForm = () => {
     setFormData({
       name: "",
+      type: "",
       duration: "",
       price: "",
       description: "",
@@ -154,6 +159,18 @@ const AdminAddService = () => {
     setError({});
   };
 
+  const handleSeatChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedSeats = [...formData.seats];
+
+    // Update the specific seat's field
+    updatedSeats[index][name] = value;
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      seats: updatedSeats, // Update the seats array in form data
+    }));
+  };
   return (
     <section className="container items mt-5">
       <h1 className="fs-700 ff-serif text-center">Add Service</h1>
@@ -172,6 +189,25 @@ const AdminAddService = () => {
             disabled={loading}
           />
           {error.name && <div className="invalid-feedback">{error.name}</div>}
+        </div>
+        <div className="mb-3">
+          <label htmlFor="type" className="form-label">
+            Type
+          </label>
+          <select
+            className={`form-control ${error.type ? "is-invalid" : ""}`}
+            id="type"
+            name="type"
+            value={formData.type}
+            onChange={handleChange}
+            disabled={loading}
+          >
+            {formData.type}
+            <option value="">Select Type</option>
+            <option value="room">Room</option>
+            <option value="desk">Desk</option>
+          </select>
+          {error.type && <div className="invalid-feedback">{error.type}</div>}
         </div>
 
         <div className="mb-3">
@@ -316,19 +352,13 @@ const AdminAddService = () => {
                 disabled={loading}
               />
               <input
-                type="text"
+                type="number"
                 className="form-control me-2"
                 placeholder="Floor Number"
-                disabled={loading}
+                name="floor_number" // Use the name attribute to match the seat property
                 value={seat.floor_number}
-                onChange={(e) => {
-                  const updatedSeats = [...formData.seats];
-                  updatedSeats[index].floor_number = e.target.value;
-                  setFormData((prevFormData) => ({
-                    ...prevFormData,
-                    seats: updatedSeats,
-                  }));
-                }}
+                onChange={(e) => handleSeatChange(index, e)} // Handle changes here
+                disabled={loading}
               />
             </div>
           ))}

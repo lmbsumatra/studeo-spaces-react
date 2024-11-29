@@ -39,7 +39,7 @@ const Payment = () => {
       customer_id: location.state.customerID || null,
       customer_name: location.state.name,
       message: "A customer has booked.",
-      type: "new_booking",
+      type: "booking",
       action_url: null,
     };
 

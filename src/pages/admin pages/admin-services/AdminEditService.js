@@ -11,6 +11,7 @@ const AdminEditService = () => {
   const { id } = useParams();
   const [formData, setFormData] = useState({
     name: "",
+    type: "",
     duration: "",
     price: "",
     images: null,
@@ -35,16 +36,23 @@ const AdminEditService = () => {
           throw new Error("Failed to fetch service");
         }
         const data = await response.json();
+        console.log(data);
+        // Then proceed with setting form data
         setFormData({
-          name: data.name,
-          duration: data.duration,
-          price: data.price?.toString() || "",
-          images: data.images,
-          description: data.description || "",
-          count: data.count?.toString() || "",
-          availability: Boolean(data.availability),
-          seats: data.seats,
-          service_code: data.service_code,
+          name: data.service.name,
+          type: data.service.type,
+          duration: data.service.duration,
+          price: data.service.price ? data.service.price.toString() : "",
+          images: data.service.images,
+          description: data.service.description || "",
+          count: data.service.count?.toString() || "",
+          availability: Boolean(data.service.availability),
+          seats: data.service.seats.map((seat) => ({
+            ...seat,
+            booking_count_today: seat.booking_count_today || 0, // Ensure the booking count is included
+          })),
+          service_code: data.service.service_code,
+          booked_seat_codes_today: data.booked_seat_codes_today,
         });
         // Set image preview if exists
         if (data.images) {
@@ -61,15 +69,33 @@ const AdminEditService = () => {
   }, [id]);
 
   const generateSeats = debounce((count, serviceCode) => {
-    const seats = Array.from({ length: count }, (_, i) => ({
-      seat_code: `${serviceCode}-${i + 1}`,
-      floor_number: "",
-    }));
+    const bookedSeatCodes = formData.booked_seat_codes_today || []; // The booked seat codes for today
+    
+    // Ensure that the updated seats array contains the correct floor numbers.
+    const updatedSeats = Array.from({ length: count }, (_, i) => {
+      const seatIndex = i; // Current seat index
+      const existingSeat = formData.seats[seatIndex]; // Get the existing seat, if any
+  
+      const seatCode = `${serviceCode}-${i + 1}`;
+      const isBooked = bookedSeatCodes.includes(seatCode); // Check if the seat is booked
+  
+      // If the seat already exists, reuse its floor_number, otherwise set it as empty.
+      const floorNumber = existingSeat ? existingSeat.floor_number : "";
+  
+      return {
+        seat_code: seatCode,
+        floor_number: floorNumber, // Use existing floor_number or empty
+        booking_count_today: existingSeat ? existingSeat.booking_count_today : 0, // Retain booking count if the seat already exists
+        booked: isBooked, // Mark as booked if the seat is in the booked seat codes
+      };
+    });
+  
     setFormData((prevFormData) => ({
       ...prevFormData,
-      seats: seats,
+      seats: updatedSeats, // Update the seats array with the new seats
     }));
   }, 300);
+  
 
   useEffect(() => {
     if (formData.count && formData.service_code) {
@@ -79,18 +105,41 @@ const AdminEditService = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+  
     setFormData((prevFormData) => {
-      const updatedForm = {
+      let updatedForm = {
         ...prevFormData,
         [name]: type === "checkbox" ? checked : value,
       };
-      // Automatically generate seats when count changes
+  
+      // Automatically regenerate seats when count changes
       if (name === "count" && value && !isNaN(value)) {
-        generateSeats(parseInt(value, 10));
+        const newCount = parseInt(value, 10);
+        const bookedSeatsCount = prevFormData.booked_seat_codes_today.length;
+  
+        // Check if the new count is lower than the booked seats
+        if (newCount < bookedSeatsCount) {
+          // Set error message and prevent the change
+          setError((prevError) => ({
+            ...prevError,
+            count: `Cannot remove booked seats. Currently, ${bookedSeatsCount} seats are booked today.`,
+          }));
+          return prevFormData; // Return the previous form data to prevent count change
+        } else {
+          // Remove the error if count is valid
+          setError((prevError) => {
+            const { count, ...rest } = prevError;
+            return rest;
+          });
+          generateSeats(newCount, prevFormData.service_code); // Regenerate seats
+        }
       }
+  
       return updatedForm;
     });
   };
+  
+  
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -125,6 +174,14 @@ const AdminEditService = () => {
       newErrors.count = "Valid count is required";
     }
 
+    // Validate that each seat has a valid floor_number
+    formData.seats.forEach((seat, index) => {
+      if (seat.floor_number && isNaN(seat.floor_number)) {
+        newErrors[`floor_number_${index}`] =
+          "Floor number must be a valid number";
+      }
+    });
+
     setError(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
@@ -148,22 +205,30 @@ const AdminEditService = () => {
       // Create FormData instance
       const updateData = new FormData();
       updateData.append("name", formData.name.trim());
+      updateData.append("type", formData.type.trim());
       updateData.append("duration", formData.duration.trim());
       updateData.append("price", Number(formData.price));
       updateData.append("description", formData.description.trim());
       updateData.append("count", Number(formData.count));
       updateData.append("availability", formData.availability ? 1 : 0);
       updateData.append("service_code", formData.service_code);
+      // Exclude booking_count_today from being sent to the backend
+      const seatsWithoutBookingCount = formData.seats.map((seat) => {
+        const { booking_count_today, ...seatWithoutBookingCount } = seat;
+        return seatWithoutBookingCount; // Exclude booking count when sending to backend
+      });
+      updateData.append("seats", JSON.stringify(seatsWithoutBookingCount));
 
       // Append image if a new one was selected
       if (imageFile) {
         console.log(imageFile);
-        updateData.append("image", imageFile);
+        updateData.append("images", imageFile);
       }
       // Iterate over FormData to log all key-value pairs
       for (let pair of updateData.entries()) {
         console.log(`${pair[0]}: ${pair[1]}`);
       }
+
       const response = await fetch(`${baseApiUrl}services/${id}`, {
         method: "POST", // Using POST instead of PATCH for FormData
         headers: {
@@ -191,12 +256,28 @@ const AdminEditService = () => {
   const handleSeatChange = (index, e) => {
     const { name, value } = e.target;
     const updatedSeats = [...formData.seats];
+  
+    // Update the specific seat's field
     updatedSeats[index][name] = value;
+  
+    // Filter out the seats based on the new count while keeping booked seats intact
+    const bookedSeatCodes = formData.booked_seat_codes_today || [];
+  
+    // Filter the seats to ensure booked ones are retained
+    const filteredSeats = updatedSeats.filter((seat, idx) => {
+      // Keep booked seats or seats within the new count limit
+      return bookedSeatCodes.includes(seat.seat_code) || idx < formData.count;
+    });
+  
     setFormData((prevFormData) => ({
       ...prevFormData,
-      seats: updatedSeats,
+      seats: filteredSeats, // Updated seat list
+      count: filteredSeats.length, // Automatically update count based on seats
     }));
   };
+  
+  
+  
 
   return (
     <div className="container items mt-5">
@@ -216,6 +297,25 @@ const AdminEditService = () => {
             disabled={loading}
           />
           {error.name && <div className="invalid-feedback">{error.name}</div>}
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="type" className="form-label">
+            Type
+          </label>
+          <select
+            className={`form-control ${error.type ? "is-invalid" : ""}`}
+            id="type"
+            name="type"
+            value={formData.type}
+            onChange={handleChange}
+            disabled={loading}
+          >
+            <option value="">Select Type</option>
+            <option value="room">Room</option>
+            <option value="desk">Desk</option>
+          </select>
+          {error.type && <div className="invalid-feedback">{error.type}</div>}
         </div>
 
         <div className="mb-3">
@@ -268,10 +368,10 @@ const AdminEditService = () => {
           {error.images && (
             <div className="invalid-feedback">{error.images}</div>
           )}
-          {imagePreview && (
+          {imagePreview || formData.images && (
             <div className="mt-2">
               <img
-                src={imagePreview}
+                src={imagePreview || formData.images}
                 alt="Service preview"
                 style={{ maxWidth: "200px", maxHeight: "200px" }}
                 className="mt-2 img-thumbnail"
@@ -317,6 +417,7 @@ const AdminEditService = () => {
         </div>
 
         <div className="mb-3">
+          {}
           <label htmlFor="count" className="form-label">
             Count
           </label>
@@ -328,7 +429,9 @@ const AdminEditService = () => {
             value={formData.count}
             onChange={handleChange}
             disabled={loading}
+            min="0"
           />
+          
           {error.count && <div className="invalid-feedback">{error.count}</div>}
         </div>
 
@@ -357,18 +460,24 @@ const AdminEditService = () => {
                 className="form-control me-2"
                 placeholder="Seat Code"
                 value={seat.seat_code}
-                readOnly // Generated automatically
+                readOnly // Seat Code is auto-generated
                 disabled={loading}
               />
               <input
-                type="text"
+                type="number"
                 className="form-control me-2"
                 placeholder="Floor Number"
-                name="floor_number"
+                name="floor_number" // Use the name attribute to match the seat property
                 value={seat.floor_number}
-                onChange={(e) => handleSeatChange(index, e)} // Handle floor number change
+                onChange={(e) => handleSeatChange(index, e)} // Handle changes here
                 disabled={loading}
               />
+              {error[`floor_number_${index}`] && (
+                <div className="invalid-feedback">
+                  {error[`floor_number_${index}`]}{" "}
+                  {/* Show error for each floor number */}
+                </div>
+              )}
             </div>
           ))}
         </div>

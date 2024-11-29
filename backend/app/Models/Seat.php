@@ -29,4 +29,9 @@ class Seat extends Model
     {
         return $this->belongsTo(Service::class);
     }
+
+    public function bookings()
+{
+    return $this->hasMany(Booking::class, 'seat_code', 'seat_code');
+}
 }

@@ -45,12 +45,13 @@ const Book = () => {
   const [sharedUserInfo, setSharedUserInfo] = useState({
     name: "",
     email: "",
-    contact: ""
+    contact: "",
   });
   const [contact, setContact] = useState("");
-  const [remainingBullets, setRemainingBullets] = useState(passDetails?.remaining_bullets ?? 15);
+  const [remainingBullets, setRemainingBullets] = useState(
+    passDetails?.remaining_bullets ?? 15
+  );
   const [remainingBulletsState, setRemainingBulletsState] = useState(15);
-
 
   useEffect(() => {
     const now = new Date();
@@ -137,7 +138,7 @@ const Book = () => {
       alert("Please fill in all required fields.");
       return;
     }
-
+    let seat_code = "";
     const bookingDetails = {
       service_id: selectedService.id,
       service_name: selectedService.name, // Pass the service name
@@ -149,6 +150,7 @@ const Book = () => {
       contact_number: contactNumber,
       payment_method: paymentMethod,
       customerID,
+      seat_code,
     };
 
     setLoading(true);
@@ -215,7 +217,7 @@ const Book = () => {
   const handleCloseCardModal = () => setShowCardModal(false);
   const handleShowCardModal = () => setShowCardModal(true);
 
-   const handleShowShareModal = () => {
+  const handleShowShareModal = () => {
     if (passDetails?.pass?.reference_number) {
       setShowShareModal(true);
       setShowCardModal(false);
@@ -230,7 +232,8 @@ const Book = () => {
 
   const handleCopyReferenceNumber = () => {
     if (passDetails?.pass?.reference_number) {
-      navigator.clipboard.writeText(passDetails.pass.reference_number)
+      navigator.clipboard
+        .writeText(passDetails.pass.reference_number)
         .then(() => {
           toast.success("Reference number copied to clipboard!");
         })
@@ -241,118 +244,116 @@ const Book = () => {
   };
 
   const handleCheckPass = async () => {
-      setLoading(true);
-      try {
-          const payload = isOwner
-              ? { customer_id: customerID, pass_id: passID }
-              : {
-                  reference_number: referenceNumber,
-                  name: name,
-                  email: email, 
-                  contact: contact,
-              };
+    setLoading(true);
+    try {
+      const payload = isOwner
+        ? { customer_id: customerID, pass_id: passID }
+        : {
+            reference_number: referenceNumber,
+            name: name,
+            email: email,
+            contact: contact,
+          };
 
-          const url = isOwner
-              ? `${baseApiUrl}check-pass`
-              : `${baseApiUrl}check-pass-by-reference`;
+      const url = isOwner
+        ? `${baseApiUrl}check-pass`
+        : `${baseApiUrl}check-pass-by-reference`;
 
-          const response = await axios.post(url, payload);
+      const response = await axios.post(url, payload);
 
-          console.log("API Response (Check Pass):", response.data);
+      console.log("API Response (Check Pass):", response.data);
 
-          if (response.data.success) {
-            setPassID(response.data.pass.pass_id || "");
-              console.log("Pass ID:", passID);
+      if (response.data.success) {
+        setPassID(response.data.pass.pass_id || "");
+        console.log("Pass ID:", passID);
 
-              setPassDetails({   
-                  customer: response.data.customer,
-                  pass: response.data.pass
-              });
-              setCustomerDetails(response.data.customer); 
-              setRemainingBullets(response.data.pass.remaining_bullets); // Update remainingBullets state
-              handleShowCardModal();
-          }
-
-          console.log('API Response:', response.data);
-          console.log('Request Payload:', payload); // Log the request payload
-
-      } catch (error) {
-          console.error('Error:', error.response?.data?.error || error);
-          toast.error(error.response?.data?.error || 'Error checking pass');
-      } finally {
-          setLoading(false);
-          handleClosePassModal();
+        setPassDetails({
+          customer: response.data.customer,
+          pass: response.data.pass,
+        });
+        setCustomerDetails(response.data.customer);
+        setRemainingBullets(response.data.pass.remaining_bullets); // Update remainingBullets state
+        handleShowCardModal();
       }
+
+      console.log("API Response:", response.data);
+      console.log("Request Payload:", payload); // Log the request payload
+    } catch (error) {
+      console.error("Error:", error.response?.data?.error || error);
+      toast.error(error.response?.data?.error || "Error checking pass");
+    } finally {
+      setLoading(false);
+      handleClosePassModal();
+    }
   };
 
-  
   const handleUsePass = async () => {
     if (!passDetails || !passDetails.customer || !passDetails.pass) {
-        toast.error("Pass details are missing. Please try again.");
-        return;
+      toast.error("Pass details are missing. Please try again.");
+      return;
     }
 
     const referenceNumberToUse = passDetails.pass.reference_number;
 
     if (!referenceNumberToUse) {
-        toast.error("Reference number is missing. Please check and try again.");
-        return;
+      toast.error("Reference number is missing. Please check and try again.");
+      return;
     }
 
     setLoading(true);
     try {
-        console.log('Share Mode:', shareMode);
-        console.log('Pass Details:', passDetails);
+      console.log("Share Mode:", shareMode);
+      console.log("Pass Details:", passDetails);
 
-        let userData = {};
+      let userData = {};
 
-        if (!isOwner) {
-            userData = {
-                user_name: name,
-                user_email: email,
-                user_contact: contact
-            };
-        } else {
-            userData = {
-                user_name: passDetails.customer.name,
-                user_email: passDetails.customer.email,
-                user_contact: passDetails.customer.contact_number
-            };
-        }
-
-        const payload = {
-            reference_number: referenceNumberToUse,
-            name: userData.user_name,
-            email: userData.user_email,
-            contact_number: userData.user_contact
+      if (!isOwner) {
+        userData = {
+          user_name: name,
+          user_email: email,
+          user_contact: contact,
         };
+      } else {
+        userData = {
+          user_name: passDetails.customer.name,
+          user_email: passDetails.customer.email,
+          user_contact: passDetails.customer.contact_number,
+        };
+      }
 
-        const response = await axios.post(`${baseApiUrl}use-pass`, payload);
-        console.log('API Response:', response.data);
+      const payload = {
+        reference_number: referenceNumberToUse,
+        name: userData.user_name,
+        email: userData.user_email,
+        contact_number: userData.user_contact,
+      };
 
-        toast.success("Pass used successfully!");
+      const response = await axios.post(`${baseApiUrl}use-pass`, payload);
+      console.log("API Response:", response.data);
 
-        // Update remaining bullets from response data
-        if (response.data.remaining_bullets >= 0) {
-            setRemainingBullets(response.data.remaining_bullets); // Update global state
-            setRemainingBulletsState(response.data.remaining_bullets); // Update local state
-        }
+      toast.success("Pass used successfully!");
 
-        if (shareMode) {
-            setShareMode(false);
-            setSharedUserInfo({
-                name: "",
-                email: "",
-                contact: ""
-            });
-        }
+      // Update remaining bullets from response data
+      if (response.data.remaining_bullets >= 0) {
+        setRemainingBullets(response.data.remaining_bullets); // Update global state
+        setRemainingBulletsState(response.data.remaining_bullets); // Update local state
+      }
+
+      if (shareMode) {
+        setShareMode(false);
+        setSharedUserInfo({
+          name: "",
+          email: "",
+          contact: "",
+        });
+      }
     } catch (error) {
-        console.error('Error using pass:', error.response?.data?.error || error);
-        toast.error(error.response?.data?.error || "Error using pass");
+      console.error("Error using pass:", error.response?.data?.error || error);
+      toast.error(error.response?.data?.error || "Error using pass");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
+  };
 
   return (
     <div className="container mt-5">
@@ -483,110 +484,114 @@ const Book = () => {
           </div>
         </div>
 
-      {/* Pass Modal */}
-      <Modal show={showPassModal} onHide={handleClosePassModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title className="w-100 text-center">
-            Use 15 Day Pass
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <form>
-            {/* Toggle Checkbox */}
-            <div className="mb-3 form-check">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                checked={!isOwner} 
-                onChange={(e) => setIsOwner(!e.target.checked)} // Update isOwner accordingly
-              />
-              <label className="form-check-label">
-                Use with reference number
-              </label>
-            </div>
+        {/* Pass Modal */}
+        <Modal show={showPassModal} onHide={handleClosePassModal} centered>
+          <Modal.Header closeButton>
+            <Modal.Title className="w-100 text-center">
+              Use 15 Day Pass
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <form>
+              {/* Toggle Checkbox */}
+              <div className="mb-3 form-check">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  checked={!isOwner}
+                  onChange={(e) => setIsOwner(!e.target.checked)} // Update isOwner accordingly
+                />
+                <label className="form-check-label">
+                  Use with reference number
+                </label>
+              </div>
 
-            {/* Conditional Rendering */}
-            {isOwner ? (
-              // Owner's view: Customer ID and Pass ID fields
-              <>
-                <div className="mb-3">
-                  <label className="form-label">Enter Customer ID</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter Customer ID"
-                    value={customerID}
-                    onChange={(e) => setCustomerID(e.target.value)}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Enter Pass ID</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter Pass ID"
-                    value={passID}
-                    onChange={(e) => setPassID(e.target.value)}
-                  />
-                </div>
-              </>
-            ) : (
-              // Non-owner's view: Reference number and personal details
-              <>
-                <div className="mb-3">
-                  <label className="form-label">Enter Reference Number</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter Reference Number"
-                    value={referenceNumber}
-                    onChange={(e) => setReferenceNumber(e.target.value)}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Enter Your Name</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter Your Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Enter Your Email</label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    placeholder="Enter Your Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Enter Your Contact Number</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter Your Contact Number"
-                    value={contact}
-                    onChange={(e) => setContact(e.target.value)}
-                  />
-                </div>
-              </>
-            )}
-          </form>
-        </Modal.Body>
-        <Modal.Footer>
-          <button className="btn btn-secondary-clr" onClick={handleClosePassModal}>
-            Close
-          </button>
-          <button className="btn btn-primary-clr" onClick={handleCheckPass}>
-            Check
-          </button>
-        </Modal.Footer>
-      </Modal>
-
+              {/* Conditional Rendering */}
+              {isOwner ? (
+                // Owner's view: Customer ID and Pass ID fields
+                <>
+                  <div className="mb-3">
+                    <label className="form-label">Enter Customer ID</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter Customer ID"
+                      value={customerID}
+                      onChange={(e) => setCustomerID(e.target.value)}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Enter Pass ID</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter Pass ID"
+                      value={passID}
+                      onChange={(e) => setPassID(e.target.value)}
+                    />
+                  </div>
+                </>
+              ) : (
+                // Non-owner's view: Reference number and personal details
+                <>
+                  <div className="mb-3">
+                    <label className="form-label">Enter Reference Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter Reference Number"
+                      value={referenceNumber}
+                      onChange={(e) => setReferenceNumber(e.target.value)}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Enter Your Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter Your Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Enter Your Email</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      placeholder="Enter Your Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">
+                      Enter Your Contact Number
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter Your Contact Number"
+                      value={contact}
+                      onChange={(e) => setContact(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
+            </form>
+          </Modal.Body>
+          <Modal.Footer>
+            <button
+              className="btn btn-secondary-clr"
+              onClick={handleClosePassModal}
+            >
+              Close
+            </button>
+            <button className="btn btn-primary-clr" onClick={handleCheckPass}>
+              Check
+            </button>
+          </Modal.Footer>
+        </Modal>
 
         {/* Card Modal */}
         <Modal show={showCardModal} onHide={handleCloseCardModal} centered>
@@ -596,12 +601,15 @@ const Book = () => {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body className="d-flex justify-content-center">
-          <PassCard 
-            customerDetails={customerDetails}
-            passDetails={{ ...passDetails, remaining_bullets: remainingBullets }}
-            logo={logo}
-            onUse={handleUsePass}
-          />
+            <PassCard
+              customerDetails={customerDetails}
+              passDetails={{
+                ...passDetails,
+                remaining_bullets: remainingBullets,
+              }}
+              logo={logo}
+              onUse={handleUsePass}
+            />
           </Modal.Body>
           <Modal.Footer>
             <button
@@ -613,8 +621,8 @@ const Book = () => {
             >
               Close
             </button>
-            <button 
-              className="btn btn-primary-clr" 
+            <button
+              className="btn btn-primary-clr"
               onClick={handleShowShareModal}
             >
               Share
@@ -639,9 +647,9 @@ const Book = () => {
                 <input
                   type="text"
                   className="form-control text-center"
-                  value={passDetails?.pass?.reference_number || ''}
+                  value={passDetails?.pass?.reference_number || ""}
                   readOnly
-                  style={{ maxWidth: '300px' }}
+                  style={{ maxWidth: "300px" }}
                 />
                 <button
                   className="btn btn-primary-clr"
@@ -651,14 +659,19 @@ const Book = () => {
                 </button>
               </div>
               <p className="text-muted">
-                Share this reference number with others to let them use your pass.
-                They will need to provide their own details when using the pass.
+                Share this reference number with others to let them use your
+                pass. They will need to provide their own details when using the
+                pass.
               </p>
               {/* Display remaining days and bullets */}
               <div className="mt-3">
                 <p className="mb-2">Pass Status:</p>
-                <p className="mb-1">Remaining Days: {passDetails?.pass?.remaining_days || 0}</p>
-                <p>Remaining Bullets: {passDetails?.pass?.remaining_bullets || 0}</p>
+                <p className="mb-1">
+                  Remaining Days: {passDetails?.pass?.remaining_days || 0}
+                </p>
+                <p>
+                  Remaining Bullets: {passDetails?.pass?.remaining_bullets || 0}
+                </p>
               </div>
             </div>
           </Modal.Body>
