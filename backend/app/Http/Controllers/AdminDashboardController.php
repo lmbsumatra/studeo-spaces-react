@@ -157,13 +157,15 @@ class AdminDashboardController extends Controller
         // Get the selected date (default to today in Manila timezone)
         $selectedDate = $request->input('date', Carbon::now()->setTimezone('Asia/Manila')->toDateString());
     
-        // Define the specific service IDs: 1 = Glassbox, 2 = All Day All Night
+        // Define the specific service IDs and their corresponding names
         $servicesData = [];
     
-        // Define your service IDs for Glassbox and All Day All Night
+        // Define your service IDs with names: 1 = Glassbox, 2 = All Day All Night, 5 = Barkadaral 1, 6 = Barkadaral 2
         $serviceConditions = [
-            1 => 'Glassbox', // service_id 1 is Glassbox
-            3 => 'All Day All Night' // service_id 2 is All Day All Night
+            1 => 'Glassbox',              // service_id 1 is Glassbox
+            3 => 'All Day All Night',     // service_id 2 is All Day All Night
+            5 => 'Barkadaral 1',          // service_id 5 is Barkadaral 1
+            6 => 'Barkadaral 2',          // service_id 6 is Barkadaral 2
         ];
     
         // Iterate over each service_id condition
@@ -172,7 +174,6 @@ class AdminDashboardController extends Controller
             $service = Service::leftJoin('bookings', function ($join) use ($selectedDate, $serviceId) {
                 $join->on('services.id', '=', 'bookings.service_id')
                     ->where('bookings.date', '=', $selectedDate)
-                    // ->where('bookings.status', 'Completed') // Only completed bookings
                     ->where('services.id', '=', $serviceId); // Filter by specific service_id
             })
             ->where('services.id', $serviceId)
@@ -195,7 +196,7 @@ class AdminDashboardController extends Controller
                 $booking = Booking::where('service_id', $serviceId)
                     ->where('seat_code', $seat->seat_code)
                     ->where('date', $selectedDate)
-                    // ->where('status', 'Completed')
+                    ->whereIn('bookings.status', ['pending', 'completed'])  // Status is either pending or completed
                     ->first(); // Fetch the booking data for this seat
     
                 $isBooked = $booking ? true : false; // True if booked, false if not
@@ -221,6 +222,5 @@ class AdminDashboardController extends Controller
         // Return the data as JSON
         return response()->json($servicesData);
     }
-    
     
 }

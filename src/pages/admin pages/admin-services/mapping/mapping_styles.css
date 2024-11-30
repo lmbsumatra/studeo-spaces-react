@@ -67,6 +67,30 @@
   color: white;
   cursor: pointer;
 }
+/* Booked seat styles */
+.roombooked {
+  background-color: #dc3545; /* Red for booked seats */
+  color: white;
+  cursor: not-allowed;
+}
+.scrollable {
+  max-height: 90vh; /* Set a maximum height for the container */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding-right: 10px; /* Optional: To avoid content getting hidden behind scrollbar */
+}
+
+
+.my-modal {
+  width: auto;
+  /* overflow: hidden; */
+}
+
+/* Available seat styles */
+.roomavailable {
+  background-color: #28a745; /* Green for available seats */
+  color: white;
+  cursor: pointer;
+}
 
 .bottom-area {
   display: flex;
@@ -94,8 +118,8 @@
 
 .stairs {
   position: absolute;
-  left: 190px;
-  top: 106px;
+  left: 186px;
+  top: 114px;
   background-color: #e0e0e0;
   padding: 130px 92px;
   border-radius: 5px;
@@ -145,13 +169,13 @@
 
 /* Mobile-responsive adjustments */
 @media (max-width: 768px) {
-  .lobby.lobby-3{
-  padding: 20px 56px;
-  background: #e0e0e0;
-  text-align: center;
-  border-radius: 5px;
-  margin: 10px 0px;
-}
+  .lobby.lobby-3 {
+    padding: 20px 56px;
+    background: #e0e0e0;
+    text-align: center;
+    border-radius: 5px;
+    margin: 10px 0px;
+  }
   /* Reduce padding and margins for smaller screens */
   .map-window {
     padding: 15px;
@@ -181,7 +205,6 @@
     font-size: 18px;
   }
 
-
   /* Adjust the layout of floor sections */
   .area {
     width: 100%;
@@ -197,9 +220,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    
   }
-  .stairs span{
+  .stairs span {
     text-align: center;
   }
 
@@ -228,7 +250,9 @@
     font-size: 7px;
   }
 
-  .lobby, .counter, .lobby2 {
+  .lobby,
+  .counter,
+  .lobby2 {
     padding: 15px;
     font-size: 14px;
   }
@@ -237,8 +261,5 @@
   .map-window {
     width: 100%;
     max-width: 95%;
-    
   }
-
- 
 }

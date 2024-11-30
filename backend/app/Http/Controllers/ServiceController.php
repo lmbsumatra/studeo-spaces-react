@@ -449,6 +449,7 @@ class ServiceController extends Controller
             ->join('seats', 'bookings.seat_code', '=', 'seats.seat_code')
             ->where('seats.service_id', $service->id)  // Filter by service ID
             ->whereDate('bookings.date', $todayPH)  // Only bookings for today
+            ->whereIn('bookings.status', ['pending', 'completed'])  // Status is either pending or completed
             ->select('bookings.seat_code')  // Select the seat_code from bookings
             ->get();  // Get the results
 

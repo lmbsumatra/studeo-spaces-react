@@ -501,7 +501,7 @@ const AdminEditService = () => {
 
         {/* Seats Display */}
         <div className="mb-3">
-          <h4>Seats</h4>
+          <label>{formData.type === "room" ? " Room" : "Seats"}</label>
           {formData.seats.map((seat, index) => (
             <div key={index} className="d-flex align-items-center mb-2">
               <input
