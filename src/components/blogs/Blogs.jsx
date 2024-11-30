@@ -16,16 +16,6 @@ const Blogs = () => {
         link="https://studeospaces.com/a-beginners-guide-to-understanding-flow-state-in-studying/?fbclid=IwZXh0bgNhZW0CMTEAAR0AeGvV21ozBYMzQzk14KXUl3D5fqoazjOQTuQfQzRH7-sb7dsm_G3OluM_aem_Ab2jFYB2N8LcnddO2-9iZOXQbgJzaWFpWdA8c9gnpGNF2AwhlYVXDcc-ud6_oZ6ctoQcXcjUdvPpLraLl-0ktJ3:"
         isImageLeft={true}
       />
-
-      <hr />
-      <Blog
-        title="Study Hub in Manila"
-        subtitle="Key Benefits of Joining a Study Hub in Manila"
-        content="Have you ever wondered how you can optimize your study habits and significantly enhance your academic performance? In an era of ubiquitous distractions, finding a space that fosters concentration and productivity is more critical than ever. For students in Manila, study hubs are becoming increasingly popular as a solution to these challenges. This article explores the key benefits of joining a study hub in Manila and how it can transform your study sessions from ordinary to extraordinary."
-        imageUrl={KeyBenefitsImage}
-        link="https://studeospaces.com/key-benefits-of-joining-a-study-hub-in-manila/"
-        isImageLeft={false}
-      />
     </section>
   );
 };

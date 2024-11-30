@@ -14,6 +14,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
 
+use App\Http\Controllers\AdminBlogController;
+use App\Http\Controllers\TempImageController;
+
 Route::post('/notifications', [NotificationController::class, 'createNotification']);
 Route::get('/notifications', [NotificationController::class, 'index']);
 Route::delete('/notifications/{id}', [NotificationController::class, 'softDelete']);
@@ -76,6 +79,13 @@ Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])->middlewar
 Route::get('/booking-chart-data', [ChartDataController::class, 'booking']);
 Route::get('/top-customers-data', [ChartDataController::class, 'topCustomers']);
 Route::get('/user-growth-data', [ChartDataController::class, 'userGrowth']);
+
+Route::get('blogs',[AdminBlogController::class,'index']);
+Route::post('blogs',[AdminBlogController::class,'store']);
+Route::post('save-temp-image',[TempImageController::class,'store']);
+Route::get('blogs/{id}',[AdminBlogController::class,'show']);
+Route::put('blogs/{id}',[AdminBlogController::class,'update']);
+Route::delete('blogs/{id}',[AdminBlogController::class,'destroy']);
 
 use Illuminate\Support\Facades\Mail;
 

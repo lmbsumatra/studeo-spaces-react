@@ -42,6 +42,11 @@ import AdminFeedbackScreen from "./pages/admin pages/admin-feedbacks/AdminFeedba
 import PoliciesScreen from "./pages/PoliciesScreen";
 import TermsAndConditionScreen from "./pages/TermsAndConditionScreen";
 import AdminSettings from "./pages/admin pages/AdminSettings";
+import AdminBlog from "./pages/admin pages/admin-blog/AdminBlog";
+import AdminCreate from "./pages/admin pages/admin-blog/AdminCreate";
+import BlogDetail from "./components/AdminBlog/BlogDetail";
+import AdminEditBlog from "./pages/admin pages/admin-blog/AdminEditBlog";
+import UserBlogDetail from "./components/blogs/UserBlogDetail";
 
 const App = () => {
   const location = useLocation();
@@ -55,6 +60,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/blogs" element={<Blog />} />
+        <Route path="/blogs-details/:id" element={<UserBlogDetail />} />
         <Route path="/services" element={<Services />} />
         <Route path="/booking" element={<Book />} />
         <Route path="/faqs" element={<FAQs />} />
@@ -98,7 +104,11 @@ const App = () => {
             path="/admin/content-management"
             element={<PageNotAvailable />}
           />
-          <Route path="/admin/blogs" element={<PageNotAvailable />} />
+          <Route path="/admin/blogs" element={<AdminBlog />} />
+          <Route path="/admin/blogs-create" element={<AdminCreate />} />
+          <Route path="/admin/blogs-edit/:id" element={<AdminEditBlog />} />
+          <Route path="/admin/blogs-details/:id" element={<BlogDetail />} />
+          
           <Route path="/admin/*" element={<PageNotAvailable />} />
           <Route path="/admin" element={<Navigate to="/admin/dashboard" />} />
 
