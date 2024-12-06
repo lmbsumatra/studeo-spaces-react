@@ -76,22 +76,23 @@ const Service = ({
   useEffect(() => {
     if (preselectedServiceId) {
       const serviceToSelect = services.find(
-        (service) => service.id === Number(preselectedServiceId)
+        (service) => service.id === Number(preselectedServiceId) // Ensure type consistency
       );
       if (serviceToSelect) {
-        setSelectedService(serviceToSelect);
-        onServiceSelect?.(serviceToSelect);
+        setSelectedService(serviceToSelect); // Use the actual service object
+        onServiceSelect?.(serviceToSelect); // Pass the service object
       }
     }
   }, [services, preselectedServiceId, onServiceSelect]);
-
+  
   const handleServiceSelect = (service) => {
+    console.log({ service });
     setSelectedService(service);
     onServiceSelect?.(service);
   };
 
   const handleBookClick = (serviceId) => {
-    navigate(`/booking`, { state: serviceId });
+    navigate(`/booking?serviceId=${serviceId}`);
   };
 
   const renderServiceCard = (service) => {

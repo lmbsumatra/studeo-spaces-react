@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import axios from "axios";
 import Footer from "../../components/Footer";
 import Service from "../../components/services/Service";
@@ -27,9 +27,16 @@ const Book = () => {
   const [referenceNumber, setReferenceNumber] = useState("");
   const [customerID, setCustomerID] = useState("");
   const [loading, setLoading] = useState(false);
-  const location = useLocation();
   const navigate = useNavigate();
-  const serviceId = location.state;
+  const location = useLocation();
+
+  // Create a URLSearchParams instance to parse the query string
+  const queryParams = new URLSearchParams(location.search);
+
+  // Get the 'serviceId' query parameter
+  const serviceId = queryParams.get("serviceId");
+
+  // console.log({ serviceId }); // should log { serviceId: '1' }
   const [isUserIdPolicyOpen, setUserIdPolicyOpen] = useState(false);
 
   //15 DAY PASS
@@ -205,10 +212,15 @@ const Book = () => {
   };
 
   const handleServiceSelect = (service) => {
-    navigate(`/booking?serviceId=${service.id}`);
-    console.log(selectedService);
+    if (selectedService?.id === service.id) {
+      return; // Do nothing if the selected service hasn't changed
+    }
+    console.log("Service selected:", service);
     setSelectedService(service);
+    navigate(`/booking?serviceId=${service.id}`);
   };
+  
+  
 
   //15 DAY PASS
   const handleClosePassModal = () => setShowPassModal(false);
