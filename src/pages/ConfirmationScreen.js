@@ -1,11 +1,15 @@
 //cofirmation.js
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
+import { toast } from "react-toastify";
+import { baseApiUrl, baseSocketUrl } from "../App.js";
+import axios from "axios";
 
 const ConfirmationScreen = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   // Ensure the component doesn't try to render without state
   useEffect(() => {
@@ -53,8 +57,39 @@ const ConfirmationScreen = () => {
   };
 
   // Handle proceed to payment
-  const handleProceedToPayment = () => {
-    navigate("/payment", { state: bookingDetails });
+  const handleProceedToPayment = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+
+    try {
+      const requestData = {
+        description: `Booking for Service: ${service_name}`, // Include service_name in the description
+        line_items: [
+          {
+            name: service_name, // Set service_name as the line item name
+            amount: parseFloat(price) * 100, // Convert price to cents (if necessary)
+            currency: "PHP",
+            quantity: 1,
+          },
+        ],
+        success_url: `http://localhost:3000/payment`,
+        cancel_url: `http://localhost:3000/booking`,
+        booking_details: bookingDetails, // Send booking details along
+      };
+
+      console.log("Request Data:", requestData);
+
+      const response = await axios.post(
+        `${baseApiUrl}create-checkout-session`,
+        requestData
+      );
+      const checkoutUrl = response.data.checkout_url;
+      window.location.href = checkoutUrl; // Redirect to PayMongo checkout
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -92,8 +127,9 @@ const ConfirmationScreen = () => {
         <button
           className="btn btn-primary-clr"
           onClick={handleProceedToPayment}
+          disabled={isLoading} // Disable the button when loading
         >
-          Proceed to Payment
+          {isLoading ? "Processing..." : "Proceed to Payment"}
         </button>
       </div>
       <Footer />

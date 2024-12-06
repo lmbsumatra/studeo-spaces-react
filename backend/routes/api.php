@@ -91,3 +91,7 @@ use Illuminate\Support\Facades\Mail;
 
 Route::post('/send-receipt', [BookingController::class, 'sendEmailReceipt']);
 Route::post('/bookings/cancel/{refNumber}', [BookingController::class, 'cancelBooking']);
+
+Route::post('/create-checkout-session', [PaymentController::class, 'createCheckoutSession'])->middleware('throttle:5,1');
+Route::post('/webhook', [PaymentController::class, 'handleWebhook']);
+

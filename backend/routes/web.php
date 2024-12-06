@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,3 +17,7 @@ Route::get('/view-email', function () {
     ];
     return view('emails.booking_summary', compact('bookingDetails'));
 });
+
+// web.php (Laravel routes)
+Route::get('payment-success', [PaymentController::class, 'handleSuccess'])->name('payment.success');
+Route::get('payment-failure', [PaymentController::class, 'handleFailure'])->name('payment.failure');
