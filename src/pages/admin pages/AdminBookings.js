@@ -326,7 +326,7 @@ const AdminBookings = () => {
                     </select>
                   </th>
                   <th scope="col">
-                    Status
+                    Payment Status
                     <select
                       value={statusFilter} // Set the selected value
                       onChange={handleStatusFilterChange}
@@ -336,6 +336,7 @@ const AdminBookings = () => {
                       <option value="Pending">Pending</option>
                       <option value="Completed">Completed</option>
                       <option value="Cancelled">Cancelled</option>
+                      <option value="Done">Done</option>
                     </select>
                   </th>
                   <th scope="col">Actions</th>

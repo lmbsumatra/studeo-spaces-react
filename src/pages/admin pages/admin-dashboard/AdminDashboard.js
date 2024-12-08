@@ -157,13 +157,13 @@ const AdminDashboard = () => {
       <div className="container stats">
         <div className="row">
           <div className="table-responsive col-lg-6">
-            <h2 className="fs-600 ff-serif">Upcoming Bookings</h2>
+            <h2 className="fs-600 ff-serif">Bookings Today</h2>
             <table className="table">
               <thead>
                 <tr>
                   <th scope="col">Customer Name</th>
                   <th scope="col">Service</th>
-                  <th scope="col">Payment</th>
+                  <th scope="col">Payment Status</th>
                   <th scope="col">Time</th>
                 </tr>
               </thead>
@@ -174,7 +174,7 @@ const AdminDashboard = () => {
                       <tr key={booking.id}>
                         <td>{booking?.customer_name}</td>
                         <td>{booking?.service_name}</td>
-                        <td>{booking.service?.price}</td>
+                        <td>{booking?.status}</td>
                         <td>{formatTimeTo12Hour(booking.time)}</td> {/* Assuming 'time' is formatted in 'date' */}
                       </tr>
                     ))}

@@ -91,6 +91,7 @@ const Payment = () => {
       }
 
       // Step 3: Send the notification
+      await axios.post(`${baseApiUrl}notifications`, notificationData);
       socket.emit("booking", {
         ...notificationData,
         message_id: bookingId, // Include message ID in the notification data
@@ -117,9 +118,8 @@ const Payment = () => {
   return (
     <div>
       <div className="container text-center mt-5">
-        <h2 className="fs-600 ff-serif">Payment Integration</h2>
+        <h2 className="fs-600 ff-serif">Payment Successful!</h2>
         <div className="details-container">
-          <h4>Payment Successful!</h4>
           <div className="mt-3">
             {loading ? (
               <Spinner

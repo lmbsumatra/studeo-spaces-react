@@ -139,9 +139,6 @@ const ConfirmationScreen = () => {
         <p>
           <strong>Payment Method:</strong> {payment_method}
         </p>
-        <p>
-          <strong>Reference Number:</strong> {referenceNumber} {/* Display the reference number */}
-        </p>
       </div>
 
       <div className="container text-center">

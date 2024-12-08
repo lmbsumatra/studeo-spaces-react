@@ -55,123 +55,36 @@ class BookingController extends Controller
                 Log::error('Service not found', ['service_id' => $validatedData['service_id']]);
                 return response()->json(['error' => 'Service not found'], 404);
             }
+            $validatedData['service_name'] = $service->name;
 
-            Log::info('Service found', ['service' => $service]);
+            // Determine pass type and payment method
+            $passDetails = $this->determinePassType($customer = $this->findOrCreateCustomer($validatedData));
+            $validatedData = array_merge($validatedData, $passDetails);
 
-            // Add service_name to validated data
-            $validatedData['service_name'] = $service->name; // Ensure service_name is part of the validated data
-            $serviceName = $service->name; // Store the service name temporarily
-
-
-            $seatCode = $validatedData['seat_code'] ?? null;
-            $seat = null;
-
-            // If seat_code is not provided in the request, find the first available seat
-            if (!$seatCode) {
-                Log::info('No seat_code provided, looking for available seat for the selected service, date, and time', [
+            // Validate the seat
+            $seat = $this->validateSeat($validatedData, $validatedData['seat_code'] ?? null, $validatedData['pass_type'] === 'Shared');
+            if (!$seat) {
+                Log::warning('No available seat found or seat already booked', [
                     'service_id' => $validatedData['service_id'],
                     'date' => $validatedData['date'],
                 ]);
-
-                // Find a seat where no booking exists for the given service, date, and time
-                $seat = Seat::whereDoesntHave('bookings', function ($query) use ($validatedData) {
-                    $query->where('date', $validatedData['date'])
-                        ->where('service_id', $validatedData['service_id']);
-                })
-                    ->where('service_id', $validatedData['service_id'])
-                    ->first();
-
-                // If no seat is available, log and return an error
-                if (!$seat) {
-                    Log::warning('No available seat found', [
-                        'service_id' => $validatedData['service_id'],
-                        'date' => $validatedData['date'],
-                    ]);
-                    return response()->json(['error' => 'No available seats for this service at the selected date and time'], 400);
-                }
-
-                Log::info('Available seat found', ['seat_code' => $seat->seat_code]);
-                $seatCode = $seat->seat_code;
-            } else {
-                Log::info('Seat code provided', ['seat_code' => $seatCode]);
-
-                // Validate that the specified seat is available
-                $seat = Seat::where('seat_code', $seatCode)->first();
-                if (!$seat) {
-                    Log::error('Seat not found', ['seat_code' => $seatCode]);
-                    return response()->json(['error' => 'Seat not found'], 404);
-                }
-
-                // Check if the seat is already booked for the selected date and time
-                $existingBooking = Booking::where('seat_code', $seatCode)
-                    ->where('date', $validatedData['date'])
-                    ->where('service_id', $validatedData['service_id'])
-                    ->first();
-
-                if ($existingBooking) {
-                    Log::warning('Seat already booked', [
-                        'seat_code' => $seatCode,
-                        'date' => $validatedData['date'],
-                    ]);
-                    return response()->json(['error' => 'Seat is already booked for the selected date and time'], 400);
-                }
-
-                Log::info('Seat validated successfully', ['seat_code' => $seatCode]);
+                return response()->json(['error' => 'No available seats for this service at the selected date and time'], 400);
             }
-
-            // Find or create the customer
-            Log::info('Looking for customer or creating a new one', ['email' => $validatedData['email']]);
-            $customer = Customer::firstOrCreate(
-                ['email' => $validatedData['email']],
-                [
-                    'name' => $validatedData['name'],
-                    'contact_number' => $validatedData['contact_number']
-                ]
-            );
-
-            Log::info('Customer found or created', ['customer_id' => $customer->id, 'customer_email' => $validatedData['email']]);
-
-            // Retrieve the pass for the customer if it exists
-            $pass = Pass::where('customer_id', $customer->id)->first();
-            $isOwner = $pass && $pass->customer_id == $customer->id;
-            $isSharedPass = $pass && PassShare::where('pass_id', $pass->id)->where('shared_with_customer_id', $customer->id)->exists();
-
-            if ($isOwner) {
-                $validatedData['pass_type'] = 'Owner';
-                $validatedData['payment_method'] = 'Shared Pass';
-            } elseif ($isSharedPass) {
-                $validatedData['pass_type'] = 'Shared';
-                $validatedData['payment_method'] = 'Shared Pass';
-            } else {
-                $validatedData['pass_type'] = 'Regular';
-            }
-
-            Log::info('Pass type determined', ['pass_type' => $validatedData['pass_type']]);
+            $validatedData['seat_code'] = $seat->seat_code;
 
             // Create the booking
             $bookingData = array_merge($validatedData, [
                 'status' => 'Pending',
-                'seat_code' => $seatCode, // Make sure this is included in the merge
                 'customer_id' => $customer->id,
-                // 'service_name' => $service->name,
             ]);
-
-            // Log booking data before creation for debugging
-            Log::info('Booking data before save', ['booking_data' => $bookingData]);
-
-            // Create the booking
             $booking = new Booking($bookingData);
-            Log::info('Booking created', $booking->toArray());
-
-
-
-            $saved = $booking->save();
+            $booking->save();
             $booking['service_name'] = $service->name;
 
             Log::info('Booking created successfully', ['booking_id' => $booking->id, 'customer_id' => $customer->id]);
 
-            // Create a 15-day pass if applicable (e.g., if service ID is 40)
-            if ($service->id == 4) { // Assuming 40 is the ID for the 15-day pass service
+            // Create a 15-day pass if applicable
+            if ($service->id == 4) { // Assuming 4 is the ID for the 15-day pass service
                 Log::info('Creating a 15-day pass for the customer', ['customer_id' => $customer->id]);
                 Pass::create([
                     'customer_id' => $customer->id,
@@ -180,17 +93,15 @@ class BookingController extends Controller
                     'total_bullets' => 15,
                     'remaining_bullets' => 15,
                     'is_shared' => false,
-                    'reference_number' => $this->generatePassReference()
+                    'reference_number' => $this->generatePassReference(),
                 ]);
             }
 
-            Log::info('Booking and pass creation process completed');
-
+            // Create checkout session
             Log::info('Creating checkout session');
-            $checkoutResponse = $this->createCheckoutSession($booking, $serviceName);
-
-            // If the checkout response contains the checkout URL, return it
+            $checkoutResponse = $this->createCheckoutSession($booking, $service->name);
             $checkoutResponseBody = json_decode($checkoutResponse->getContent(), true);
+
             if (isset($checkoutResponseBody['checkout_url'])) {
                 return response()->json([
                     'booking' => $booking,
@@ -204,10 +115,97 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             Log::error('Error occurred while processing booking', [
                 'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             return response()->json(['error' => 'An error occurred while processing your request'], 500);
         }
+    }
+
+    /**
+     * Validate seat availability and return a seat instance.
+     */
+    private function validateSeat($validatedData, $seatCode = null, $isSharedPass = false)
+    {
+        // If no seat code is provided, find an available seat for the service, date, and time
+        if (!$seatCode) {
+            return Seat::whereDoesntHave('bookings', function ($query) use ($validatedData) {
+                $query->where('date', $validatedData['date'])
+                    ->where('time', $validatedData['time'])
+                    ->where('service_id', $validatedData['service_id'])
+                    ->whereNotIn('status', ['Completed', 'completed']);
+            })->where('service_id', $validatedData['service_id'])->first();
+        }
+    
+        // Find the seat with the given seat code
+        $seat = Seat::where('seat_code', $seatCode)->first();
+        if (!$seat) {
+            return null; // Seat not found
+        }
+    
+        // For shared passes, allow multiple bookings but limit total bookings
+        if ($isSharedPass) {
+            $existingSharedBookings = Booking::where('seat_code', $seatCode)
+                ->where('date', $validatedData['date'])
+                ->where('service_id', $validatedData['service_id'])
+                ->whereNotIn('status', ['Completed', 'completed'])
+                ->where('payment_method', 'Shared Pass')
+                ->count();
+    
+            // Example: Allow up to 3 shared pass bookings per seat
+            if ($existingSharedBookings >= 1) {
+                return null; // Too many shared pass bookings for this seat
+            }
+        }
+    
+        // For regular bookings (non-shared passes), ensure the seat is not already booked
+        if (!$isSharedPass) {
+            $existingBooking = Booking::where('seat_code', $seatCode)
+                ->where('date', $validatedData['date'])
+                ->where('service_id', $validatedData['service_id'])
+                ->whereNotIn('status', ['Completed', 'completed'])
+                ->exists();
+    
+            if ($existingBooking) {
+                return null; // Seat is already booked
+            }
+        }
+    
+        // If the seat passes both checks, return the seat
+        return $seat;
+    }
+
+
+    /**
+     * Find or create a customer based on validated data.
+     */
+    private function findOrCreateCustomer($validatedData)
+    {
+        Log::info('Looking for customer or creating a new one', ['email' => $validatedData['email']]);
+        return Customer::firstOrCreate(
+            ['email' => $validatedData['email']],
+            [
+                'name' => $validatedData['name'],
+                'contact_number' => $validatedData['contact_number'],
+            ]
+        );
+    }
+
+    /**
+     * Determine pass type and payment method for the customer.
+     */
+    private function determinePassType($customer)
+    {
+        $pass = Pass::where('customer_id', $customer->id)->first();
+        if ($pass) {
+            if (PassShare::where('pass_id', $pass->id)->where('shared_with_customer_id', $customer->id)->exists()) {
+                Log::info('Pass type determined: Shared Pass', ['customer_id' => $customer->id]);
+                return ['pass_type' => 'Shared', 'payment_method' => 'Shared Pass'];
+            }
+            Log::info('Pass type determined: Owner Pass', ['customer_id' => $customer->id]);
+            return ['pass_type' => 'Owner', 'payment_method' => 'Shared Pass'];
+        }
+        Log::info('Pass type determined: Regular', ['customer_id' => $customer->id]);
+        return ['pass_type' => 'Regular'];
     }
 
     public function createCheckoutSession(Booking $booking, $serviceName)
@@ -225,7 +223,7 @@ class BookingController extends Controller
         // Create success and cancel URLs with booking details
         $successUrl = route('booking.payment.success', ['state' => urlencode(json_encode($bookingDetails))]);
         $cancelUrl = route('booking.payment.cancel', ['state' => urlencode(json_encode($bookingDetails))]);
-    
+
         Log::info('Success and Cancel URLs created', ['success_url' => $successUrl, 'cancel_url' => $cancelUrl]);
 
         $client = new Client();
@@ -313,23 +311,28 @@ class BookingController extends Controller
     public function paymentSuccess(Request $request)
     {
         Log::info('Payment success callback received', ['request_data' => $request->all()]);
-        
+
         // Decode the booking details passed in the query string
         $bookingDetails = json_decode(urldecode($request->query('state')), true);
         Log::info('Booking details for success:', ['booking_details' => $bookingDetails]);
-        
-        
+
         // Find the booking by its ID
         $booking = Booking::find($bookingDetails['id']);
         if ($booking) {
             // Update the booking status to "Completed"
             $booking->status = 'Completed';
+
+            // Additional logic for shared pass
+            if ($booking->payment_method === 'Shared Pass') {
+                Log::info('Shared pass booking marked as completed', ['booking_id' => $booking->id]);
+                $booking->status = 'Completed'; // Explicitly ensure the status is completed
+            }
+
             $booking->save();
             Log::info('Booking status updated to completed', ['booking_id' => $booking->id]);
 
             $serviceName = $booking->service ? $booking->service->name : 'N/A'; // 'service' is the relationship method on the Booking model
 
-            
             // Generate the success URL dynamically for the frontend
             $successUrl = 'http://localhost:3000/payment?state=' . urlencode(json_encode([
                 'id' => $booking->id,
@@ -337,27 +340,26 @@ class BookingController extends Controller
                 'details' => $booking->toArray(), // Include full booking details
                 'service_name' => $serviceName,
             ]));
-            
-            
+
             // Optionally, log the success URL if needed
             Log::info('Redirecting to success URL', ['success_url' => $successUrl]);
-    
+
             // Redirect the user to the frontend success page
             return redirect()->away($successUrl); // `away()` redirects to an external URL
         }
-        
+
         Log::error('Booking not found for payment success', ['booking_id' => $bookingDetails['id']]);
         return response()->json(['error' => 'Booking not found'], 404);
     }
-    
+
     public function paymentCanceled(Request $request)
     {
         Log::info('Payment canceled callback received', ['request_data' => $request->all()]);
-        
+
         // Decode the booking details passed in the query string
         $bookingDetails = json_decode(urldecode($request->query('state')), true);
         Log::info('Booking details for cancel:', ['booking_details' => $bookingDetails]);
-        
+
         // Find the booking by its ID
         $booking = Booking::find($bookingDetails['id']);
         if ($booking) {
@@ -365,28 +367,28 @@ class BookingController extends Controller
             $booking->status = 'Cancelled';
             $booking->save();
             Log::info('Booking status updated to canceled', ['booking_id' => $booking->id]);
-    
+
             // Generate the cancel URL dynamically for the frontend
             $cancelUrl = 'http://localhost:3000/booking-cancelled?state=' . urlencode(json_encode($bookingDetails));
-    
+
             // Optionally, log the cancel URL if needed
             Log::info('Redirecting to cancel URL', ['cancel_url' => $cancelUrl]);
-    
+
             // Redirect the user to the frontend cancel page
             return redirect()->away($cancelUrl); // `away()` redirects to an external URL
         }
-    
+
         Log::error('Booking not found for payment cancellation', ['booking_id' => $bookingDetails['id']]);
         return response()->json(['error' => 'Booking not found'], 404);
     }
-    
-    
+
+
     //SENDING RECEIPT MAIL
     public function sendEmailReceipt(Request $request)
     {
         // Log the incoming request data
         Log::info('Incoming email receipt request:', $request->all());
-    
+
         // Validate the incoming request
         try {
             $validatedData = $request->validate([
@@ -403,7 +405,7 @@ class BookingController extends Controller
             Log::error('Validation failed:', $e->errors());
             return response()->json(['error' => 'Validation failed. Please check your input.'], 422);
         }
-    
+
         // Prepare booking details for the email
         $bookingDetails = [
             'service_id' => $validatedData['service_id'],
@@ -413,10 +415,10 @@ class BookingController extends Controller
             'refNumber' => $validatedData['refNumber'],
             'customer_id' => $validatedData['customer_id'] ?? 'N/A', // Include customer_id or 'N/A' if not provided
         ];
-    
+
         // Log the booking details before sending the email
         Log::info('Prepared booking details for email:', $bookingDetails);
-    
+
         // Send the email
         try {
             Log::info('Attempting to send email to: ' . $validatedData['email']);
@@ -428,7 +430,7 @@ class BookingController extends Controller
             return response()->json(['error' => 'Failed to send email. Please try again later.'], 500);
         }
     }
-    
+
 
     //SENDING CANCELLATION EMAIL
     public function cancelBooking($refNumber)

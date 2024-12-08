@@ -49,42 +49,40 @@ class ServiceController extends Controller
     public function available(Request $request)
     {
         $date = $request->query('date');
-
+    
         // Check if the date is provided in the query, else use the current date in 'Asia/Manila' timezone
         $date = $date ? Carbon::parse($date)->setTimezone('Asia/Manila')->format('Y-m-d') : Carbon::now()->setTimezone('Asia/Manila')->format('Y-m-d');
-
-        // Log the formatted date
-        // Log::info($date);
-
+    
         // Fetch services and calculate bookings count for the selected date
         $services = Service::leftJoin('bookings', function ($join) use ($date) {
             $join->on('services.id', '=', 'bookings.service_id')
-                ->where('bookings.date', '=', $date);
+                 ->where('bookings.date', '=', $date);
         })
-            ->select('services.id', 'services.name', 'services.count') // Select relevant fields
-            ->selectRaw('COUNT(bookings.id) as bookings_count') // Count the number of bookings
-            ->groupBy('services.id', 'services.name', 'services.count') // Group by necessary columns
-            ->get();
+        ->select('services.id', 'services.name', 'services.count') // Select relevant fields
+        ->selectRaw('COUNT(CASE WHEN LOWER(bookings.status) = "completed" THEN bookings.id END) as completed_count') // Count only completed bookings (case-insensitive)
+        ->groupBy('services.id', 'services.name', 'services.count') // Group by necessary columns
+        ->get();
+        
         Log::info($services);
+    
         $result = $services->map(function ($service) {
-            // Assuming 'default_count' holds the total available count for each service
+            // Assuming 'count' holds the total available count for each service
             $availableSeats = $service->count ?? 0; // Default available count
-            $bookingsCount = $service->bookings_count ?? 0; // Count of bookings for the date
-            // Log::info($availableSeats);
-            // Log::info($bookingsCount);
-
-            // Calculate available seats
-            $finalAvailableSeats = max($availableSeats - $bookingsCount, 0); // Ensure non-negative value
-
+            $completedCount = $service->completed_count ?? 0; // Count of completed bookings
+    
+            // Calculate available seats by subtracting completed bookings count
+            $finalAvailableSeats = max($availableSeats - $completedCount, 0); // Ensure non-negative value
+    
             return [
                 'service_id' => $service->id,
                 'available_seats' => $finalAvailableSeats,
+                'completed_bookings' => $completedCount,
             ];
         });
-
+    
         return response()->json($result);
     }
-
+    
     public function updateAvailableSeats(Request $request, $id)
     {
         $validatedData = $request->validate([

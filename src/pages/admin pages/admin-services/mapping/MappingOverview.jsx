@@ -22,6 +22,9 @@ const MappingOverview = ({ isActive, onClose }) => {
     { id: 10, seat_code: "A10", isBooked: true },
   ]);
 
+  const [showFreeSeatModal, setShowFreeSeatModal] = useState(false);
+  const [selectedSeat, setSelectedSeat] = useState(null);
+
   const handleFloorChange = (event) => {
     setFloor(event.target.value);
   };
@@ -42,6 +45,9 @@ const MappingOverview = ({ isActive, onClose }) => {
       console.error("Error fetching seat data:", error);
     }
   };
+
+
+
 
   useEffect(() => {
     if (currentDate) {
@@ -197,6 +203,60 @@ const MappingOverview = ({ isActive, onClose }) => {
     ...(secondFloorRoom2.seats || []),
   ];
 
+  const handleSeatClick = (seat) => {
+    console.log(seat)
+    if (seat.isBooked) {
+      // Open the "Free up seat" modal
+      setSelectedSeat(seat);
+      setShowFreeSeatModal(true);
+    }
+  };
+
+  const handleFreeSeat = async () => {
+    try {
+      // Prepare the data for freeing up the seat
+      const seatData = {
+        seat_code: selectedSeat.seat_code,
+        isBooked: false,  // Setting the seat as not booked
+      };
+  
+      // Send a request to free up the seat
+      const response = await fetch(`${baseApiUrl}free-up-seat`, {
+        method: "POST",  // Assuming you're using PUT to update the seat status
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(seatData),  // Send the updated seat data in the request body
+      });
+  
+      if (response.ok) {
+        const updatedSeat = await response.json();
+        console.log("Seat freed up:", updatedSeat);
+  
+        // Update the local state to reflect the changes
+        setTemporarySeats((prevSeats) =>
+          prevSeats.map((seat) =>
+            seat.id === selectedSeat.id ? { ...seat, isBooked: false } : seat
+          )
+        );
+  
+        setShowFreeSeatModal(false);  // Close the modal after freeing the seat
+        setSelectedSeat(null);  // Reset the selected seat
+      } else {
+        // Handle errors in freeing the seat
+        console.error("Failed to free up the seat. Try again later.");
+      }
+    } catch (error) {
+      console.error("Error freeing up the seat:", error);
+    }
+  };
+  
+
+  const handleCloseFreeSeatModal = () => {
+    setShowFreeSeatModal(false);
+    setSelectedSeat(null);
+  };
+
 
   return (
     <Modal show={isActive} onHide={onClose} size={floor === "Ground Floor" ? "lg" : "xl"} centered  dialogClassName="my-modal">
@@ -234,6 +294,7 @@ const MappingOverview = ({ isActive, onClose }) => {
                           seat.isBooked ? "booked" : "available"
                         }`}
                         key={seat.id}
+                        onClick={() => handleSeatClick(seat)}
                       >
                         {seat.seat_code}
                       </div>
@@ -247,6 +308,7 @@ const MappingOverview = ({ isActive, onClose }) => {
                           seat.isBooked ? "booked" : "available"
                         }`}
                         key={seat.id}
+                        onClick={() => handleSeatClick(seat)}
                       >
                         {seat.seat_code}
                       </div>
@@ -284,9 +346,11 @@ const MappingOverview = ({ isActive, onClose }) => {
                    className={`card p-2 ${
                     secondFloorRoom1?.seats?.[0]?.isBooked ? "roombooked" : "roomavailable"
                   }`}
+                  
+                  
                   >
                     <span>BarkadAral 01</span>
-                    <div className="seat-container b-2">
+                    <div className="seat-container b-2"onClick={() => handleSeatClick(secondFloorRoom1?.seats?.[0])}>
                       <div>
                         {temporarySeats.slice(0, 4).map((seat) => (
                           <div className="seat text-dark" key={seat.id}>
@@ -348,6 +412,7 @@ const MappingOverview = ({ isActive, onClose }) => {
                           className={`seat ${
                             seat.isBooked ? "booked" : "available"
                           }`}
+                          onClick={() => handleSeatClick(seat)}
                           key={seat.id}
                         >
                           {seat.seat_code}
@@ -361,6 +426,7 @@ const MappingOverview = ({ isActive, onClose }) => {
                           className={`seat ${
                             seat.isBooked ? "booked" : "available"
                           }`}
+                          onClick={() => handleSeatClick(seat)}
                           key={seat.id}
                         >
                           {seat.seat_code}
@@ -376,6 +442,7 @@ const MappingOverview = ({ isActive, onClose }) => {
                           className={`seat ${
                             seat.isBooked ? "booked" : "available"
                           }`}
+                          onClick={() => handleSeatClick(seat)}
                           key={seat.id}
                         >
                           {seat.seat_code}
@@ -389,6 +456,7 @@ const MappingOverview = ({ isActive, onClose }) => {
                           className={`seat ${
                             seat.isBooked ? "booked" : "available"
                           }`}
+                          onClick={() => handleSeatClick(seat)}
                           key={seat.id}
                         >
                           {seat.seat_code}
@@ -409,6 +477,7 @@ const MappingOverview = ({ isActive, onClose }) => {
                         className={`seat ${
                           seat.isBooked ? "booked" : "available"
                         }`}
+                        onClick={() => handleSeatClick(seat)}
                         key={seat.id}
                       >
                         {seat.seat_code}
@@ -423,6 +492,25 @@ const MappingOverview = ({ isActive, onClose }) => {
           )}
         </div>
       </Modal.Body>
+       {/* Free Seat Confirmation Modal */}
+       <Modal show={showFreeSeatModal} onHide={handleCloseFreeSeatModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Freeing Up Seat</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Are you sure you want to free up seat <strong>{selectedSeat?.seat_code}</strong>?
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <button className="btn btn-secondary" onClick={handleCloseFreeSeatModal}>
+            Cancel
+          </button>
+          <button className="btn btn-primary" onClick={handleFreeSeat}>
+            Confirm
+          </button>
+        </Modal.Footer>
+      </Modal>
     </Modal>
   );
 };

@@ -66,6 +66,7 @@ Route::get('/payments', [PaymentController::class, 'index']);
 
 Route::get('/admin-dashboard-data', [AdminDashboardController::class, 'getData']);
 Route::get('/booking-data', [AdminDashboardController::class, 'getMappingData']);
+Route::post('/free-up-seat', [AdminDashboardController::class, 'freeUpSeat']);
 Route::post('/admins', [AuthController::class, 'login']);
 
 Route::post('/update-username', [AdminController::class, 'changeUsername']);

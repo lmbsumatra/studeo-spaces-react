@@ -211,7 +211,6 @@ class PaymentController extends Controller
 
 
 
-
     public function handleFailure(Request $request)
     {
         return redirect('http://localhost:3000/booking')->with('status', 'failed');

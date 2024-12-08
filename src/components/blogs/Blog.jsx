@@ -24,7 +24,7 @@ const Blog = () => {
   // Function to handle image URL
   const showImage = (img) => {
     return img
-      ? `http://localhost:8000/uploads/blogs/${img}`
+      ? `http://localhost:8000/uploads/temp/${img}`
       : 'https://placehold.co/600x400';
   };
 
