@@ -377,7 +377,7 @@ const MappingOverview = ({ isActive, onClose }) => {
                   >
                    <span>BarkadAral 02 </span>
 
-                    <div className="seat-container b-2">
+                    <div className="seat-container b-2"onClick={() => handleSeatClick(secondFloorRoom2?.seats?.[0])}>
                       <div>
                         {temporarySeats.slice(0, 4).map((seat) => (
                           <div className="seat text-dark" key={seat.id}>

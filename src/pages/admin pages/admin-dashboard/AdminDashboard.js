@@ -61,6 +61,10 @@ const AdminDashboard = () => {
       <span className="sr-only">Loading...</span>
     </div>
   );
+  const handleViewClick = (id) => {
+    // Navigate to the message details page
+    navigate(`/admin/messages?highlight=${id}`);
+  };
 
   return (
     <div className="container mt-5" id="dashboard">
@@ -311,13 +315,7 @@ const AdminDashboard = () => {
                       "No message content"}
                   </p>
                   <div className="d-flex w-100 justify-content-between">
-                    <button className="btn btn-warning text-white">
-                      Mark as read
-                    </button>
-                    <button className="btn btn-outline-danger bg-light text-danger">
-                      Delete
-                    </button>
-                    <button className="btn btn-primary text-white">View</button>
+                    <button className="btn btn-primary text-white"  onClick={() => handleViewClick(data.messages[data.messages.length - 1].id)} >View</button>
                   </div>
                 </div>
               ) : (
