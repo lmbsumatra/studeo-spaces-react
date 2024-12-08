@@ -30,6 +30,10 @@ Route::middleware('auth:sanctum')->get('/admin', function (Request $request) {
 Route::post('/bookings', [BookingController::class, 'store']);
 Route::get('/bookings', [BookingController::class, 'index']);
 Route::get('/bookings/{refNumber}', [BookingController::class, 'show']);
+// Define the routes for success and cancel callback within the same controller
+Route::get('/booking-successful', [BookingController::class, 'paymentSuccess'])->name('booking.payment.success');
+Route::get('/booking-canceled', [BookingController::class, 'paymentCanceled'])->name('booking.payment.cancel');
+
 
 Route::post('/check-pass', [BookingController::class, 'checkPass']);
 Route::post('/check-pass-by-reference', [BookingController::class, 'checkPassByReference']);

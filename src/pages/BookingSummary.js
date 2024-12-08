@@ -8,19 +8,27 @@ const BookingSummary = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    window.history.pushState(null, "", window.location.href);
+    console.log(location.state);
+    if (!location.state) {
+      navigate("/booking"); // Redirect to the booking page if no state exists
+    }
 
+    // Block going back in history if location.state is not set
     const handlePopState = () => {
-      window.location.reload();
-      navigate("/booking");
+      if (!location.state) {
+        navigate("/booking"); // Redirect to the booking page
+      }
     };
 
+    // Add event listener to prevent back navigation
+    window.history.pushState(null, document.title); // Push a new state to the history
     window.addEventListener("popstate", handlePopState);
 
     return () => {
+      // Cleanup event listener when the component is unmounted
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [navigate]);
+  }, [location.state, navigate]);
 
   const formatTimeTo12Hour = (time) => {
     let [hours, minutes] = time.split(":");
@@ -30,25 +38,21 @@ const BookingSummary = () => {
     return `${hours}:${minutes} ${period}`;
   };
 
-  // // Function to generate Customer ID
-  // const generateCustomerID = (userId) => {
-  //   const today = new Date();
-  //   const year = today.getFullYear();
-  //   const month = String(today.getMonth() + 1).padStart(2, "0"); // Add leading zero
-  //   const day = String(today.getDate()).padStart(2, "0"); // Add leading zero
-  //   const incrementalId = String(userId).padStart(3, "0"); // Pad the user ID to 3 digits
-  //   return `${year}${month}${day}-${incrementalId}`;
-  // };
+  if (!location.state) {
+    return null; // Avoid rendering if no booking details are passed
+  }
 
-  useEffect(() => {
-    if (!location.state) {
-      navigate("/booking");
-    }
-  }, [location.state, navigate]);
-
+  // Destructure the state passed from the previous page
   const {
+    service_name = "N/A", // Top-level service_name
+    emailSent = false, // Top-level emailSent
+    details = {} // Destructure the details object
+  } = location.state || {};
+  
+  // Now, destructure the details object
+  const {
+    customer_id = "N/A",
     service_id = "N/A",
-    service_name = "N/A",
     price = "N/A",
     date = "N/A",
     time = "N/A",
@@ -57,15 +61,25 @@ const BookingSummary = () => {
     contact_number = "N/A",
     payment_method = "N/A",
     refNumber = "N/A",
-    customerID = "N/A",
-  } = location.state || {};
-
-  // // Generate the formatted Customer ID
-  // const formattedCustomerID = generateCustomerID(customerID);
-
-  if (!location.state) {
-    return null;
-  }
+    seat_code = "N/A",
+    pass_type = "N/A",
+    status = "N/A",
+    created_at = "N/A",
+    updated_at = "N/A",
+    service = {} // Destructure the service object
+  } = details;
+  
+  // Destructure the service object
+  const {
+    service_code = "N/A",
+    duration = "N/A",
+    description = "N/A",
+    images = "N/A", // Assuming this is an image URL
+    count = "N/A",
+    availability = "N/A",
+    type = "N/A"
+  } = service;
+  
 
   const saveReceiptAsImage = () => {
     const element = document.querySelector(".card-body"); // Target only the card-body
@@ -78,9 +92,7 @@ const BookingSummary = () => {
       })
       .catch((error) => {
         console.error("Failed to save receipt as image:", error);
-        alert(
-          "Something went wrong while saving the receipt. Please try again."
-        );
+        alert("Something went wrong while saving the receipt. Please try again.");
       });
   };
 
@@ -127,8 +139,11 @@ const BookingSummary = () => {
             <hr />
             <h3 className="fs-500 ff-serif">Customer ID</h3>
             <p>
-              <strong>Customer ID:</strong> {customerID}
+              <strong>Customer ID:</strong> {customer_id}
             </p>
+            <hr />
+            <h3 className="fs-500 ff-serif">Email Sent</h3>
+            <p>{emailSent ? "Email Sent" : "Email Not Sent"}</p>
           </div>
           <div className="mt-5 text-center">
             <h4 className="fs-500 ff-serif">Thank you for your booking!</h4>

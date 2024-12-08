@@ -1,4 +1,4 @@
-//cofirmation.js
+// confirmation.js
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
@@ -30,6 +30,18 @@ const ConfirmationScreen = () => {
     return `${hours}:${minutes} ${period}`;
   };
 
+  // Function to generate a random reference number
+  const generateReferenceNumber = () => {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let referenceNumber = "";
+    for (let i = 0; i < 6; i++) {
+      referenceNumber += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return referenceNumber;
+  };
+
+  const referenceNumber = generateReferenceNumber(); // Generate the reference number
+
   // Extract the state
   const {
     service_id,
@@ -43,24 +55,24 @@ const ConfirmationScreen = () => {
     payment_method,
   } = location.state;
 
-  // Create the bookingDetails object
+  // Create the bookingDetails object, including the reference number
   const bookingDetails = {
     service_id,
     service_name,
     price,
-    currentDate,
+    date: currentDate,
     time,
     name,
     email,
     contact_number,
     payment_method,
+    refNumber: referenceNumber, // Add the reference number here
   };
 
-  // Handle proceed to payment
   const handleProceedToPayment = async () => {
     if (isLoading) return;
     setIsLoading(true);
-
+  
     try {
       const requestData = {
         description: `Booking for Service: ${service_name}`, // Include service_name in the description
@@ -72,21 +84,27 @@ const ConfirmationScreen = () => {
             quantity: 1,
           },
         ],
-        success_url: `http://localhost:3000/payment`,
-        cancel_url: `http://localhost:3000/booking`,
+        success_url: `${window.location.origin}/payment-success`,
+        cancel_url: `${window.location.origin}/payment-canceled`,
         booking_details: bookingDetails, // Send booking details along
       };
-
+  
       console.log("Request Data:", requestData);
-
-      const response = await axios.post(
-        `${baseApiUrl}create-checkout-session`,
-        requestData
-      );
-      const checkoutUrl = response.data.checkout_url;
-      window.location.href = checkoutUrl; // Redirect to PayMongo checkout
+  
+      // Adjust the API URL (ensure it points to your backend)
+      const response = await axios.post(`${baseApiUrl}bookings`, bookingDetails);
+      console.log(response)
+      
+      // Handle response and redirect to checkout session URL
+      if (response.data.checkout_url) {
+        const checkoutUrl = response.data.checkout_url;
+        window.location.href = checkoutUrl; // Redirect to PayMongo checkout
+      } else {
+        toast.error("Failed to create checkout session.");
+      }
     } catch (error) {
       console.error("Error creating checkout session:", error);
+      toast.error("There was an error with the payment process. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -120,6 +138,9 @@ const ConfirmationScreen = () => {
         </p>
         <p>
           <strong>Payment Method:</strong> {payment_method}
+        </p>
+        <p>
+          <strong>Reference Number:</strong> {referenceNumber} {/* Display the reference number */}
         </p>
       </div>
 

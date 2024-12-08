@@ -165,7 +165,7 @@ const MappingOverview = ({ isActive, onClose }) => {
               <div className="card px-2">
                 Available Seats{" "}
                 <span className="fw-bold">
-                  {secondFloorRoom1.isBooked ? "Booked" : "Available"}
+                {secondFloorRoom1?.seats?.[0]?.isBooked ? "Booked" : "Available"}
                 </span>
               </div>
             </div>
@@ -180,7 +180,7 @@ const MappingOverview = ({ isActive, onClose }) => {
               <div className="card p-2">
                 Available Seats{" "}
                 <span className="fw-bold">
-                  {secondFloorRoom2.isBooked ? "Booked" : "Available"}
+                  {secondFloorRoom2?.seats?.[0]?.isBooked ? "Booked" : "Available"}
                 </span>
               </div>
             </div>

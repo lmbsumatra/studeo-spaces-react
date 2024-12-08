@@ -15,14 +15,17 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BookingSummaryMail;
 use App\Mail\CancellationConfirmationMail;
+use GuzzleHttp\Client;
 
 class BookingController extends Controller
 {
     private function generatePassReference()
     {
+        Log::info('Generating pass reference');
         do {
             $reference = 'PASS-' . strtoupper(substr(md5(uniqid()), 0, 8));
         } while (Pass::where('reference_number', $reference)->exists());
+        Log::info('Generated pass reference', ['reference' => $reference]);
 
         return $reference;
     }
@@ -44,7 +47,6 @@ class BookingController extends Controller
                 'payment_method' => 'required|in:GCash,Pay on Counter,Bank Card',
                 'seat_code' => 'nullable|string|exists:seats,seat_code',
             ]);
-
             Log::info('Request data validated successfully', ['validated_data' => $validatedData]);
 
             // Find the service
@@ -56,6 +58,11 @@ class BookingController extends Controller
 
             Log::info('Service found', ['service' => $service]);
 
+            // Add service_name to validated data
+            $validatedData['service_name'] = $service->name; // Ensure service_name is part of the validated data
+            $serviceName = $service->name; // Store the service name temporarily
+
+
             $seatCode = $validatedData['seat_code'] ?? null;
             $seat = null;
 
@@ -64,13 +71,11 @@ class BookingController extends Controller
                 Log::info('No seat_code provided, looking for available seat for the selected service, date, and time', [
                     'service_id' => $validatedData['service_id'],
                     'date' => $validatedData['date'],
-                    // 'time' => $validatedData['time'],
                 ]);
 
                 // Find a seat where no booking exists for the given service, date, and time
                 $seat = Seat::whereDoesntHave('bookings', function ($query) use ($validatedData) {
                     $query->where('date', $validatedData['date'])
-                        // ->where('time', $validatedData['time'])
                         ->where('service_id', $validatedData['service_id']);
                 })
                     ->where('service_id', $validatedData['service_id'])
@@ -81,7 +86,6 @@ class BookingController extends Controller
                     Log::warning('No available seat found', [
                         'service_id' => $validatedData['service_id'],
                         'date' => $validatedData['date'],
-                        // 'time' => $validatedData['time'],
                     ]);
                     return response()->json(['error' => 'No available seats for this service at the selected date and time'], 400);
                 }
@@ -101,7 +105,6 @@ class BookingController extends Controller
                 // Check if the seat is already booked for the selected date and time
                 $existingBooking = Booking::where('seat_code', $seatCode)
                     ->where('date', $validatedData['date'])
-                    // ->where('time', $validatedData['time'])
                     ->where('service_id', $validatedData['service_id'])
                     ->first();
 
@@ -109,7 +112,6 @@ class BookingController extends Controller
                     Log::warning('Seat already booked', [
                         'seat_code' => $seatCode,
                         'date' => $validatedData['date'],
-                        // 'time' => $validatedData['time'],
                     ]);
                     return response()->json(['error' => 'Seat is already booked for the selected date and time'], 400);
                 }
@@ -117,8 +119,8 @@ class BookingController extends Controller
                 Log::info('Seat validated successfully', ['seat_code' => $seatCode]);
             }
 
-
             // Find or create the customer
+            Log::info('Looking for customer or creating a new one', ['email' => $validatedData['email']]);
             $customer = Customer::firstOrCreate(
                 ['email' => $validatedData['email']],
                 [
@@ -145,12 +147,13 @@ class BookingController extends Controller
             }
 
             Log::info('Pass type determined', ['pass_type' => $validatedData['pass_type']]);
-            Log::info('HERE', ['seat_code' => $seatCode]);
+
             // Create the booking
             $bookingData = array_merge($validatedData, [
                 'status' => 'Pending',
                 'seat_code' => $seatCode, // Make sure this is included in the merge
                 'customer_id' => $customer->id,
+                // 'service_name' => $service->name,
             ]);
 
             // Log booking data before creation for debugging
@@ -158,7 +161,12 @@ class BookingController extends Controller
 
             // Create the booking
             $booking = new Booking($bookingData);
+            Log::info('Booking created', $booking->toArray());
+
+
+
             $saved = $booking->save();
+            $booking['service_name'] = $service->name;
 
             Log::info('Booking created successfully', ['booking_id' => $booking->id, 'customer_id' => $customer->id]);
 
@@ -178,7 +186,21 @@ class BookingController extends Controller
 
             Log::info('Booking and pass creation process completed');
 
-            return response()->json(['booking' => $booking, 'id' => $booking->id, 'customerID' => $customer->id], 201);
+            Log::info('Creating checkout session');
+            $checkoutResponse = $this->createCheckoutSession($booking, $serviceName);
+
+            // If the checkout response contains the checkout URL, return it
+            $checkoutResponseBody = json_decode($checkoutResponse->getContent(), true);
+            if (isset($checkoutResponseBody['checkout_url'])) {
+                return response()->json([
+                    'booking' => $booking,
+                    'id' => $booking->id,
+                    'customerID' => $customer->id,
+                    'checkout_url' => $checkoutResponseBody['checkout_url'],
+                ], 201);
+            }
+
+            return response()->json(['error' => 'Checkout session creation failed'], 500);
         } catch (\Exception $e) {
             Log::error('Error occurred while processing booking', [
                 'exception' => $e->getMessage(),
@@ -188,45 +210,225 @@ class BookingController extends Controller
         }
     }
 
+    public function createCheckoutSession(Booking $booking, $serviceName)
+    {
+        Log::info('Creating checkout session for booking', ['booking_id' => $booking->id]);
 
+        // Extract booking details from the booking model
+        $bookingDetails = $booking->toArray();
+        Log::info('Extracted booking details', ['booking_details' => $bookingDetails]);
+
+        // Get the service object (assuming you have a relation with the Service model)
+        $price = $booking->price;  // Assuming price is stored in the bookings table
+        Log::info('Service Name and Price', ['service_name' => $serviceName, 'price' => $price]);
+
+        // Create success and cancel URLs with booking details
+        $successUrl = route('booking.payment.success', ['state' => urlencode(json_encode($bookingDetails))]);
+        $cancelUrl = route('booking.payment.cancel', ['state' => urlencode(json_encode($bookingDetails))]);
+    
+        Log::info('Success and Cancel URLs created', ['success_url' => $successUrl, 'cancel_url' => $cancelUrl]);
+
+        $client = new Client();
+        $maxRetries = 3;
+        $retryDelay = 100; // in milliseconds
+        Log::info('Max retries set', ['max_retries' => $maxRetries]);
+
+        for ($i = 0; $i < $maxRetries; $i++) {
+            try {
+                Log::info("Attempting to create checkout session, attempt #$i");
+
+                $response = $client->post('https://api.paymongo.com/v1/checkout_sessions', [
+                    'headers' => [
+                        'Authorization' => 'Basic ' . base64_encode(env('PAYMONGO_SECRET_KEY') . ':'),
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => [
+                        'data' => [
+                            'attributes' => [
+                                'description' => "Booking for: " . $serviceName,
+                                'line_items' => [
+                                    [
+                                        'name' => $serviceName,
+                                        'amount' => (int)($price * 100), // Convert price to cents
+                                        'currency' => 'PHP',
+                                        'quantity' => 1,
+                                    ],
+                                ],
+                                'payment_method_types' => ['card', 'paymaya', 'gcash'],
+                                'success_url' => $successUrl,
+                                'cancel_url' => $cancelUrl,
+                                'metadata' => [
+                                    'booking_details' => $bookingDetails, // Pass the customer booking data as metadata
+                                    'id' => $booking->id,
+                                ]
+                            ]
+                        ]
+                    ]
+                ]);
+
+                // Log the API response from PayMongo
+                $body = json_decode($response->getBody(), true);
+                Log::info('Checkout session created successfully', ['response' => $body]);
+
+                $checkoutUrl = $body['data']['attributes']['checkout_url'];
+                Log::info('Checkout URL received', ['checkout_url' => $checkoutUrl]);
+
+                unset($booking['service_name']);
+
+                // Update booking with checkout_url from PayMongo API (Optional)
+                $booking->update(['checkout_url' => $checkoutUrl]);
+                Log::info('Booking updated with checkout URL', ['booking_id' => $booking->id]);
+
+                $checkoutUrl = $body['data']['attributes']['checkout_url'] ?? null;
+                if (!$checkoutUrl) {
+                    Log::error('No checkout URL in PayMongo response', ['response_body' => $body]);
+                    return response()->json(['error' => 'Failed to create checkout session, no URL returned'], 500);
+                }
+
+                // Return checkout URL to frontend
+                return response()->json(['checkout_url' => $checkoutUrl]);
+            } catch (\GuzzleHttp\Exception\ClientException $e) {
+                Log::error('Error during checkout session creation', [
+                    'error' => $e->getMessage(),
+                    'response_code' => $e->getResponse()->getStatusCode(),
+                    'response_body' => (string) $e->getResponse()->getBody(),  // Log the body of the response for more details
+                    'attempt' => $i + 1
+                ]);
+
+                // Retry logic
+                if ($e->getResponse()->getStatusCode() === 429 && $i < $maxRetries - 1) {
+                    usleep($retryDelay * 1000); // Delay before retrying
+                    $retryDelay *= 2; // Exponential backoff
+                    Log::warning('Rate limit exceeded for PayMongo API: Too many requests');
+                } else {
+                    Log::error('Final attempt failed to create checkout session', [
+                        'exception' => $e->getMessage(),
+                        'response' => (string) $e->getResponse()->getBody()  // Log full response on final failure
+                    ]);
+                    return response()->json(['error' => 'Failed to create checkout session', 'details' => $e->getMessage()], 500);
+                }
+            }
+        }
+    }
+    public function paymentSuccess(Request $request)
+    {
+        Log::info('Payment success callback received', ['request_data' => $request->all()]);
+        
+        // Decode the booking details passed in the query string
+        $bookingDetails = json_decode(urldecode($request->query('state')), true);
+        Log::info('Booking details for success:', ['booking_details' => $bookingDetails]);
+        
+        
+        // Find the booking by its ID
+        $booking = Booking::find($bookingDetails['id']);
+        if ($booking) {
+            // Update the booking status to "Completed"
+            $booking->status = 'Completed';
+            $booking->save();
+            Log::info('Booking status updated to completed', ['booking_id' => $booking->id]);
+
+            $serviceName = $booking->service ? $booking->service->name : 'N/A'; // 'service' is the relationship method on the Booking model
+
+            
+            // Generate the success URL dynamically for the frontend
+            $successUrl = 'http://localhost:3000/payment?state=' . urlencode(json_encode([
+                'id' => $booking->id,
+                'status' => 'Completed',
+                'details' => $booking->toArray(), // Include full booking details
+                'service_name' => $serviceName,
+            ]));
+            
+            
+            // Optionally, log the success URL if needed
+            Log::info('Redirecting to success URL', ['success_url' => $successUrl]);
+    
+            // Redirect the user to the frontend success page
+            return redirect()->away($successUrl); // `away()` redirects to an external URL
+        }
+        
+        Log::error('Booking not found for payment success', ['booking_id' => $bookingDetails['id']]);
+        return response()->json(['error' => 'Booking not found'], 404);
+    }
+    
+    public function paymentCanceled(Request $request)
+    {
+        Log::info('Payment canceled callback received', ['request_data' => $request->all()]);
+        
+        // Decode the booking details passed in the query string
+        $bookingDetails = json_decode(urldecode($request->query('state')), true);
+        Log::info('Booking details for cancel:', ['booking_details' => $bookingDetails]);
+        
+        // Find the booking by its ID
+        $booking = Booking::find($bookingDetails['id']);
+        if ($booking) {
+            // Update the booking status to "Canceled"
+            $booking->status = 'Cancelled';
+            $booking->save();
+            Log::info('Booking status updated to canceled', ['booking_id' => $booking->id]);
+    
+            // Generate the cancel URL dynamically for the frontend
+            $cancelUrl = 'http://localhost:3000/booking-cancelled?state=' . urlencode(json_encode($bookingDetails));
+    
+            // Optionally, log the cancel URL if needed
+            Log::info('Redirecting to cancel URL', ['cancel_url' => $cancelUrl]);
+    
+            // Redirect the user to the frontend cancel page
+            return redirect()->away($cancelUrl); // `away()` redirects to an external URL
+        }
+    
+        Log::error('Booking not found for payment cancellation', ['booking_id' => $bookingDetails['id']]);
+        return response()->json(['error' => 'Booking not found'], 404);
+    }
+    
+    
     //SENDING RECEIPT MAIL
     public function sendEmailReceipt(Request $request)
     {
+        // Log the incoming request data
+        Log::info('Incoming email receipt request:', $request->all());
+    
         // Validate the incoming request
-        $validatedData = $request->validate([
-            'email' => 'required|email',
-            'service_name' => 'required|string',
-            'date' => 'required|date',
-            'time' => 'required',
-            'price' => 'required|numeric',
-            'refNumber' => 'required|string',
-            'customer_id' => 'nullable|integer', // Add validation for customer_id
-        ]);
-
-        Log::info('Email data received: ', $validatedData);
-        Log::info('Received email data: ', $request->all());
-
+        try {
+            $validatedData = $request->validate([
+                'email' => 'required|email',
+                'service_id' => 'required|integer',
+                'date' => 'required|date',
+                'time' => 'required',
+                'price' => 'required|numeric',
+                'refNumber' => 'required|string',
+                'customer_id' => 'nullable|integer', // Add validation for customer_id
+            ]);
+            Log::info('Validation successful. Validated data:', $validatedData);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed:', $e->errors());
+            return response()->json(['error' => 'Validation failed. Please check your input.'], 422);
+        }
+    
         // Prepare booking details for the email
         $bookingDetails = [
-            'service_name' => $validatedData['service_name'],
+            'service_id' => $validatedData['service_id'],
             'date' => $validatedData['date'],
             'time' => $validatedData['time'],
             'price' => $validatedData['price'],
             'refNumber' => $validatedData['refNumber'],
             'customer_id' => $validatedData['customer_id'] ?? 'N/A', // Include customer_id or 'N/A' if not provided
         ];
-
+    
+        // Log the booking details before sending the email
+        Log::info('Prepared booking details for email:', $bookingDetails);
+    
         // Send the email
         try {
-            Log::info('Sending email to: ' . $validatedData['email']);
+            Log::info('Attempting to send email to: ' . $validatedData['email']);
             Mail::to($validatedData['email'])->send(new BookingSummaryMail($bookingDetails));
             Log::info('Email sent successfully to: ' . $validatedData['email']);
             return response()->json(['message' => 'Email sent successfully!'], 200);
         } catch (\Exception $e) {
-            Log::error('Failed to send booking email: ' . $e->getMessage());
+            Log::error('Failed to send booking email to ' . $validatedData['email'] . ': ' . $e->getMessage());
             return response()->json(['error' => 'Failed to send email. Please try again later.'], 500);
         }
     }
+    
 
     //SENDING CANCELLATION EMAIL
     public function cancelBooking($refNumber)

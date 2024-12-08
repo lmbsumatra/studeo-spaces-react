@@ -21,3 +21,10 @@ Route::get('/view-email', function () {
 // web.php (Laravel routes)
 Route::get('payment-success', [PaymentController::class, 'handleSuccess'])->name('payment.success');
 Route::get('payment-failure', [PaymentController::class, 'handleFailure'])->name('payment.failure');
+
+use App\Http\Controllers\BookingController;
+
+// Routes for handling payment success and cancel events
+Route::get('/booking-successful', [BookingController::class, 'paymentSuccess'])->name('booking.payment.success');
+Route::get('/booking-canceled', [BookingController::class, 'paymentCanceled'])->name('booking.payment.cancel');
+

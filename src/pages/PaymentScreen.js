@@ -11,33 +11,53 @@ const Payment = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState(null);
   const socket = io(`${baseSocketUrl}:3002`, { transports: ["websocket"] });
 
-  const generateReferenceNumber = () => {
-    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let referenceNumber = "";
-    for (let i = 0; i < 6; i++) {
-      referenceNumber += characters.charAt(
-        Math.floor(Math.random() * characters.length)
-      );
-    }
-    return referenceNumber;
-  };
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const state = urlParams.get("state");
 
-  const referenceNumber = generateReferenceNumber();
+    if (state) {
+      // Parse and set the booking details
+      const parsedDetails = JSON.parse(state);
+      setBookingDetails(parsedDetails);
+      console.log("Booking details from state:", parsedDetails);
+    } else {
+      // Redirect to /home if state is missing
+      navigate("/home");
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    if (bookingDetails) {
+      handleBookingSummary();
+    }
+  }, [bookingDetails]);
 
   const handleBookingSummary = async () => {
-    if (!location.state) return;
+    if (!bookingDetails) return;
 
-    const bookingDetailsWithRef = {
-      ...location.state,
-      refNumber: referenceNumber,
-      date: location.state.currentDate, // Using currentDate from location.state
-    };
+    const { details } = bookingDetails;
+    const {
+      id,
+      customer_id,
+      service_id,
+      price,
+      date,
+      time,
+      name,
+      email,
+      contact_number,
+      payment_method,
+      seat_code,
+      pass_type,
+      refNumber,
+    } = details;
 
     const notificationData = {
-      customer_id: location.state.customerID || null,
-      customer_name: location.state.name,
+      customer_id: customer_id || null,
+      customer_name: name,
       message: "A customer has booked.",
       type: "booking",
       action_url: null,
@@ -46,45 +66,31 @@ const Payment = () => {
     try {
       setLoading(true);
 
-      console.log("Booking details:", bookingDetailsWithRef);
-
-      // Step 1: Make the POST request for booking
-      const response = await axios.post(
-        `${baseApiUrl}bookings`,
-        bookingDetailsWithRef
-      );
-      const { customerID } = response.data;
-      const bookingId = response.data.id; // Assuming 'id' is returned in the response
+      // Step 1: Use the ID directly from the state
+      const bookingId = id;
       notificationData.related_data_id = bookingId;
-      console.log(notificationData);
-      await axios.post(`${baseApiUrl}notifications`, notificationData);
+
       // Step 2: Send the email receipt
       const emailData = {
-        email: location.state.email,
-        name: location.state.name,
-        service_name: location.state.service_name,
-        price: location.state.price,
-        date: location.state.currentDate,
-        time: location.state.time,
-        refNumber: referenceNumber,
-        customer_id: customerID,
+        email: email,
+        name: name,
+        service_id: service_id,
+        price: price,
+        date: date,
+        time: time,
+        refNumber: refNumber,
+        customer_id: customer_id,
       };
-      // console.log("Customer ID:", customerID);
-      // console.log(emailData);
-      // toast.success("Your booking has been successful!");
 
       const emailResponse = await axios.post(
         `${baseApiUrl}send-receipt`,
         emailData
-      ); // API endpoint for sending the receipt email
+      );
       if (emailResponse.status !== 200) {
         throw new Error("Failed to send email.");
-      } else {
-        console.log(emailResponse);
       }
 
       // Step 3: Send the notification
-      // Ensure socket is connected before emitting
       socket.emit("booking", {
         ...notificationData,
         message_id: bookingId, // Include message ID in the notification data
@@ -92,74 +98,42 @@ const Payment = () => {
 
       toast.success("Your booking has been successful!");
 
-      // Step 4: Redirect to Booking Summary
-      navigate("/booking-successful", {
-        state: { ...bookingDetailsWithRef, customerID, emailSent: true }, // Pass emailSent flag
-      });
+      // Wait for 5 seconds and then redirect to booking summary
+      setTimeout(() => {
+        navigate("/booking-successful", {
+          state: { ...bookingDetails, emailSent: true }, // Pass emailSent flag
+        });
+      }, 5000); // Redirect after 5 seconds
     } catch (error) {
       console.error("Error during booking process:", error);
-
-      // Log specific error details for easier debugging
-      if (error.response) {
-        console.error("Error response:", error.response.data);
-        console.error("Error status:", error.response.status);
-      } else if (error.request) {
-        console.error("Error request:", error.request);
-      } else {
-        console.error("Error message:", error.message);
-      }
-
       toast.error("Booking failed. Please try again.");
-      navigate("/booking", { state: location.state });
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (!location.state) {
-      navigate("/booking");
-    }
-  }, [location.state, navigate]);
-
-  if (!location.state) {
-    return null;
-  }
-
-  const {
-    service_id,
-    price,
-    currentDate,
-    time,
-    name,
-    email,
-    contact_number,
-    payment_method,
-  } = location.state;
+  if (!bookingDetails) return null; // Avoid rendering if booking details are missing
 
   return (
     <div>
       <div className="container text-center mt-5">
         <h2 className="fs-600 ff-serif">Payment Integration</h2>
-        <button
-          className="btn btn-primary-clr mt-5"
-          onClick={handleBookingSummary}
-        >
-          {loading ? (
-            <>
+        <div className="details-container">
+          <h4>Payment Successful!</h4>
+          <div className="mt-3">
+            {loading ? (
               <Spinner
                 as="span"
                 animation="border"
                 size="sm"
                 role="status"
                 aria-hidden="true"
-              />{" "}
-              Processing
-            </>
-          ) : (
-            "Proceed to Booking Summary"
-          )}
-        </button>
+              />
+            ) : (
+              "Redirecting to booking summary..."
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
