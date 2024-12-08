@@ -6,6 +6,7 @@ import { baseApiUrl } from "../../../../App";
 
 const MappingOverview = ({ isActive, onClose }) => {
   const [floor, setFloor] = useState("Ground Floor");
+  const [loading, setLoading] = useState(false);
   const [currentDate, setCurrentDate] = useState("");
   const [currentTime, setCurrentTime] = useState("");
   const [servicesData, setServicesData] = useState(null);
@@ -213,43 +214,45 @@ const MappingOverview = ({ isActive, onClose }) => {
   };
 
   const handleFreeSeat = async () => {
+    setLoading(true);  // Set loading to true when freeing up the seat
     try {
-      // Prepare the data for freeing up the seat
       const seatData = {
         seat_code: selectedSeat.seat_code,
-        isBooked: false,  // Setting the seat as not booked
+        isBooked: false,
       };
-  
-      // Send a request to free up the seat
+
       const response = await fetch(`${baseApiUrl}free-up-seat`, {
-        method: "POST",  // Assuming you're using PUT to update the seat status
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(seatData),  // Send the updated seat data in the request body
+        body: JSON.stringify(seatData),
       });
-  
+
       if (response.ok) {
         const updatedSeat = await response.json();
         console.log("Seat freed up:", updatedSeat);
-  
-        // Update the local state to reflect the changes
+
         setTemporarySeats((prevSeats) =>
           prevSeats.map((seat) =>
             seat.id === selectedSeat.id ? { ...seat, isBooked: false } : seat
           )
         );
-  
-        setShowFreeSeatModal(false);  // Close the modal after freeing the seat
-        setSelectedSeat(null);  // Reset the selected seat
+
+        await fetchSeatData();
+
+        setShowFreeSeatModal(false);
+        setSelectedSeat(null);
       } else {
-        // Handle errors in freeing the seat
         console.error("Failed to free up the seat. Try again later.");
       }
     } catch (error) {
       console.error("Error freeing up the seat:", error);
+    } finally {
+      setLoading(false);  // Reset loading state when the process is complete
     }
   };
+
   
 
   const handleCloseFreeSeatModal = () => {
@@ -503,11 +506,11 @@ const MappingOverview = ({ isActive, onClose }) => {
           </p>
         </Modal.Body>
         <Modal.Footer>
-          <button className="btn btn-secondary" onClick={handleCloseFreeSeatModal}>
+          <button className="btn btn-secondary" onClick={handleCloseFreeSeatModal}disable={loading}>
             Cancel
           </button>
-          <button className="btn btn-primary" onClick={handleFreeSeat}>
-            Confirm
+          <button className="btn btn-primary" onClick={handleFreeSeat} disable={loading}>
+          {loading ? "Freeing Seat..." : "Confirm"}
           </button>
         </Modal.Footer>
       </Modal>
