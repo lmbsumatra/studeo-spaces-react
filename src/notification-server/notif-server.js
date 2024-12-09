@@ -2,31 +2,33 @@ const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
 const cors = require("cors");
-const os = require('os');
+const os = require("os");
 const moment = require("moment-timezone");
 
+// Helper function to get the local IP address
 const getLocalIp = () => {
   const interfaces = os.networkInterfaces();
   for (const iface in interfaces) {
     for (const addr of interfaces[iface]) {
-      if (addr.family === 'IPv4' && !addr.internal) {
-        if (addr.address.startsWith('192.168.')) {
+      if (addr.family === "IPv4" && !addr.internal) {
+        if (addr.address.startsWith("192.168.")) {
           return addr.address;
         }
       }
     }
   }
-  return '127.0.0.1';
+  return "127.0.0.1";
 };
 
-const baseSocketUrl = `http://${getLocalIp()}`;
+// Set up the base socket URL
+const baseSocketUrl = `http://${getLocalIp()}`; // Local IP for local dev, but it should work on Railway with public URL
 console.log(`Base Socket URL: ${baseSocketUrl}`);
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: [`${baseSocketUrl}:3001`, `${baseSocketUrl}:3000`],
+    origin: "*",  // Allow connections from any domain (you can restrict this as needed)
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
     credentials: true,
@@ -34,23 +36,23 @@ const io = socketIo(server, {
 });
 
 app.use(cors({
-  origin: [
-    `${baseSocketUrl}:3001`,
-    `${baseSocketUrl}:3000`,
-  ],
+  origin: "*",  // Allow connections from any domain (you can restrict this as needed)
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type"],
   credentials: true,
 }));
 
+// Function to get the current date in PHT
 const getPHTDate = () => {
-  return moment().tz('Asia/Manila').format('YYYY-MM-DD'); // Date only in PHT
+  return moment().tz("Asia/Manila").format("YYYY-MM-DD");  // Date only in PHT
 };
 
+// Function to get the current time in PHT
 const getPHTTime = () => {
-  return moment().tz('Asia/Manila').format('HH:mm:ss'); // Time only in PHT
+  return moment().tz("Asia/Manila").format("HH:mm:ss");  // Time only in PHT
 };
 
+// Handle socket connection events
 io.on("connection", (socket) => {
   console.log("Admin connected");
 
@@ -138,11 +140,14 @@ io.on("connection", (socket) => {
     });
   });
 
+  // Handle disconnection
   socket.on("disconnect", () => {
     console.log("Admin disconnected");
   });
 });
 
-server.listen(3002, () => {
-  console.log("Server listening on port 3002");
+// Start the server on the dynamic port provided by Railway
+const port = process.env.PORT || 3002;  // Use Railway's dynamic port
+server.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });

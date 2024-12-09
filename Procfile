@@ -1,0 +1,1 @@
+web: node src/notification-server/notif-server.js
