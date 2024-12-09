@@ -26,7 +26,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: [`${baseSocketUrl}:3001`, `${baseSocketUrl}:3000`],
+    origin: [`https://studeo-spaces-react.vercel.app/`,`${baseSocketUrl}:3001`, `${baseSocketUrl}:3000`],
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
     credentials: true,
@@ -35,6 +35,7 @@ const io = socketIo(server, {
 
 app.use(cors({
   origin: [
+    `https://studeo-spaces-react.vercel.app/`,
     `${baseSocketUrl}:3001`,
     `${baseSocketUrl}:3000`,
   ],
