@@ -10,7 +10,7 @@ const BookingDetails = () => {
   const navigate = useNavigate();
   const [bookingDetails, setBookingDetails] = useState(null);
   const [loading, setLoading] = useState(true);
-  const socket = io(`${baseSocketUrl}:3002`, { transports: ["websocket"] });
+  const socket = io(`${baseSocketUrl}`, { transports: ["websocket"] });
 
   const formatTimeTo12Hour = (time) => {
     let [hours, minutes] = time.split(":");

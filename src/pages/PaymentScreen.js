@@ -12,7 +12,7 @@ const Payment = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [bookingDetails, setBookingDetails] = useState(null);
-  const socket = io(`${baseSocketUrl}:3002`, { transports: ["websocket"] });
+  const socket = io(`${baseSocketUrl}`, { transports: ["websocket"] });
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);

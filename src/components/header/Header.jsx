@@ -40,7 +40,7 @@ const Header = () => {
       }
     };
 
-    const socket = io(`${baseSocketUrl}:3002`, { transports: ["websocket"] });
+    const socket = io(`${baseSocketUrl}`, { transports: ["websocket"] });
 
     // Fetch notifications on mount
     fetchNotifications();
