@@ -48,8 +48,7 @@ const Blog = () => {
               </i>
             </p>
             <a
-              href={`/blogs/${blog.id}`}
-              target="_blank"
+              href={`/blogs-details/${blog.id}`}
               rel="noopener noreferrer"
               className="btn btn-primary-clr learn-more-button"
             >
