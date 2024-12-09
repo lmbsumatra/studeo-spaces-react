@@ -134,6 +134,6 @@ const AppWrapper = () => (
 
 export default AppWrapper;
 
-export const baseApiUrl = `http://${window.location.hostname}:8000/api/`;
+export const baseApiUrl = `https://studeo-spaces-react-production.up.railway.app/api/`;
 
 export const baseSocketUrl = `http://${window.location.hostname}`;
