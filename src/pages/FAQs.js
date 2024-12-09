@@ -23,7 +23,7 @@ const FAQs = () => {
   });
   const [loading, setLoading] = useState(false); // Loading state
 
-  const socket = io(`${baseSocketUrl}:3002`, { transports: ["websocket"] });
+  const socket = io(`${baseSocketUrl}`, { transports: ["websocket"] });
 
   const testNotificationData = {
     customer_name: formData.name,

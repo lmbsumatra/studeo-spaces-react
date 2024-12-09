@@ -136,4 +136,4 @@ export default AppWrapper;
 
 export const baseApiUrl = `https://studeo-spaces-react-production.up.railway.app/api/`;
 
-export const baseSocketUrl = `${window.location.hostname}`;
+export const baseSocketUrl = `inspiring-clarity-production.up.railway.app`;
