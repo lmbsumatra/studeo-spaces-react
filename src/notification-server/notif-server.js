@@ -21,14 +21,14 @@ const getLocalIp = () => {
 };
 
 // Set up the base socket URL
-const baseSocketUrl = `http://${getLocalIp()}`; // Local IP for local dev, but it should work on Railway with public URL
+const baseSocketUrl = `https://inspiring-clarity-production.up.railway.app/`; // Local IP for local dev, but it should work on Railway with public URL
 console.log(`Base Socket URL: ${baseSocketUrl}`);
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "*",  // Allow connections from any domain (you can restrict this as needed)
+    origin: "https://studeo-spaces-react.vercel.app/",  // Allow connections from any domain (you can restrict this as needed)
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
     credentials: true,

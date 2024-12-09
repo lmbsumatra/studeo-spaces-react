@@ -97,7 +97,7 @@ const Admin = () => {
 
   useEffect(() => {
      // Initialize socket
-  const socket = io(`${baseSocketUrl}:3002`, { transports: ["websocket"] });
+  const socket = io(`${baseSocketUrl}`, { transports: ["websocket"] });
     // Connect to the socket
     socket.on("connect", () => {
       console.log("Socket connected:", socket.id); // Debugging
