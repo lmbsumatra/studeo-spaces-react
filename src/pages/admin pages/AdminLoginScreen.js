@@ -33,7 +33,7 @@ const AdminLoginScreen = () => {
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("token");
     if (isAuthenticated) {
-      navigate("/admin-dashboard");
+      navigate("/admin/dashboard");
     }
   }, [navigate]);
 
@@ -83,8 +83,6 @@ const AdminLoginScreen = () => {
     }
   };
 
-
-  
 
   // Handle "Forgot Password" modal toggle
 const handleForgotPasswordModalShow = () => {
