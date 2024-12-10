@@ -118,28 +118,45 @@ const Book = () => {
   const handleBookNowClick = async () => {
     const missingFields = [];
 
+    // Check if service is selected
     if (!selectedService || !selectedService.id) {
       missingFields.push("Service");
     }
+
+    // Check if date is selected
     if (!currentDate) {
       missingFields.push("Date");
     }
+
+    // Check if time is selected
     if (!time) {
       missingFields.push("Time");
     }
+
+    // Check if name is provided
     if (!name || name.trim() === "") {
       missingFields.push("Name");
     }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || email.trim() === "") {
       missingFields.push("Email");
+    } else if (!emailRegex.test(email)) {
+      missingFields.push("Email (Invalid format)");
     }
+
+    // Validate contact number (if not empty)
     if (!contactNumber || contactNumber.trim() === "") {
       missingFields.push("Contact Number");
     }
+
+    // Check if payment method is selected
     if (!paymentMethod || paymentMethod.trim() === "") {
       missingFields.push("Payment Method");
     }
 
+    // If any missing fields, show alert
     if (missingFields.length > 0) {
       console.log("Missing fields:", missingFields.join(", "));
       alert("Please fill in all required fields.");
@@ -219,8 +236,6 @@ const Book = () => {
     setSelectedService(service);
     navigate(`/booking?serviceId=${service.id}`);
   };
-  
-  
 
   //15 DAY PASS
   const handleClosePassModal = () => setShowPassModal(false);
