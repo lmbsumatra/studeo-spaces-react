@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./style.css";
+import { baseApiUrl } from "../../App";
 
 const Blog = () => {
   const [blogs, setBlogs] = useState([]);
@@ -9,7 +10,7 @@ const Blog = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/blogs');
+        const res = await fetch(`${baseApiUrl}blogs`);
         const result = await res.json();
         setBlogs(result.data || []);
       } catch (error) {
@@ -22,7 +23,7 @@ const Blog = () => {
   // Function to handle image URL
   const showImage = (img) => {
     return img
-      ? `http://localhost:8000/uploads/blogs/${img}`
+      ? `${baseApiUrl}uploads/blogs/${img}`
       : 'https://placehold.co/600x400';
   };
 

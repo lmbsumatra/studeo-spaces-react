@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import BlogCard from "../../../components/AdminBlog/BlogCard";
+import { baseApiUrl } from "../../../App";
 
 const AdminBlog = () => {
 
@@ -9,15 +10,19 @@ const AdminBlog = () => {
   const [keyword, setKeyword] = useState('');
 
   const fetchBlogs = async () => {
-    const res = await fetch('http://localhost:8000/api/blogs/');
+    const res = await fetch(`${baseApiUrl}blogs/`);
     const result = await res.json();
     setAdminBlogs(result.data);
   };
 
   const searchBlogs = async () => {
-    const res = await fetch(`http://localhost:8000/api/blogs?keyword=${keyword}`);
-    const result = await res.json();
-    setAdminBlogs(result.data);
+    try {
+      const res = await fetch(`${baseApiUrl}blogs?keyword=${keyword}`); // Use baseApiUrl
+      const result = await res.json();
+      setAdminBlogs(result.data);
+    } catch (error) {
+      console.error("Error searching blogs:", error);
+    }
   };
 
   useEffect(() => {

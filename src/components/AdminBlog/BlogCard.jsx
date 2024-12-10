@@ -1,31 +1,34 @@
 import React from "react";
 import { toast } from "react-toastify";
+import { baseApiUrl } from "../../App";
 
 const BlogCard = ({ blog, adminBlog, setAdminBlogs }) => {
   const showImage = (img) => {
     return img
-      ? "http://localhost:8000/uploads/blogs/" + img
+      ? `${baseApiUrl}uploads/blogs/${img}`
       : "https://placehold.co/600x400";
   };
 
   const deleteBlog = async (id) => {
     if (window.confirm("Are you sure you want to delete?")) {
-      const res = await fetch("http://localhost:8000/api/blogs/" + id, {
+      const res = await fetch(`${baseApiUrl}blogs/${id}`, {
         method: "DELETE",
       });
 
-      const newBlogs = adminBlog.filter((blog) => blog.id != id);
-
-      setAdminBlogs(newBlogs);
-
-      toast.success("Blog Deleted Successfully.");
+      if (res.ok) {
+        const newBlogs = adminBlog.filter((blog) => blog.id !== id);
+        setAdminBlogs(newBlogs);
+        toast.success("Blog Deleted Successfully.");
+      } else {
+        toast.error("Failed to delete the blog.");
+      }
     }
   };
 
   return (
     <div className="col-12 col-md-2 col-lg-3 mb-3">
       <div className="card border-0 shadow-lg">
-        <img src={showImage(blog.image)} className="card-img-top" />
+        <img src={showImage(blog.image)} className="card-img-top" alt="Blog" />
         <div className="card-body">
           <h2 className="h5">{blog.title}</h2>
           <p>{blog.shortDesc}</p>

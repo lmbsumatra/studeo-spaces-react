@@ -3,6 +3,7 @@ import Editor from 'react-simple-wysiwyg';
 import { useForm } from "react-hook-form";
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { baseApiUrl } from "../../../App";
 
 const AdminCreate = () => {
   const [html, setHtml] = useState('');
@@ -15,27 +16,26 @@ const AdminCreate = () => {
   }
 
   const handleFileChange = async(e) => {
-    const file = e.target.files[0]
+    const file = e.target.files[0];
     const formData = new FormData();
-    formData.append("image",file);
+    formData.append("image", file);
 
-    const res = await fetch("http://localhost:8000/api/save-temp-image/", {
+    const res = await fetch(`${baseApiUrl}save-temp-image/`, {
       method: "POST",
-      body: formData
+      body: formData,
     });
 
     const result = await res.json();
 
     console.log(result);
 
-    if(result.status == false){
+    if(result.status === false){
       alert(result.errors.image);
       e.target.value = null;
     }
 
     setImageId(result.image.id);
-
-  }
+  };
 
   const {
     register,
@@ -46,13 +46,12 @@ const AdminCreate = () => {
   const formSubmit = async(data) => {
     const newData = { ...data, "description": html, image_id: imageId };
 
-
-    const res = await fetch("http://localhost:8000/api/blogs",{
+    const res = await fetch(`${baseApiUrl}blogs`, {
       method: "POST",
       headers: {
-        'Content-type' : 'application/json'
+        'Content-type': 'application/json',
       },
-      body: JSON.stringify(newData)
+      body: JSON.stringify(newData),
     });
 
     if (!html || html.trim() === "") {
@@ -62,10 +61,7 @@ const AdminCreate = () => {
     setHtmlError(false);
     toast.success("Blog Added Successfully.");
     navigate('/admin/blogs');
-    // console.log(newData);
   };
-
-  
 
   return (
     <div className='container'>
@@ -83,8 +79,8 @@ const AdminCreate = () => {
                     required: "Title is required",  // Custom error message if the title is empty
                     minLength: {
                       value: 10,                      // Minimum length of 10 characters
-                      message: "Title must be at least 10 characters" // Custom error message
-                    }
+                      message: "Title must be at least 10 characters", // Custom error message
+                    },
                   })}
                   type="text"
                   className={`form-control ${errors.title && 'is-invalid'}`}
@@ -94,7 +90,8 @@ const AdminCreate = () => {
             </div>
             <div className='mb-3'>
               <label className='form-label'>Short Description</label>
-              <textarea { ...register('shortDesc', { required: true }) } 
+              <textarea 
+                {...register('shortDesc', { required: true })} 
                 cols="30" 
                 rows="5" 
                 className={`form-control ${errors.shortDesc && 'is-invalid'}`}>
@@ -121,11 +118,13 @@ const AdminCreate = () => {
 
             <div className='mb-3'>
               <label className='form-label'>Author</label>
-              <input { ...register('author',{required: true}) } 
+              <input 
+                {...register('author', { required: true })} 
                 type="text" 
                 className={`form-control ${errors.author && 'is-invalid'}`}
-                placeholder='Author' />
-                {errors.author && <p className='invalid-feedback'>Author field is required</p>}
+                placeholder='Author' 
+              />
+              {errors.author && <p className='invalid-feedback'>Author field is required</p>}
             </div>
 
             <button className='btn btn-success'>Create</button>
