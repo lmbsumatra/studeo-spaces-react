@@ -394,7 +394,7 @@ class BookingController extends Controller
             $serviceName = $booking->service ? $booking->service->name : 'N/A'; // 'service' is the relationship method on the Booking model
 
             // Generate the success URL dynamically for the frontend
-            $successUrl = 'https://studeo-spaces-react.vercel.app/payment?state=' . urlencode(json_encode([
+            $successUrl = 'https://studeospaces.vercel.app/payment?state=' . urlencode(json_encode([
                 'id' => $booking->id,
                 'status' => 'Completed',
                 'details' => $booking->toArray(), // Include full booking details
@@ -430,7 +430,7 @@ class BookingController extends Controller
             Log::info('Booking status updated to canceled', ['booking_id' => $booking->id]);
 
             // Generate the cancel URL dynamically for the frontend
-            $cancelUrl = 'https://studeo-spaces-react.vercel.app/booking-cancelled?state=' . urlencode(json_encode($bookingDetails));
+            $cancelUrl = 'https://studeospaces.vercel.app/booking-cancelled?state=' . urlencode(json_encode($bookingDetails));
 
             // Optionally, log the cancel URL if needed
             Log::info('Redirecting to cancel URL', ['cancel_url' => $cancelUrl]);
