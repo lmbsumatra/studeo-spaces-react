@@ -10,6 +10,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { toast } from "react-toastify";
 import { io } from "socket.io-client";
 import { baseApiUrl, baseSocketUrl } from "../../App";
+import logo from "../../assets/images/studeo-spaces-logo.png";
 
 dayjs.extend(relativeTime);
 
@@ -69,7 +70,7 @@ const Header = () => {
       await axios.delete(`${baseApiUrl}notifications/${id}`);
       setNotifications(notifications.filter((notif) => notif.id !== id));
       setUnreadCount(unreadCount - 1);
-      setShowNotifications(false); // Close notification popup
+      setShowNotifications(true); // Close notification popup
       toast.info("Notification removed.");
     } catch (error) {
       toast.error("Failed removing notification.");
@@ -146,7 +147,16 @@ const Header = () => {
   return (
     <nav className="navbar">
       <div className="container-fluid">
-        <NavLink to="/" className="navbar-brand"></NavLink>
+        <NavLink to="/" className="navbar-brand">
+          {!isAdminPath && (
+            <img
+              src={logo}
+              alt="Logo"
+              style={{ height: "50px", width: "50px", margin: "15px" }}
+            />
+          )}
+        </NavLink>
+
         <div>
           <ul className="navbar-nav">
             {isAdminPath ? (

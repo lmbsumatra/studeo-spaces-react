@@ -263,3 +263,9 @@
     max-width: 95%;
   }
 }
+
+
+.bkd-room {
+  width: auto !important;
+  border-radius: 8px;
+}

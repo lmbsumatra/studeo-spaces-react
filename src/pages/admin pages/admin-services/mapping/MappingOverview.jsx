@@ -346,7 +346,7 @@ const MappingOverview = ({ isActive, onClose }) => {
 
                   {/* BarkadAral 01 */}
                   <div
-                   className={`card p-2 ${
+                   className={`bkd-room p-2 ${
                     secondFloorRoom1?.seats?.[0]?.isBooked ? "roombooked" : "roomavailable"
                   }`}
                   
@@ -374,7 +374,7 @@ const MappingOverview = ({ isActive, onClose }) => {
                   </div>
                   {/* BarkadAral 02 */}
                   <div
-                    className={`card p-2 ${
+                    className={`bkd-room p-2 ${
                       secondFloorRoom2?.seats?.[0]?.isBooked ? "roombooked" : "roomavailable"
                     }`}
                   >

@@ -1,8 +1,10 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css"
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate()
   return (
     <section className="hero container-fluid">
         <div className="">
@@ -16,7 +18,7 @@ const Hero = () => {
             exams, Studeo Spaces offers a supportive and resourceful atmosphere
             tailored to your study needs.
           </p>
-          <button className="btn btn-primary-clr learn-more-button">Learn More</button>
+          <button className="btn btn-primary-clr learn-more-button" onClick={() => navigate("/faqs")}>Learn More</button>
         </div>
     </section>
   );

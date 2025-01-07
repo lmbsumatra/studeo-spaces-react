@@ -53,7 +53,7 @@ const Promo = () => {
           <div key={index} className="card promo p-5">
             <h2 className="promo-title">{promo.title}</h2>
             <p className="promo-description">{promo.description}</p>
-            <div className="promo-buttons">
+            {/* <div className="promo-buttons">
               {promo.buttons.map((button, btnIndex) => (
                 <button
                   key={btnIndex}
@@ -63,7 +63,7 @@ const Promo = () => {
                   {button.text}
                 </button>
               ))}
-            </div>
+            </div> */}
           </div>
         ))}
       </Slider>
