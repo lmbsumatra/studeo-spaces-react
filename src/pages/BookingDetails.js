@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import io from "socket.io-client";
 import { baseApiUrl, baseSocketUrl } from "../App.js";
+import { Modal, Button } from 'react-bootstrap';
 
 const BookingDetails = () => {
   const location = useLocation();
@@ -11,6 +12,8 @@ const BookingDetails = () => {
   const [bookingDetails, setBookingDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const socket = io(`${baseSocketUrl}`, { transports: ["websocket"] });
+  const [showModal, setShowModal] = useState(false); 
+  const [cancelConfirmed, setCancelConfirmed] = useState(false);
 
   const formatTimeTo12Hour = (time) => {
     let [hours, minutes] = time.split(":");
@@ -44,47 +47,44 @@ const BookingDetails = () => {
     fetchBookingDetails();
   }, [location.state, navigate]);
 
-  const handleCancelBooking = async () => {
-    const confirmCancel = window.confirm(
-      "Are you sure you want to cancel this booking?"
-    );
-    if (confirmCancel) {
+  const handleCancelBooking = () => {
+    // Show the modal for confirmation
+    setShowModal(true);
+  };
+
+  const handleModalClose = () => setShowModal(false); // Close the modal without cancellation
+  const handleConfirmCancel = async () => {
+    setCancelConfirmed(true);
+    // Proceed with cancellation if confirmed
+    try {
+      const response = await axios.post(
+        `${baseApiUrl}bookings/cancel/${bookingDetails.refNumber}`
+      );
+
+      const bookingId = response.data.id; // Assuming 'id' is returned in the response
       const notificationData = {
         customer_id: location.state.customerID || null,
         customer_name: location.state.name,
         message: "A customer has canceled their booking.",
         type: "cancelbooking",
         action_url: null,
+        related_data_id: bookingId,
       };
 
-      try {
-        // Send cancellation request to backend
-        const response = await axios.post(
-          `${baseApiUrl}bookings/cancel/${bookingDetails.refNumber}`
-        );
-        //console.log("Backend response:", response.data);
+      // Notify via WebSocket
+      socket.emit("cancelbooking", {
+        ...notificationData,
+        message_id: bookingId, // Include message ID in the notification data
+      });
 
-        const bookingId = response.data.id; // Assuming 'id' is returned in the response
-        notificationData.related_data_id = bookingId;
-
-        // Optional: Notify via WebSocket (if required)
-        socket.emit("cancelbooking", {
-          ...notificationData,
-          message_id: bookingId, // Include message ID in the notification data
-        });
-
-        // Show success message and redirect
-        toast.success("Booking cancelled successfully.");
-        navigate("/booking");
-      } catch (error) {
-        console.error(
-          "Error response from backend:",
-          error.response?.data || error
-        );
-        console.error("Error cancelling booking:", error);
-        toast.error("Failed to cancel booking.");
-      }
+      // Show success message and redirect
+      toast.success("Booking cancelled successfully.");
+      navigate("/booking");
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      toast.error("Failed to cancel booking.");
     }
+    handleModalClose();  // Close the modal after cancellation
   };
 
   const handleDone = () => {
@@ -183,14 +183,15 @@ const BookingDetails = () => {
             <div className="mt-5 text-center">
               <h4 className="fs-500 ff-serif">Thank you for your booking!</h4>
               <p className="fs-400">We look forward to serving you.</p>
-              {status === "Pending" ? (
-                <button
-                  className="btn btn-danger"
-                  onClick={handleCancelBooking}
-                >
+              {(status === "Pending" || status === "Completed") && (
+                <button className="btn btn-danger" onClick={handleCancelBooking}>
                   Cancel Booking
                 </button>
-              ) : (
+              )}
+              {status === "Cancelled" && (
+                <p className="fs-500 ff-serif text-danger">Your booking has been cancelled.</p>
+              )}
+              {status !== "Pending" && status !== "Completed" && status !== "Cancelled" && (
                 <button className="btn btn-success" onClick={handleDone}>
                   Done
                 </button>
@@ -199,6 +200,25 @@ const BookingDetails = () => {
           </div>
         </div>
       </div>
+      {/* Modal for cancellation warning */}
+      <Modal show={showModal} onHide={handleModalClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Cancel Booking</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Are you sure you want to cancel this booking? Please note that cancellations are not refundable.
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleModalClose}>
+            Close
+          </Button>
+          <Button variant="danger" onClick={handleConfirmCancel}>
+            Confirm Cancel
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
