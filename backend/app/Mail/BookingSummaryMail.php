@@ -5,9 +5,9 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
-class BookingSummaryMail extends Mailable implements ShouldQueue
+
+class BookingSummaryMail extends Mailable 
 {
     use Queueable, SerializesModels;
 

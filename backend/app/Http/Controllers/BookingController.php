@@ -59,7 +59,8 @@ class BookingController extends Controller
             $validatedData['service_name'] = $service->name;
     
             // Determine pass type and payment method
-            $passDetails = $this->determinePassType($customer = $this->findOrCreateCustomer($validatedData));
+            $customer = $this->findOrCreateCustomer($validatedData);
+            $passDetails = $this->determinePassType($customer);
             $validatedData = array_merge($validatedData, $passDetails);
     
             // Begin database transaction
@@ -508,9 +509,9 @@ class BookingController extends Controller
             }
 
             // Update booking status to 'Canceled'
-            $booking->status = 'Canceled';
+            $booking->status = 'Cancelled';
             $booking->save();
-            Log::info("Booking status updated to 'Canceled' for refNumber: $refNumber");
+            Log::info("Booking status updated to 'Cancelled' for refNumber: $refNumber");
 
             // Send cancellation confirmation email
             Mail::to($booking->email)->send(new CancellationConfirmationMail($booking));
