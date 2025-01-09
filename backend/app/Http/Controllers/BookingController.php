@@ -449,7 +449,7 @@ class BookingController extends Controller
     {
         // Log the incoming request data
         Log::info('Incoming email receipt request:', $request->all());
-
+    
         // Validate the incoming request
         try {
             $validatedData = $request->validate([
@@ -459,27 +459,40 @@ class BookingController extends Controller
                 'time' => 'required',
                 'price' => 'required|numeric',
                 'refNumber' => 'required|string',
-                'customer_id' => 'nullable|integer', // Add validation for customer_id
+                'customer_id' => 'nullable|integer',
             ]);
             Log::info('Validation successful. Validated data:', $validatedData);
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation failed:', $e->errors());
             return response()->json(['error' => 'Validation failed. Please check your input.'], 422);
         }
-
+    
+        // Fetch service details
+        try {
+            $service = Service::find($validatedData['service_id']);
+            if (!$service) {
+                Log::error('Service not found for service_id: ' . $validatedData['service_id']);
+                return response()->json(['error' => 'Invalid service ID. Please check and try again.'], 400);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error fetching service: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to retrieve service information. Please try again later.'], 500);
+        }
+    
         // Prepare booking details for the email
         $bookingDetails = [
             'service_id' => $validatedData['service_id'],
+            'service_name' => $service->name ?? 'N/A',
             'date' => $validatedData['date'],
             'time' => $validatedData['time'],
             'price' => $validatedData['price'],
             'refNumber' => $validatedData['refNumber'],
-            'customer_id' => $validatedData['customer_id'] ?? 'N/A', // Include customer_id or 'N/A' if not provided
+            'customer_id' => $validatedData['customer_id'] ?? 'N/A',
         ];
-
+    
         // Log the booking details before sending the email
         Log::info('Prepared booking details for email:', $bookingDetails);
-
+    
         // Send the email
         try {
             Log::info('Attempting to send email to: ' . $validatedData['email']);
@@ -490,7 +503,7 @@ class BookingController extends Controller
             Log::error('Failed to send booking email to ' . $validatedData['email'] . ': ' . $e->getMessage());
             return response()->json(['error' => 'Failed to send email. Please try again later.'], 500);
         }
-    }
+    } 
 
 
     //SENDING CANCELLATION EMAIL
