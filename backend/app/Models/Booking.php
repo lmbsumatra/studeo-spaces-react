@@ -23,7 +23,6 @@ class Booking extends Model
         'customer_id',
         'pass_type',
         'seat_code',
-        'pass_id',
     ];
 
     public function customer()
@@ -34,9 +33,5 @@ class Booking extends Model
     public function service()
     {
         return $this->belongsTo(Service::class);
-    }
-    public function pass()
-    {
-        return $this->belongsTo(Pass::class);
     }
 }

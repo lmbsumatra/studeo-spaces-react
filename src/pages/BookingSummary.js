@@ -8,6 +8,7 @@ const BookingSummary = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // console.log(location.state);
     if (!location.state) {
       navigate("/booking"); // Redirect to the booking page if no state exists
     }
@@ -47,7 +48,7 @@ const BookingSummary = () => {
     emailSent = false, // Top-level emailSent
     details = {} // Destructure the details object
   } = location.state || {};
-
+  
   // Now, destructure the details object
   const {
     customer_id = "N/A",
@@ -62,13 +63,12 @@ const BookingSummary = () => {
     refNumber = "N/A",
     seat_code = "N/A",
     pass_type = "N/A",
-    pass_id = "N/A",
     status = "N/A",
     created_at = "N/A",
     updated_at = "N/A",
     service = {} // Destructure the service object
   } = details;
-
+  
   // Destructure the service object
   const {
     service_code = "N/A",
@@ -79,6 +79,7 @@ const BookingSummary = () => {
     availability = "N/A",
     type = "N/A"
   } = service;
+  
 
   const saveReceiptAsImage = () => {
     const element = document.querySelector(".card-body"); // Target only the card-body
@@ -90,6 +91,7 @@ const BookingSummary = () => {
         link.click(); // Programmatically trigger download
       })
       .catch((error) => {
+        // console.error("Failed to save receipt as image:", error);
         alert("Something went wrong while saving the receipt. Please try again.");
       });
   };
@@ -139,15 +141,6 @@ const BookingSummary = () => {
             <p>
               <strong>Customer ID:</strong> {customer_id}
             </p>
-            {service_id === 4 && pass_id && (
-              <>
-                <hr />
-                <h3 className="fs-500 ff-serif">Pass Information</h3>
-                <p>
-                  <strong>Pass ID:</strong> {pass_id}
-                </p>
-              </>
-            )}
             <hr />
             <h3 className="fs-500 ff-serif">Email Sent</h3>
             <p>{emailSent ? "Email Sent" : "Email Not Sent"}</p>
