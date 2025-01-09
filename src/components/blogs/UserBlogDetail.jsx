@@ -5,25 +5,33 @@ import "./style.css";
 import { baseApiUrl } from "../../App";
 
 const UserBlogDetail = () => {
-  const [blog, setBlog] = useState([]);
-  const params = useParams();
-
-  const fetchBlog = async () => {
-    const res = await fetch(`${baseApiUrl}blogs/${params.id}`);
-    const result = await res.json();
-    setBlog(result.data);
-    // console.log(params.id)
-  };
+  const [blog, setBlog] = useState(null); // Initial state as null
+    const params = useParams();
   
-  useEffect(() => {
-    fetchBlog();
-  }, []); // Added empty dependency array to prevent infinite re-renders
-
+    const fetchBlog = async () => {
+      try {
+        const res = await fetch(`${baseApiUrl}blogs/${params.id}`);
+        const result = await res.json();
+        setBlog(result.data || null); // Set blog data or null if no data
+      } catch (error) {
+        console.error("Error fetching blog:", error);
+        setBlog(null); // Handle error by setting blog to null
+      }
+    };
+  
+    useEffect(() => {
+      fetchBlog();
+    }, []); // Run once when the component mounts
+  
+    if (!blog) {
+      return <div className="text-center mt-5">Loading or no blog found...</div>; // Fallback UI
+    }
+  
   return (
     <div>
       <div className="container">
         <div className="d-flex justify-content-between pt-5">
-          <h1>{blog.title}</h1>
+          <h1>{blog.title || 'Loading...'}</h1>
           <div>
             <a href="/blogs" className="btn btn-warning">
               Back to Blog
@@ -40,7 +48,7 @@ const UserBlogDetail = () => {
               {blog.image && (
                 <img
                   className="w-50"
-                  src={`${baseApiUrl}uploads/blogs/${blog.image}`}
+                  src={blog.image}
                   alt="Blog"
                 />
               )}
