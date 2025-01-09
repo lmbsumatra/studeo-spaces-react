@@ -6,133 +6,129 @@ import { useNavigate } from 'react-router-dom';
 import { baseApiUrl } from "../../../App";
 
 const AdminCreate = () => {
-  const [html, setHtml] = useState('');
-  const [imageId, setImageId] = useState('');
-  const [htmlError, setHtmlError] = useState(false);
-  const navigate = useNavigate();
+    const [html, setHtml] = useState('');
+    const [imageFile, setImageFile] = useState(null);
+    const [htmlError, setHtmlError] = useState(false);
+    const navigate = useNavigate();
 
-  function onChange(e) {
-    setHtml(e.target.value);
-  }
+    const handleFileChange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                setImageFile(file); // Save the selected file
+                console.log("Selected file:", file); // Debug log
+            }
+    };
 
-  const handleFileChange = async(e) => {
-    const file = e.target.files[0];
-    const formData = new FormData();
-    formData.append("image", file);
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm();
 
-    const res = await fetch(`${baseApiUrl}save-temp-image/`, {
-      method: "POST",
-      body: formData,
-    });
-
-    const result = await res.json();
-
-    // console.log(result);
-
-    if(result.status === false){
-      alert(result.errors.image);
-      e.target.value = null;
-    }
-
-    setImageId(result.image.id);
-  };
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-
-  const formSubmit = async(data) => {
-    const newData = { ...data, "description": html, image_id: imageId };
-
-    const res = await fetch(`${baseApiUrl}blogs`, {
-      method: "POST",
-      headers: {
-        'Content-type': 'application/json',
-      },
-      body: JSON.stringify(newData),
-    });
-
-    if (!html || html.trim() === "") {
-      setHtmlError(true);
-      return;
-    }
-    setHtmlError(false);
-    toast.success("Blog Added Successfully.");
-    navigate('/admin/blogs');
-  };
-
-  return (
-    <div className='container'>
-        <div className="d-flex justify-content-between pt-5 mb-5">
-            <h4>Create Blog</h4>
-            <a href="/admin/blogs" className='btn btn-success'>Back</a>
+    const formSubmit = async (data) => {
+        if (!html || html.trim() === "") {
+            setHtmlError(true);
+            return;
+        }
+        setHtmlError(false);
+    
+        const formData = new FormData();
+        formData.append("title", data.title);
+        formData.append("author", data.author);
+        formData.append("shortDesc", data.shortDesc);
+        formData.append("description", html);
+        if (imageFile) {
+            formData.append("image", imageFile);
+        }
+    
+        // Debug: Log FormData contents
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
+    
+        try {
+            const res = await fetch(`${baseApiUrl}blogs`, {
+                method: "POST",
+                body: formData,
+            });
+    
+            const result = await res.json();
+    
+            if (result.status) {
+                toast.success("Blog Added Successfully.");
+                navigate('/admin/blogs');
+            } else {
+                toast.error(result.message || "Failed to create blog.");
+            }
+        } catch (error) {
+            console.error("Error submitting blog:", error);
+            toast.error("Failed to create blog.");
+        }
+    };
+    return (
+        <div className='container'>
+            <div className="d-flex justify-content-between pt-5 mb-5">
+                <h4>Create Blog</h4>
+                <a href="/admin/blogs" className='btn btn-success'>Back</a>
+            </div>
+            <div className='card border-0 shadow-lg'>
+                <form onSubmit={handleSubmit(formSubmit)}>
+                    <div className='card-body'>
+                        <div className='mb-10'>
+                            <label className='form-label'>Title</label>
+                            <input
+                                {...register('title', {
+                                    required: "Title is required",
+                                    minLength: {
+                                        value: 10,
+                                        message: "Title must be at least 10 characters",
+                                    },
+                                })}
+                                type="text"
+                                className={`form-control ${errors.title && 'is-invalid'}`}
+                                placeholder="Title"
+                            />
+                            {errors.title && <p className="invalid-feedback">{errors.title.message}</p>}
+                        </div>
+                        <div className='mb-3'>
+                            <label className='form-label'>Short Description</label>
+                            <textarea
+                                {...register('shortDesc', { required: true })}
+                                cols="30"
+                                rows="5"
+                                className={`form-control ${errors.shortDesc && 'is-invalid'}`}
+                            ></textarea>
+                            {errors.shortDesc && <p className='invalid-feedback'>Short description is required</p>}
+                        </div>
+                        <div className='mb-3'>
+                            <label className='form-label'>Description</label>
+                            <div style={{ border: '1px solid #ced4da', borderRadius: '0.375rem', maxHeight: '300px', overflow: 'auto' }}>
+                            <Editor 
+                              value={html} 
+                              containerProps={{ style: { height: '300px', overflow: 'auto', padding: '10px' } }} onChange={(e) => setHtml(e.target.value)} />
+                            </div>
+                            {htmlError && <p className='invalid-feedback'>Description is required</p>}
+                        </div>
+                        <div className='mb-3'>
+                            <label className="form-label">Image</label>
+                            <input onChange={handleFileChange} type="file" className="form-control" />
+                        </div>
+                        <div className='mb-3'>
+                            <label className='form-label'>Author</label>
+                            <input
+                                {...register('author', { required: true })}
+                                type="text"
+                                className={`form-control ${errors.author && 'is-invalid'}`}
+                                placeholder='Author'
+                            />
+                            {errors.author && <p className='invalid-feedback'>Author field is required</p>}
+                        </div>
+                        <button className='btn btn-success'>Create</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div className='card border-0 shadow-lg'>
-          <form onSubmit={handleSubmit(formSubmit)}>
-          <div className='card-body'>
-            <div className='mb-10'>
-              <label className='form-label'>Title</label>
-              <input
-                  {...register('title', {
-                    required: "Title is required",  // Custom error message if the title is empty
-                    minLength: {
-                      value: 10,                      // Minimum length of 10 characters
-                      message: "Title must be at least 10 characters", // Custom error message
-                    },
-                  })}
-                  type="text"
-                  className={`form-control ${errors.title && 'is-invalid'}`}
-                  placeholder="Title"
-                />
-                {errors.title && <p className="invalid-feedback">{errors.title.message}</p>}
-            </div>
-            <div className='mb-3'>
-              <label className='form-label'>Short Description</label>
-              <textarea 
-                {...register('shortDesc', { required: true })} 
-                cols="30" 
-                rows="5" 
-                className={`form-control ${errors.shortDesc && 'is-invalid'}`}>
-              </textarea>
-              {errors.shortDesc && <p className='invalid-feedback'>Short description is required</p>}
-            </div>
-
-            <div className='mb-3'>
-              <label className='form-label'>Description</label>
-              <div style={{ border: '1px solid #ced4da', borderRadius: '0.375rem', maxHeight: '300px', overflow: 'auto' }}>
-              <Editor 
-                value={html} 
-                containerProps={{ style: { height: '300px', overflow: 'auto', padding: '10px' } }} 
-                onChange={onChange} 
-              />
-            </div>
-              {htmlError && <p className='invalid-feedback'>Description is required</p>}
-            </div>
-            
-            <div className='mb-3'>
-              <label className='form-label'>Image</label>
-              <input onChange={handleFileChange} type="file" className='form-control' />
-            </div>
-
-            <div className='mb-3'>
-              <label className='form-label'>Author</label>
-              <input 
-                {...register('author', { required: true })} 
-                type="text" 
-                className={`form-control ${errors.author && 'is-invalid'}`}
-                placeholder='Author' 
-              />
-              {errors.author && <p className='invalid-feedback'>Author field is required</p>}
-            </div>
-
-            <button className='btn btn-success'>Create</button>
-          </div>
-          </form>
-        </div>
-    </div>
-  );
+    );
 };
 
 export default AdminCreate;

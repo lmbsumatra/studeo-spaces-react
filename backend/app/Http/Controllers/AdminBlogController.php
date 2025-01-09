@@ -3,201 +3,187 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
-use App\Models\TempImage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
+use Cloudinary;
 
 class AdminBlogController extends Controller
-{   
-    // This method will return all blogs
-    public function index(Request $request) {
-
+{
+    // Fetch all blogs
+    public function index(Request $request)
+    {
         $blogs = Blog::orderBy('created_at', 'DESC');
 
-        if(!empty($request->keyword)){
-            $blogs = $blogs->where('title','like','%' .$request->keyword. '%');
-
+        if (!empty($request->keyword)) {
+            $blogs = $blogs->where('title', 'like', '%' . $request->keyword . '%');
         }
 
         $blogs = $blogs->get();
 
         return response()->json([
             'status' => true,
-            'data' => $blogs
+            'data' => $blogs,
         ]);
     }
 
-    // This method will return a single blog
-    public function show($id) {
+    // Fetch a single blog
+    public function show($id)
+    {
         $blog = Blog::find($id);
-        
+
         if ($blog == null) {
             return response()->json([
                 'status' => false,
-                'message' => 'Blog not found'
+                'message' => 'Blog not found',
             ]);
-        }  
+        }
 
         $blog['date'] = \Carbon\Carbon::parse($blog->created_at)->format('d M, Y');
 
         return response()->json([
             'status' => true,
-            'data' => $blog
+            'data' => $blog,
         ]);
     }
 
-    // This method will store a new blog
-    public function store(Request $request) {
-        // Validate the request data
+    // Create a new blog
+    public function store(Request $request)
+    {
         $validator = Validator::make($request->all(), [
-            'title' => 'required|min:10', // Title is required and must be at least 10 characters long
-            'author' => 'required|min:3'  // Author is required and must be at least 3 characters long
+            'title' => 'required|min:10',
+            'author' => 'required|min:3',
+            'shortDesc' => 'required',
+            'description' => 'required',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // Validate uploaded image
         ]);
 
-        // Check if validation fails
         if ($validator->fails()) {
             return response()->json([
                 'status' => false,
                 'message' => 'Please fix the errors',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ]);
         }
 
-        // Create a new Blog instance and save the data
         $blog = new Blog();
         $blog->title = $request->title;
         $blog->author = $request->author;
-        $blog->description = $request->description;
         $blog->shortDesc = $request->shortDesc;
-        $blog->save();
+        $blog->description = $request->description;
 
-        // Save the image if provided
-        $tempImage = TempImage::find($request->image_id);
-
-        if ($tempImage != null) {
-            // Extract the image extension and create a new image name
-            $imageExtArray = explode('.', $tempImage->name);
-            $ext = last($imageExtArray);
-            $imageName = time() . '-' . $blog->id . '.' . $ext;
-
-            $blog->image = $imageName;
-            $blog->save();
-
-            // Define the source and destination paths for the image
-            $sourcePath = public_path('uploads/temp/' . $tempImage->name);
-            $destPath = public_path('uploads/blogs/' . $imageName);
-
-            // Copy the image from the temporary location to the blog images location
-            if (!File::copy($sourcePath, $destPath)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Failed to copy image to destination.'
-                ]);
-            }
+        // Upload image to Cloudinary if provided
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $uploadResult = cloudinary()->upload($file->getRealPath(), [
+                'folder' => 'blogs',
+            ]);
+            $blog->image = $uploadResult->getSecurePath(); // Save Cloudinary URL
+            \Log::info('Image uploaded to Cloudinary: ' . $blog->image);
         }
 
-        // Return a success response
+        $blog->save();
+
         return response()->json([
             'status' => true,
             'message' => 'Blog added successfully',
-            'data' => $blog
+            'data' => $blog,
         ]);
     }
 
-    // This method will update a blog
-    public function update($id, Request $request) {
+    // Update an existing blog
+    public function update($id, Request $request)
+    {
         $blog = Blog::find($id);
 
         if ($blog == null) {
             return response()->json([
                 'status' => false,
-                'message' => 'Blog not found'
+                'message' => 'Blog not found',
             ]);
         }
 
-        // Validate the request data
         $validator = Validator::make($request->all(), [
-            'title' => 'required|min:10', // Title is required and must be at least 10 characters long
-            'author' => 'required|min:3'  // Author is required and must be at least 3 characters long
+            'title' => 'required|min:10',
+            'author' => 'required|min:3',
+            'shortDesc' => 'required',
+            'description' => 'required',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
-        // Check if validation fails
         if ($validator->fails()) {
             return response()->json([
                 'status' => false,
                 'message' => 'Please fix the errors',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ]);
         }
 
-        // Update the Blog instance with the new data
         $blog->title = $request->title;
         $blog->author = $request->author;
         $blog->description = $request->description;
         $blog->shortDesc = $request->shortDesc;
-        $blog->save();
 
+        // Handle new image upload if provided
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            try {
+                // Upload new image to Cloudinary
+                $uploadResult = cloudinary()->upload($file->getRealPath(), [
+                    'folder' => 'blogs',
+                ]);
 
-        // Save the image if provided
-        $tempImage = TempImage::find($request->image_id);
+                // Delete old image if it exists
+                if ($blog->image) {
+                    $publicId = basename(parse_url($blog->image, PHP_URL_PATH), '.' . pathinfo($blog->image, PATHINFO_EXTENSION));
+                    cloudinary()->destroy($publicId);
+                }
 
-        if ($tempImage != null) {
-
-            // Delete Old Image Here
-            File::delete(public_path('uploads/blogs/'. $blog->image));
-
-            $imageExtArray = explode('.', $tempImage->name);
-            $ext = last($imageExtArray);
-            $imageName = time() . '-' . $blog->id . '.' . $ext;
-
-            $blog->image = $imageName;
-            $blog->save();
-
-            // Define the source and destination paths for the image
-            $sourcePath = public_path('uploads/temp/' . $tempImage->name);
-            $destPath = public_path('uploads/blogs/' . $imageName);
-
-            // Copy the image from the temporary location to the blog images location
-            if (!File::copy($sourcePath, $destPath)) {
+                $blog->image = $uploadResult->getSecurePath(); // Update with the new URL
+            } catch (\Exception $e) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Failed to copy image to destination.'
+                    'message' => 'Image upload failed',
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
 
-        // Return a success response
+        $blog->save();
+
         return response()->json([
             'status' => true,
             'message' => 'Blog updated successfully',
-            'data' => $blog
+            'data' => $blog,
         ]);
     }
 
-    // This method will delete a blog
-    public function destroy($id) {
-       
+    // Delete a blog
+    public function destroy($id)
+    {
         $blog = Blog::find($id);
 
-        if ($blog == null){
+        if ($blog == null) {
             return response()->json([
                 'status' => false,
-                'message' => 'Blog not found'
+                'message' => 'Blog not found',
             ]);
-
         }
 
-        //Delete Blog image First
-        File::delete(public_path('uploads/blogs/'.$blog->image));
+        // Delete image from Cloudinary if it exists
+        if ($blog->image) {
+            try {
+                $publicId = basename(parse_url($blog->image, PHP_URL_PATH), '.' . pathinfo($blog->image, PATHINFO_EXTENSION));
+                cloudinary()->destroy($publicId);
+            } catch (\Exception $e) {
+                Log::error('Failed to delete Cloudinary image', ['error' => $e->getMessage()]);
+            }
+        }
 
-        //Delete blog from the DB
         $blog->delete();
 
         return response()->json([
             'status' => true,
             'message' => 'Blog deleted successfully',
         ]);
-
     }
 }

@@ -4,10 +4,9 @@ import { baseApiUrl } from "../../App";
 
 const BlogCard = ({ blog, adminBlog, setAdminBlogs }) => {
   const showImage = (img) => {
-    return img
-      ? `${baseApiUrl}uploads/blogs/${img}`
-      : "https://placehold.co/600x400";
+    return img || "https://placehold.co/600x400"; // Use the URL directly, fallback to placeholder
   };
+  
 
   const deleteBlog = async (id) => {
     if (window.confirm("Are you sure you want to delete?")) {

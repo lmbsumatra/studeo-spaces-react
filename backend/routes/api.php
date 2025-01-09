@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
 
 use App\Http\Controllers\AdminBlogController;
-use App\Http\Controllers\TempImageController;
+
 
 Route::post('/notifications', [NotificationController::class, 'createNotification']);
 Route::get('/notifications', [NotificationController::class, 'index']);
@@ -85,12 +85,11 @@ Route::get('/booking-chart-data', [ChartDataController::class, 'booking']);
 Route::get('/top-customers-data', [ChartDataController::class, 'topCustomers']);
 Route::get('/user-growth-data', [ChartDataController::class, 'userGrowth']);
 
-Route::get('blogs',[AdminBlogController::class,'index']);
-Route::post('blogs',[AdminBlogController::class,'store']);
-Route::post('save-temp-image',[TempImageController::class,'store']);
-Route::get('blogs/{id}',[AdminBlogController::class,'show']);
-Route::put('blogs/{id}',[AdminBlogController::class,'update']);
-Route::delete('blogs/{id}',[AdminBlogController::class,'destroy']);
+Route::get('blogs', [AdminBlogController::class, 'index']);
+Route::post('blogs', [AdminBlogController::class, 'store']); // Includes image upload
+Route::get('blogs/{id}', [AdminBlogController::class, 'show']);
+Route::put('blogs/{id}', [AdminBlogController::class, 'update']);
+Route::delete('blogs/{id}', [AdminBlogController::class, 'destroy']);
 
 use Illuminate\Support\Facades\Mail;
 
@@ -100,3 +99,10 @@ Route::post('/bookings/cancel/{refNumber}', [BookingController::class, 'cancelBo
 Route::post('/create-checkout-session', [PaymentController::class, 'createCheckoutSession'])->middleware('throttle:5,1');
 Route::post('/webhook', [PaymentController::class, 'handleWebhook']);
 
+// Route::post('test-upload', function (Request $request) {
+//     if ($request->hasFile('image')) {
+//         $uploadResult = cloudinary()->upload($request->file('image')->getRealPath(), ['folder' => 'blogs']);
+//         return response()->json($uploadResult);
+//     }
+//     return response()->json(['error' => 'No file uploaded'], 400);
+// });
