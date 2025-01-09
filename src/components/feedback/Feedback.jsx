@@ -25,7 +25,7 @@ const Feedback = () => {
         );
         setFeedbacks(publishedFeedbacks);
       } catch (err) {
-        console.error("There was an error fetching feedbacks!", err);
+        // console.error("There was an error fetching feedbacks!", err);
       } finally {
         setLoading(false); // Set loading to false after fetching
       }

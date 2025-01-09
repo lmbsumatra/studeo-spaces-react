@@ -122,7 +122,7 @@ const AdminAddService = () => {
       formDataToSend.append("seats", JSON.stringify(formData.seats));
       formDataToSend.append("images", imageFile);
 
-      console.log("HERE",formDataToSend)
+      // console.log("HERE",formDataToSend)
 
       const response = await fetch(`${baseApiUrl}services`, {
         method: "POST",

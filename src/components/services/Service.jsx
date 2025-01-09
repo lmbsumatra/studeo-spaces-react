@@ -34,11 +34,11 @@ const Service = ({
         // Construct the formatted date
         const formattedDate = `${year}-${month}-${day}`;
 
-        console.log(formattedDate);
+        // console.log(formattedDate);
 
         setDate(formattedDate);
         setLoading(true);
-        console.log(formattedDate);
+        // console.log(formattedDate);
 
         const [serviceResponse, seatsResponse] = await Promise.all([
           fetch(`${baseApiUrl}services`),
@@ -62,9 +62,9 @@ const Service = ({
 
         setServices(servicesData);
         setAvailableSeats(availableSeatsMap);
-        console.log(availableSeatsMap);
+        // console.log(availableSeatsMap);
       } catch (error) {
-        console.error(error);
+        // console.error(error);
       } finally {
         setLoading(false);
       }
@@ -86,7 +86,7 @@ const Service = ({
   }, [services, preselectedServiceId, onServiceSelect]);
   
   const handleServiceSelect = (service) => {
-    console.log({ service });
+    // console.log({ service });
     setSelectedService(service);
     onServiceSelect?.(service);
   };

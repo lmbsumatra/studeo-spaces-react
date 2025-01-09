@@ -72,7 +72,7 @@ const AdminLoginScreen = () => {
 
       toast.success(`Welcome, ${username}!`);
     } catch (error) {
-      console.error("Error logging in:", error);
+      // console.error("Error logging in:", error);
       const errorMessage = error.response
         ? error.response.data.message
         : "Login failed. Please try again.";
@@ -185,11 +185,11 @@ const handleForgotPasswordModalShow = () => {
     e.preventDefault();
     setLoading(true);
   
-    console.log("Changing password for user:", forgotUsername);  // Log the username
+    // console.log("Changing password for user:", forgotUsername);  // Log the username
   
     if (newPassword !== confirmNewPassword) {
       toast.error("Passwords do not match.");
-      console.warn("Passwords do not match:", forgotUsername);  // Log password mismatch
+      // console.warn("Passwords do not match:", forgotUsername);  // Log password mismatch
       setLoading(false);
       return;
     }
@@ -201,32 +201,32 @@ const handleForgotPasswordModalShow = () => {
         new_password_confirmation: confirmNewPassword
       });
   
-      console.log("Password change response:", response.data);  // Log the response
+      // console.log("Password change response:", response.data);  // Log the response
       toast.success("Password changed successfully!");
       setShowForgotPasswordModal(false); // Close modal after success
       resetForgotPasswordForm();
     } catch (error) {
       if (!error.response) {
         toast.error("Network error: Please check your internet connection.");
-        console.error("Network error while changing password:", error);  // Log network error
+        // console.error("Network error while changing password:", error);  // Log network error
       } else {
         if (error.response.status === 400) {
           toast.error("Bad request: Invalid data.");
-          console.error("400 Bad Request:", error.response.data);  // Log 400 error
+          // console.error("400 Bad Request:", error.response.data);  // Log 400 error
         } else if (error.response.status === 401) {
           toast.error("Unauthorized: Please check your credentials.");
-          console.warn("401 Unauthorized - Invalid credentials:", forgotUsername);  // Log 401 error
+          // console.warn("401 Unauthorized - Invalid credentials:", forgotUsername);  // Log 401 error
         } else if (error.response.status === 500) {
           toast.error("Server error: Please try again later.");
-          console.error("500 Internal Server Error:", error.response.data);  // Log 500 error
+          // console.error("500 Internal Server Error:", error.response.data);  // Log 500 error
         } else {
           toast.error("Error changing password.");
-          console.error("Error changing password:", error.response.data);  // Log unknown error
+          // console.error("Error changing password:", error.response.data);  // Log unknown error
         }
       }
     } finally {
       setLoading(false); // Ensure loading is set to false after the API call finishes
-      console.log("Password change process completed for:", forgotUsername);  // Log completion
+      // console.log("Password change process completed for:", forgotUsername);  // Log completion
     }
   };
   

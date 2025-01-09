@@ -14,7 +14,7 @@ const BookingChart = ({ data = {} }) => {
     const selectedData = data[timeframe] || []; // Select data based on timeframe
 
     if (!Array.isArray(selectedData)) {
-      console.error('Expected selectedData to be an array, but received:', selectedData);
+      // console.error('Expected selectedData to be an array, but received:', selectedData);
       return [];
     }
 

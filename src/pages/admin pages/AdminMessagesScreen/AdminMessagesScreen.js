@@ -26,7 +26,7 @@ const AdminMessagesScreen = () => {
         const response = await axios.get(`${baseApiUrl}messages`);
         setMessages(response.data);
       } catch (error) {
-        console.error("Error fetching messages:", error);
+        // console.error("Error fetching messages:", error);
       } finally {
         setLoading(false);
       }

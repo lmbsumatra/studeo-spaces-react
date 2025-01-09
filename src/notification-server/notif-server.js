@@ -22,7 +22,7 @@ const getLocalIp = () => {
 
 // Set up the base socket URL
 const baseSocketUrl = `https://inspiring-clarity-production.up.railway.app/`; // Local IP for local dev, but it should work on Railway with public URL
-console.log(`Base Socket URL: ${baseSocketUrl}`);
+// console.log(`Base Socket URL: ${baseSocketUrl}`);
 
 const app = express();
 const server = http.createServer(app);
@@ -54,11 +54,11 @@ const getPHTTime = () => {
 
 // Handle socket connection events
 io.on("connection", (socket) => {
-  console.log("Admin connected");
+  // console.log("Admin connected");
 
   // Handle inquiries
   socket.on("inquiry", (data) => {
-    console.log(`Inquiry received: ${data.message}`);
+    // console.log(`Inquiry received: ${data.message}`);
     io.emit("inquiry", {
       message: data.message,
       type: "inquiry",
@@ -70,7 +70,7 @@ io.on("connection", (socket) => {
 
   // Handle feedback
   socket.on("feedback", (data) => {
-    console.log(`Feedback received: ${data.message}`);
+    // console.log(`Feedback received: ${data.message}`);
     io.emit("feedback", {
       message: data.message,
       type: "feedback",
@@ -82,7 +82,7 @@ io.on("connection", (socket) => {
 
   // Handle complaints
   socket.on("complaint", (data) => {
-    console.log(`Complaint received: ${data.message}`);
+    // console.log(`Complaint received: ${data.message}`);
     io.emit("complaint", {
       message: data.message,
       type: "complaint",
@@ -106,7 +106,7 @@ io.on("connection", (socket) => {
 
   // Handle suggestions
   socket.on("suggestion", (data) => {
-    console.log(`Suggestion received: ${data.message}`);
+    // console.log(`Suggestion received: ${data.message}`);
     io.emit("suggestion", {
       message: data.message,
       type: "suggestion",
@@ -118,7 +118,7 @@ io.on("connection", (socket) => {
 
   // Handle bookings
   socket.on("booking", (data) => {
-    console.log(`Booking received: ${data.message}`);
+    // console.log(`Booking received: ${data.message}`);
     io.emit("booking", {
       message: data.message,
       type: "booking",
@@ -130,7 +130,7 @@ io.on("connection", (socket) => {
 
   // Handle booking cancellations
   socket.on("cancelbooking", (data) => {
-    console.log(`Booking cancellation received: ${data.message}`);
+    // console.log(`Booking cancellation received: ${data.message}`);
     io.emit("cancelbooking", {
       message: data.message,
       type: "cancelbooking",
@@ -142,12 +142,12 @@ io.on("connection", (socket) => {
 
   // Handle disconnection
   socket.on("disconnect", () => {
-    console.log("Admin disconnected");
+    // console.log("Admin disconnected");
   });
 });
 
 // Start the server on the dynamic port provided by Railway
 const port = process.env.PORT || 3002;  // Use Railway's dynamic port
 server.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  // console.log(`Server listening on port ${port}`);
 });

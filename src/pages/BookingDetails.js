@@ -36,7 +36,7 @@ const BookingDetails = () => {
         const response = await axios.get(`${baseApiUrl}bookings/${refNumber}`);
         setBookingDetails(response.data);
       } catch (error) {
-        console.error("Error fetching booking details:", error);
+        // console.error("Error fetching booking details:", error);
         toast.error("Failed to fetch booking details.");
         navigate("/booking");
       } finally {
@@ -81,7 +81,7 @@ const BookingDetails = () => {
       toast.success("Booking cancelled successfully.");
       navigate("/booking");
     } catch (error) {
-      console.error("Error cancelling booking:", error);
+      // console.error("Error cancelling booking:", error);
       toast.error("Failed to cancel booking.");
     }
     handleModalClose();  // Close the modal after cancellation

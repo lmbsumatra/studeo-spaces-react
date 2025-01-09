@@ -35,7 +35,7 @@ const AdminBookings = () => {
         }, {});
         setStatuses(initialStatuses);
       } catch (error) {
-        console.error("Error fetching bookings:", error);
+        // console.error("Error fetching bookings:", error);
       } finally {
         setLoading(false);
       }
@@ -145,7 +145,7 @@ const AdminBookings = () => {
       );
 
       if (response.status === 200) {
-        console.log("Booking status updated successfully");
+        // console.log("Booking status updated successfully");
 
         if (newStatus === "Completed") {
           const bookingDetails = bookings.find(
@@ -164,7 +164,7 @@ const AdminBookings = () => {
           );
 
           if (paymentResponse.status === 201) {
-            console.log("Payment added successfully");
+            // console.log("Payment added successfully");
           } else {
             throw new Error("Failed to add payment");
           }
@@ -173,7 +173,7 @@ const AdminBookings = () => {
         throw new Error("Failed to update status");
       }
     } catch (error) {
-      console.error("Error updating booking status:", error);
+      // console.error("Error updating booking status:", error);
       setStatuses((prevStatuses) => ({
         ...prevStatuses,
         [bookingId]: prevStatuses[bookingId],

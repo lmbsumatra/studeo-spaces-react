@@ -37,7 +37,7 @@ const EditBlog = () => {
 
     const result = await res.json();
 
-    console.log(result);
+    // console.log(result);
 
     if(result.status === false){
       alert(result.errors.image);

@@ -24,7 +24,7 @@ const UserGrowthChart = () => {
         const response = await axios.get(`${baseApiUrl}user-growth-data`);
         setUserGrowthData(response.data);
       } catch (error) {
-        console.error("Error fetching user growth data", error);
+        // console.error("Error fetching user growth data", error);
       }
     };
 

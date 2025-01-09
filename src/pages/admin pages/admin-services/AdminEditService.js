@@ -36,7 +36,7 @@ const AdminEditService = () => {
           throw new Error("Failed to fetch service");
         }
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         // Then proceed with setting form data
         setFormData({
           name: data.service.name,
@@ -70,18 +70,18 @@ const AdminEditService = () => {
 
   const generateSeats = debounce((count, serviceCode) => {
     const bookedSeatCodes = formData.booked_seat_codes_today || []; // Get the booked seat codes for today
-    console.log("Booked seats for today:", bookedSeatCodes); // Log the booked seat codes
+    // console.log("Booked seats for today:", bookedSeatCodes); // Log the booked seat codes
 
     // Step 1: Get the current list of seat codes
     const currentSeatsCount = formData.seats.length;
-    console.log("Current seats count:", currentSeatsCount);
+    // console.log("Current seats count:", currentSeatsCount);
 
     // Step 2: Calculate how many new seats are needed
     const seatsToGenerateCount = count - currentSeatsCount;
 
     // If no new seats are needed, return
     if (seatsToGenerateCount <= 0) {
-      console.log("No new seats to generate.");
+      // console.log("No new seats to generate.");
       return;
     }
 
@@ -92,7 +92,7 @@ const AdminEditService = () => {
         formData.seats[formData.seats.length - 1]?.seat_code ||
         `${serviceCode}-0`;
       const lastSeatNumber = parseInt(lastSeatCode.split("-")[1], 10); // Extract the seat number from the code (e.g., "ADAN-5" => 5)
-      console.log("Last seat number:", lastSeatNumber);
+      // console.log("Last seat number:", lastSeatNumber);
 
       const nextSeatNumber = lastSeatNumber + i + 1; // Calculate the next seat number
       const seatCode = `${serviceCode}-${nextSeatNumber}`; // Generate the seat code based on the serviceCode
@@ -101,7 +101,7 @@ const AdminEditService = () => {
       if (!formData.seats.some((seat) => seat.seat_code === seatCode)) {
         const isBooked = bookedSeatCodes.includes(seatCode); // Check if this seat is booked
 
-        console.log(`Generating seat: ${seatCode}, isBooked: ${isBooked}`);
+        // console.log(`Generating seat: ${seatCode}, isBooked: ${isBooked}`);
 
         updatedSeats.push({
           seat_code: seatCode,
@@ -112,12 +112,12 @@ const AdminEditService = () => {
       }
     }
 
-    console.log("Newly generated seats:", updatedSeats); // Log the newly generated seats
+    // console.log("Newly generated seats:", updatedSeats); // Log the newly generated seats
 
     // Step 4: Combine the new seats with the existing ones
     const allSeats = [...formData.seats, ...updatedSeats];
 
-    console.log("All seats after adding new ones:", allSeats); // Log the full list of seats (old + new)
+    // console.log("All seats after adding new ones:", allSeats); // Log the full list of seats (old + new)
 
     // Step 5: Update the form data with the new seat list
     setFormData((prevFormData) => ({
@@ -295,12 +295,12 @@ const AdminEditService = () => {
 
       // Append image if a new one was selected
       if (imageFile) {
-        console.log(imageFile);
+        // console.log(imageFile);
         updateData.append("images", imageFile);
       }
       // Iterate over FormData to log all key-value pairs
       for (let pair of updateData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
+        // console.log(`${pair[0]}: ${pair[1]}`);
       }
 
       const response = await fetch(`${baseApiUrl}services/${id}`, {

@@ -52,7 +52,7 @@ const FAQs = () => {
       // Extract the message ID from the response
       const messageId = response.data.id; // Assuming 'id' is returned in the response
       testNotificationData.related_data_id = messageId;
-      console.log(testNotificationData)
+      // console.log(testNotificationData)
       await axios.post(`${baseApiUrl}notifications`, testNotificationData);
       
       // Notify user about success
@@ -66,7 +66,7 @@ const FAQs = () => {
       // Clear form fields after successful submission
       // setFormData({ email: "", name: "", message: "", message_type: "" });
     } catch (error) {
-      console.error("Error sending message:", error);
+      // console.error("Error sending message:", error);
       toast.error("Oops! Failed to send message. Please try again.");
     } finally {
       setLoading(false); // Set loading to false after the request is completed

@@ -100,36 +100,36 @@ const Admin = () => {
   const socket = io(`${baseSocketUrl}`, { transports: ["websocket"] });
     // Connect to the socket
     socket.on("connect", () => {
-      console.log("Socket connected:", socket.id); // Debugging
+      // console.log("Socket connected:", socket.id); // Debugging
     });
 
     // Listen for different types of messages from socket
     socket.on("inquiry", (data) => {
-      console.log("Received inquiry:", data); // Debugging
+      // console.log("Received inquiry:", data); // Debugging
       handleNotification(data, "inquiry");
     });
     socket.on("feedback", (data) => {
-      console.log("Received feedback:", data); // Debugging
+      // console.log("Received feedback:", data); // Debugging
       handleNotification(data, "feedback");
     });
     socket.on("complaint", (data) => {
-      console.log("Received complaint:", data); // Debugging
+      // console.log("Received complaint:", data); // Debugging
       handleNotification(data, "complaint");
     });
     socket.on("request", (data) => {
-      console.log("Received request:", data); // Debugging
+      // console.log("Received request:", data); // Debugging
       handleNotification(data, "request");
     });
     socket.on("suggestion", (data) => {
-      console.log("Received suggestion:", data); // Debugging
+      // console.log("Received suggestion:", data); // Debugging
       handleNotification(data, "suggestion");
     });
     socket.on("booking", (data) => {
-      console.log("Received booking:", data); // Debugging
+      // console.log("Received booking:", data); // Debugging
       handleNotification(data, "booking");
     });
     socket.on("cancelbooking", (data) => {
-      console.log("Received cancelbooking:", data); // Debugging
+      // console.log("Received cancelbooking:", data); // Debugging
       handleNotification(data, "cancelbooking");
     });
 

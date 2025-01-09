@@ -21,7 +21,7 @@ const AdminCustomers = () => {
         const response = await axios.get(`${baseApiUrl}customers`);
         setCustomers(response.data);
       } catch (error) {
-        console.error("Error fetching customers:", error);
+        // console.error("Error fetching customers:", error);
       } finally {
         setLoading(false);
       }

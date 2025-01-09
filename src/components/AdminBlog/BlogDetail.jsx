@@ -14,7 +14,7 @@ const BlogDetail = () => {
       const result = await res.json();
       setBlog(result.data || null); // Set blog data or null if no data
     } catch (error) {
-      console.error("Error fetching blog:", error);
+      // console.error("Error fetching blog:", error);
       setBlog(null); // Handle error by setting blog to null
     }
   };

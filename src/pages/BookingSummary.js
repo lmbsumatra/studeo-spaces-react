@@ -8,7 +8,7 @@ const BookingSummary = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(location.state);
+    // console.log(location.state);
     if (!location.state) {
       navigate("/booking"); // Redirect to the booking page if no state exists
     }
@@ -91,7 +91,7 @@ const BookingSummary = () => {
         link.click(); // Programmatically trigger download
       })
       .catch((error) => {
-        console.error("Failed to save receipt as image:", error);
+        // console.error("Failed to save receipt as image:", error);
         alert("Something went wrong while saving the receipt. Please try again.");
       });
   };

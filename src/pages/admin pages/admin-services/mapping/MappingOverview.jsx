@@ -34,16 +34,16 @@ const MappingOverview = ({ isActive, onClose }) => {
     try {
       const response = await fetch(`${baseApiUrl}booking-data`);
       const data = await response.json();
-      console.log("Data from API:", data);
+      // console.log("Data from API:", data);
 
       // Check if the response is an array, and set it as the services data
       if (Array.isArray(data)) {
         setServicesData(data); // Set the services array
       } else {
-        console.error("Expected an array, but received:", data);
+        // console.error("Expected an array, but received:", data);
       }
     } catch (error) {
-      console.error("Error fetching seat data:", error);
+      // console.error("Error fetching seat data:", error);
     }
   };
 
@@ -205,7 +205,7 @@ const MappingOverview = ({ isActive, onClose }) => {
   ];
 
   const handleSeatClick = (seat) => {
-    console.log(seat)
+    // console.log(seat)
     if (seat.isBooked) {
       // Open the "Free up seat" modal
       setSelectedSeat(seat);
@@ -244,10 +244,10 @@ const MappingOverview = ({ isActive, onClose }) => {
         setShowFreeSeatModal(false);
         setSelectedSeat(null);
       } else {
-        console.error("Failed to free up the seat. Try again later.");
+        // console.error("Failed to free up the seat. Try again later.");
       }
     } catch (error) {
-      console.error("Error freeing up the seat:", error);
+      // console.error("Error freeing up the seat:", error);
     } finally {
       setLoading(false);  // Reset loading state when the process is complete
     }

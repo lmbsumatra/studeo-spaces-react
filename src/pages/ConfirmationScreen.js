@@ -89,11 +89,11 @@ const ConfirmationScreen = () => {
         booking_details: bookingDetails, // Send booking details along
       };
   
-      console.log("Request Data:", requestData);
+      // console.log("Request Data:", requestData);
   
       // Adjust the API URL (ensure it points to your backend)
       const response = await axios.post(`${baseApiUrl}bookings`, bookingDetails);
-      console.log(response)
+      // console.log(response)
       
       // Handle response and redirect to checkout session URL
       if (response.data.checkout_url) {
@@ -103,7 +103,7 @@ const ConfirmationScreen = () => {
         toast.error("Failed to create checkout session.");
       }
     } catch (error) {
-      console.error("Error creating checkout session:", error);
+      // console.error("Error creating checkout session:", error);
       toast.error("There was an error with the payment process. Please try again.");
     } finally {
       setIsLoading(false);

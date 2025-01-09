@@ -37,7 +37,7 @@ const Header = () => {
         setNotifications(response.data);
         setUnreadCount(response.data.filter((notif) => !notif.is_read).length);
       } catch (error) {
-        console.error("Error fetching notifications:", error);
+        // console.error("Error fetching notifications:", error);
       }
     };
 
@@ -74,7 +74,7 @@ const Header = () => {
       toast.info("Notification removed.");
     } catch (error) {
       toast.error("Failed removing notification.");
-      console.error("Error deleting notification:", error);
+      // console.error("Error deleting notification:", error);
     } finally {
       setIsDeleting(false); // Reset loading state
     }
@@ -126,7 +126,7 @@ const Header = () => {
         );
         setUnreadCount(unreadCount - 1);
       } catch (error) {
-        console.error("Error marking notification as read:", error);
+        // console.error("Error marking notification as read:", error);
       }
     }
 

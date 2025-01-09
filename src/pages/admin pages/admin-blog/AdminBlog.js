@@ -21,7 +21,7 @@ const AdminBlog = () => {
       const result = await res.json();
       setAdminBlogs(result.data);
     } catch (error) {
-      console.error("Error searching blogs:", error);
+      // console.error("Error searching blogs:", error);
     }
   };
 

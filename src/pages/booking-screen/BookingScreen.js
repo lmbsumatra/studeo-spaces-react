@@ -80,7 +80,7 @@ const Book = () => {
 
   const handleOpenUserIdPolicy = () => {
     setUserIdPolicyOpen(!isUserIdPolicyOpen);
-    console.log(isUserIdPolicyOpen);
+    // console.log(isUserIdPolicyOpen);
   };
 
   useEffect(() => {
@@ -104,7 +104,7 @@ const Book = () => {
           );
           setSelectedService(response.data);
         } catch (error) {
-          console.error("Error fetching service details:", error);
+          // console.error("Error fetching service details:", error);
           setSelectedService(null);
         }
       };
@@ -158,7 +158,7 @@ const Book = () => {
 
     // If any missing fields, show alert
     if (missingFields.length > 0) {
-      console.log("Missing fields:", missingFields.join(", "));
+      // console.log("Missing fields:", missingFields.join(", "));
       alert("Please fill in all required fields.");
       return;
     }
@@ -179,11 +179,11 @@ const Book = () => {
 
     setLoading(true);
     try {
-      console.log(bookingDetails.currentDate);
+      // console.log(bookingDetails.currentDate);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       navigate("/confirmation", { state: bookingDetails });
     } catch (error) {
-      console.error("Error booking:", error);
+      // console.error("Error booking:", error);
       alert("Error booking. Please try again.");
     } finally {
       setLoading(false);
@@ -200,7 +200,7 @@ const Book = () => {
         ? alert(response.data.message)
         : navigate("/booking-details", { state: { referenceNumber } });
     } catch (error) {
-      console.error("Error checking booking:", error);
+      // console.error("Error checking booking:", error);
       toast.error("Error: Invalid Booking Id");
     } finally {
       setLoading(false);
@@ -221,7 +221,7 @@ const Book = () => {
       setName("");
       setEmail("");
       setContactNumber("");
-      console.error("Customer ID not found:", error);
+      // console.error("Customer ID not found:", error);
       toast.error("Customer ID not found");
     } finally {
       setLoading(false);
@@ -232,7 +232,7 @@ const Book = () => {
     if (selectedService?.id === service.id) {
       return; // Do nothing if the selected service hasn't changed
     }
-    console.log("Service selected:", service);
+    // console.log("Service selected:", service);
     setSelectedService(service);
     navigate(`/booking?serviceId=${service.id}`);
   };
@@ -288,11 +288,11 @@ const Book = () => {
 
       const response = await axios.post(url, payload);
 
-      console.log("API Response (Check Pass):", response.data);
+      // console.log("API Response (Check Pass):", response.data);
 
       if (response.data.success) {
         setPassID(response.data.pass.pass_id || "");
-        console.log("Pass ID:", passID);
+        // console.log("Pass ID:", passID);
 
         setPassDetails({
           customer: response.data.customer,
@@ -303,10 +303,10 @@ const Book = () => {
         handleShowCardModal();
       }
 
-      console.log("API Response:", response.data);
-      console.log("Request Payload:", payload); // Log the request payload
+      // console.log("API Response:", response.data);
+      // console.log("Request Payload:", payload); // Log the request payload
     } catch (error) {
-      console.error("Error:", error.response?.data?.error || error);
+      // console.error("Error:", error.response?.data?.error || error);
       toast.error(error.response?.data?.error || "Error checking pass");
     } finally {
       setLoading(false);
@@ -329,8 +329,8 @@ const Book = () => {
 
     setLoading(true);
     try {
-      console.log("Share Mode:", shareMode);
-      console.log("Pass Details:", passDetails);
+      // console.log("Share Mode:", shareMode);
+      // console.log("Pass Details:", passDetails);
 
       let userData = {};
 
@@ -356,7 +356,7 @@ const Book = () => {
       };
 
       const response = await axios.post(`${baseApiUrl}use-pass`, payload);
-      console.log("API Response:", response.data);
+      // console.log("API Response:", response.data);
 
       toast.success("Pass used successfully!");
 
@@ -375,7 +375,7 @@ const Book = () => {
         });
       }
     } catch (error) {
-      console.error("Error using pass:", error.response?.data?.error || error);
+      // console.error("Error using pass:", error.response?.data?.error || error);
       toast.error(error.response?.data?.error || "Error using pass");
     } finally {
       setLoading(false);

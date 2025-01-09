@@ -126,7 +126,7 @@ const AdminSettings = () => {
         toast.error(errorMessage); // Show unexpected error message
       }
       setError(errorMessage); // Update form error state
-      console.error(error);
+      // console.error(error);
     } finally {
       setIsLoading(false); // End loading
     }
@@ -191,7 +191,7 @@ const AdminSettings = () => {
         toast.error(errorMessage); // Show unexpected error message
       }
       setError(errorMessage); // Update form error state
-      console.error(error);
+      // console.error(error);
     } finally {
       setIsLoading(false); // End loading
     }
@@ -241,7 +241,7 @@ const AdminSettings = () => {
         toast.error(errorMessage); // Show unexpected error message
       }
       setError(errorMessage); // Update form error state
-      console.error(error);
+      // console.error(error);
     } finally {
       setIsLoading(false); // End loading
     }
