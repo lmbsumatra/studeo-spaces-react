@@ -46,13 +46,14 @@ const BookingSummary = () => {
   const {
     service_name = "N/A", // Top-level service_name
     emailSent = false, // Top-level emailSent
-    details = {} // Destructure the details object
+    details = {}, // Destructure the details object
   } = location.state || {};
   
   // Now, destructure the details object
   const {
     customer_id = "N/A",
     service_id = "N/A",
+    pass_id = "N/A", 
     price = "N/A",
     date = "N/A",
     time = "N/A",
@@ -142,6 +143,15 @@ const BookingSummary = () => {
               <strong>Customer ID:</strong> {customer_id}
             </p>
             <hr />
+            {service_id === 4 && pass_id !== "N/A" && (
+              <>
+                <hr />
+                <h3 className="fs-500 ff-serif">Pass ID</h3>
+                <p>
+                  <strong>Pass ID:</strong> {pass_id}
+                </p>
+              </>
+            )}
             <h3 className="fs-500 ff-serif">Email Sent</h3>
             <p>{emailSent ? "Email Sent" : "Email Not Sent"}</p>
           </div>

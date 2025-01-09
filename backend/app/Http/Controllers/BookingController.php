@@ -34,7 +34,7 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         Log::info('Booking store request received', ['request_data' => $request->all()]);
-    
+
         try {
             $validatedData = $request->validate([
                 'service_id' => 'required|exists:services,id',
@@ -49,7 +49,7 @@ class BookingController extends Controller
                 'seat_code' => 'nullable|string|exists:seats,seat_code',
             ]);
             Log::info('Request data validated successfully', ['validated_data' => $validatedData]);
-    
+
             // Find the service
             $service = Service::find($validatedData['service_id']);
             if (!$service) {
@@ -57,14 +57,14 @@ class BookingController extends Controller
                 return response()->json(['error' => 'Service not found'], 404);
             }
             $validatedData['service_name'] = $service->name;
-    
+
             // Determine pass type and payment method
             $passDetails = $this->determinePassType($customer = $this->findOrCreateCustomer($validatedData));
             $validatedData = array_merge($validatedData, $passDetails);
-    
+
             // Begin database transaction
             DB::beginTransaction();
-    
+
             // Validate the seat
             $seat = $this->validateSeat($validatedData, $validatedData['seat_code'] ?? null, $validatedData['pass_type'] === 'Shared');
             if (!$seat) {
@@ -76,7 +76,7 @@ class BookingController extends Controller
                 return response()->json(['error' => 'No available seats for this service at the selected date and time'], 400);
             }
             $validatedData['seat_code'] = $seat->seat_code;
-    
+
             // Create the booking
             $bookingData = array_merge($validatedData, [
                 'status' => 'Pending',
@@ -85,13 +85,14 @@ class BookingController extends Controller
             $booking = new Booking($bookingData);
             $booking->save();
             $booking['service_name'] = $service->name;
-    
+
             Log::info('Booking created successfully', ['booking_id' => $booking->id, 'customer_id' => $customer->id]);
-    
+
             // Create a 15-day pass if applicable
+            $pass_id = null;
             if ($service->id == 4) { // Assuming 4 is the ID for the 15-day pass service
                 Log::info('Creating a 15-day pass for the customer', ['customer_id' => $customer->id]);
-                Pass::create([
+                $pass = Pass::create([
                     'customer_id' => $customer->id,
                     'total_days' => 15,
                     'remaining_days' => 15,
@@ -100,25 +101,29 @@ class BookingController extends Controller
                     'is_shared' => false,
                     'reference_number' => $this->generatePassReference(),
                 ]);
+
+                // Get the pass ID
+                $pass_id = $pass->id;
             }
-    
+
             // Commit the transaction
             DB::commit();
-    
+
             // Create checkout session
             Log::info('Creating checkout session');
             $checkoutResponse = $this->createCheckoutSession($booking, $service->name);
             $checkoutResponseBody = json_decode($checkoutResponse->getContent(), true);
-    
+
             if (isset($checkoutResponseBody['checkout_url'])) {
                 return response()->json([
                     'booking' => $booking,
                     'id' => $booking->id,
                     'customerID' => $customer->id,
+                    'pass_id' => $pass_id,
                     'checkout_url' => $checkoutResponseBody['checkout_url'],
                 ], 201);
             }
-    
+
             return response()->json(['error' => 'Checkout session creation failed'], 500);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -129,6 +134,7 @@ class BookingController extends Controller
             return response()->json(['error' => 'An error occurred while processing your request'], 500);
         }
     }
+
     
     /**
      * Validate seat availability and return a seat instance.
