@@ -118,7 +118,7 @@ class AdminDashboardController extends Controller
             ->whereIn('status', ['Completed', 'completed'])
             ->orderBy('date')
             ->with(['customer:id,name', 'service:id,name']) // Eager load the customer and service
-            ->get(['id', 'date', 'status', 'customer_id', 'service_id', 'time']); // Select relevant fields
+            ->get(['id', 'date', 'status', 'customer_id', 'service_id', 'time', 'refNumber']); // Select relevant fields
 
         // Format the result to include customer_name and service_name
         $upcomingBookings = $upcomingBookings->map(function ($booking) {
@@ -131,6 +131,7 @@ class AdminDashboardController extends Controller
                 'customer_name' => $booking->customer->name, // Accessing customer name
                 'service_name' => $booking->service->name,   // Accessing service name
                 'time' => $booking->time,
+                'refNumber' => $booking->refNumber,
             ];
         });
 

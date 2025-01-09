@@ -169,6 +169,7 @@ const AdminDashboard = () => {
                   <th scope="col">Service</th>
                   <th scope="col">Payment Status</th>
                   <th scope="col">Time</th>
+                  <th scope="col">Reference Number</th>
                 </tr>
               </thead>
               <tbody>
@@ -180,6 +181,7 @@ const AdminDashboard = () => {
                         <td>{booking?.service_name}</td>
                         <td>{booking?.status}</td>
                         <td>{formatTimeTo12Hour(booking.time)}</td> {/* Assuming 'time' is formatted in 'date' */}
+                        <td>{booking?.refNumber}</td>
                       </tr>
                     ))}
               </tbody>
