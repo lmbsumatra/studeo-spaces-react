@@ -236,7 +236,7 @@ class BookingController extends Controller
     private function findOrCreateCustomer($validatedData)
     {
         Log::info('Looking for customer or creating a new one', ['email' => $validatedData['email']]);
-        return Customer::firstOrCreate(
+        return Customer::updateOrCreate(
             ['email' => $validatedData['email']],
             [
                 'name' => $validatedData['name'],
