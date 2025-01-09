@@ -100,6 +100,10 @@ class BookingController extends Controller
                     'is_shared' => false,
                     'reference_number' => $this->generatePassReference(),
                 ]);
+
+                    $booking->pass_id = $pass->id;
+                    $booking->save();
+
             }
     
             // Commit the transaction
