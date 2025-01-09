@@ -5,7 +5,7 @@ import "./style.css";
 import { baseApiUrl } from "../../App";
 
 const BlogDetail = () => {
-  const [blog, setBlog] = useState(null); // Set initial state as null
+  const [blog, setBlog] = useState(null); // Initial state as null
   const params = useParams();
 
   const fetchBlog = async () => {
@@ -14,7 +14,7 @@ const BlogDetail = () => {
       const result = await res.json();
       setBlog(result.data || null); // Set blog data or null if no data
     } catch (error) {
-      // console.error("Error fetching blog:", error);
+      console.error("Error fetching blog:", error);
       setBlog(null); // Handle error by setting blog to null
     }
   };
@@ -24,7 +24,7 @@ const BlogDetail = () => {
   }, []); // Run once when the component mounts
 
   if (!blog) {
-    return <div>Loading or no blog found...</div>; // Fallback if blog is not available yet
+    return <div className="text-center mt-5">Loading or no blog found...</div>; // Fallback UI
   }
 
   return (
@@ -48,7 +48,7 @@ const BlogDetail = () => {
               {blog?.image && (
                 <img
                   className="w-50"
-                  src={`${baseApiUrl}uploads/blogs/${blog.image}`}
+                  src={blog.image}
                   alt="Blog"
                 />
               )}

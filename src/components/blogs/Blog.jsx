@@ -14,17 +14,15 @@ const Blog = () => {
         const result = await res.json();
         setBlogs(result.data || []);
       } catch (error) {
-        // console.error("Error fetching blogs:", error);
+        console.error("Error fetching blogs:", error);
       }
     };
     fetchBlogs();
   }, []);
 
   // Function to handle image URL
-  const showImage = (img) => {
-    return img
-      ? `${baseApiUrl}uploads/blogs/${img}`
-      : 'https://placehold.co/600x400';
+  const getImageUrl = (image) => {
+    return image || "https://placehold.co/600x400"; // Fallback to placeholder if image is not available
   };
 
   return (
@@ -34,8 +32,8 @@ const Blog = () => {
         <div className="row items mb-4" key={blog.id}>
           <div className={`col-sm-6 blog-img ${index % 2 === 0 ? '' : 'order-sm-2'}`}>
             <img
-              src={showImage(blog.image)}
-              alt=""
+              src={getImageUrl(blog.image)} // Use full image URL or fallback
+              alt={blog.title || 'Blog Image'}
               width="800"
               height="300"
             />
