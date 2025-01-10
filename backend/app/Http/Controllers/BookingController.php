@@ -103,7 +103,7 @@ class BookingController extends Controller
                 ]);
 
                 // Get the pass ID
-                $pass_id = $passes->id;
+                $pass_id = $pass->id;
                 Log::info('Pass created successfully', ['pass_id' => $pass_id]);
             }
 
