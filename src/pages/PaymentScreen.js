@@ -22,7 +22,7 @@ const Payment = () => {
       // Parse and set the booking details
       const parsedDetails = JSON.parse(state);
       setBookingDetails(parsedDetails);
-      console.log("Booking details from state:", parsedDetails);
+      // console.log("Booking details from state:", parsedDetails);
     } else {
       // Redirect to /home if state is missing
       navigate("/home");
@@ -70,12 +70,6 @@ const Payment = () => {
       const bookingId = id;
       notificationData.related_data_id = bookingId;
 
-      // Fetch the booking details including pass_id
-      const bookingResponse = await axios.get(`${baseApiUrl}bookings/${bookingId}`);
-      const passId = bookingResponse.data.pass_id;
-      console.log(passId);
-
-
       // Step 2: Send the email receipt
       const emailData = {
         email: email,
@@ -108,10 +102,9 @@ const Payment = () => {
       // Wait for 5 seconds and then redirect to booking summary
       setTimeout(() => {
         navigate("/booking-successful", {
-          state: { ...bookingDetails, emailSent: true, pass_id: passId}, // Pass emailSent flag
+          state: { ...bookingDetails, emailSent: true }, // Pass emailSent flag
         });
-      }, 5000); // Redirect after 5 seconds 
-
+      }, 5000); // Redirect after 5 seconds
     } catch (error) {
       // console.error("Error during booking process:", error);
       toast.error("Booking failed. Please try again.");
