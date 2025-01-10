@@ -73,6 +73,7 @@ const Payment = () => {
       // Fetch the booking details including pass_id
       const bookingResponse = await axios.get(`${baseApiUrl}bookings/${bookingId}`);
       const passId = bookingResponse.data.pass_id;
+      console.log(passId);
 
 
       // Step 2: Send the email receipt
