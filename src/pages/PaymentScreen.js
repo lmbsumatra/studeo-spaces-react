@@ -22,7 +22,7 @@ const Payment = () => {
       // Parse and set the booking details
       const parsedDetails = JSON.parse(state);
       setBookingDetails(parsedDetails);
-      // console.log("Booking details from state:", parsedDetails);
+      console.log("Booking details from state:", parsedDetails);
     } else {
       // Redirect to /home if state is missing
       navigate("/home");
@@ -100,11 +100,11 @@ const Payment = () => {
       toast.success("Your booking has been successful!");
 
       // Wait for 5 seconds and then redirect to booking summary
-      setTimeout(() => {
+      /*setTimeout(() => {
         navigate("/booking-successful", {
           state: { ...bookingDetails, emailSent: true }, // Pass emailSent flag
         });
-      }, 5000); // Redirect after 5 seconds
+      }, 5000); // Redirect after 5 seconds */
     } catch (error) {
       // console.error("Error during booking process:", error);
       toast.error("Booking failed. Please try again.");
