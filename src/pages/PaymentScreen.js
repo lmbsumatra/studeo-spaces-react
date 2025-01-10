@@ -70,6 +70,11 @@ const Payment = () => {
       const bookingId = id;
       notificationData.related_data_id = bookingId;
 
+      // Fetch the booking details including pass_id
+      const bookingResponse = await axios.get(`${baseApiUrl}bookings/${bookingId}`);
+      const passId = bookingResponse.data.pass_id;
+
+
       // Step 2: Send the email receipt
       const emailData = {
         email: email,
@@ -100,11 +105,12 @@ const Payment = () => {
       toast.success("Your booking has been successful!");
 
       // Wait for 5 seconds and then redirect to booking summary
-      /*setTimeout(() => {
+      setTimeout(() => {
         navigate("/booking-successful", {
-          state: { ...bookingDetails, emailSent: true }, // Pass emailSent flag
+          state: { ...bookingDetails, emailSent: true, pass_id: passId}, // Pass emailSent flag
         });
-      }, 5000); // Redirect after 5 seconds */
+      }, 5000); // Redirect after 5 seconds 
+
     } catch (error) {
       // console.error("Error during booking process:", error);
       toast.error("Booking failed. Please try again.");

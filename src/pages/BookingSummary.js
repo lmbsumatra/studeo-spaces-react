@@ -8,7 +8,7 @@ const BookingSummary = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // console.log(location.state);
+    console.log(location.state);
     if (!location.state) {
       navigate("/booking"); // Redirect to the booking page if no state exists
     }

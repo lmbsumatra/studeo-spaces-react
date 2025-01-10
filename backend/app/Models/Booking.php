@@ -34,4 +34,10 @@ class Booking extends Model
     {
         return $this->belongsTo(Service::class);
     }
+   
+    public function pass()
+    {
+        return $this->hasOne(Pass::class, 'id', 'pass_id');
+    }
 }
+
