@@ -35,7 +35,9 @@ const ConfirmationScreen = () => {
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let referenceNumber = "";
     for (let i = 0; i < 6; i++) {
-      referenceNumber += characters.charAt(Math.floor(Math.random() * characters.length));
+      referenceNumber += characters.charAt(
+        Math.floor(Math.random() * characters.length)
+      );
     }
     return referenceNumber;
   };
@@ -72,7 +74,7 @@ const ConfirmationScreen = () => {
   const handleProceedToPayment = async () => {
     if (isLoading) return;
     setIsLoading(true);
-  
+
     try {
       const requestData = {
         description: `Booking for Service: ${service_name}`, // Include service_name in the description
@@ -88,13 +90,16 @@ const ConfirmationScreen = () => {
         cancel_url: `${window.location.origin}/payment-canceled`,
         booking_details: bookingDetails, // Send booking details along
       };
-  
+
       // console.log("Request Data:", requestData);
-  
+
       // Adjust the API URL (ensure it points to your backend)
-      const response = await axios.post(`${baseApiUrl}bookings`, bookingDetails);
-      // console.log(response)
-      
+      const response = await axios.post(
+        `${baseApiUrl}bookings`,
+        bookingDetails
+      );
+      console.log({ response });
+
       // Handle response and redirect to checkout session URL
       if (response.data.checkout_url) {
         const checkoutUrl = response.data.checkout_url;
@@ -103,8 +108,10 @@ const ConfirmationScreen = () => {
         toast.error("Failed to create checkout session.");
       }
     } catch (error) {
-      // console.error("Error creating checkout session:", error);
-      toast.error("There was an error with the payment process. Please try again.");
+      console.error("Error creating checkout session:", error);
+      toast.error(
+        "There was an error with the payment process. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
